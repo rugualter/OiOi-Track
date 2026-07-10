@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_not_required
 from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.db import IntegrityError
-from django.db.models import prefetch_related_objects
+from django.db.models import Prefetch, prefetch_related_objects
 from django.http import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -24,6 +24,7 @@ from app.forms import EpisodeForm, ManualItemForm, get_form_class
 from app.models import (
     TV,
     BasicMedia,
+    Episode,
     Item,
     MediaTypes,
     Season,
@@ -33,6 +34,7 @@ from app.models import (
 )
 from app.providers import manual, services, tmdb
 from app.templatetags import app_tags
+from events.models import Event
 from users.models import (
     DateFormatChoices,
     HomeSortChoices,
@@ -44,52 +46,187 @@ from users.models import (
 logger = logging.getLogger(__name__)
 
 
+def _build_home_section(key, media_types):
+    """Build home section payload."""
+    return {
+        "key": key,
+        "id": slugify(key),
+        "media_types": media_types,
+        "count": sum(media_list["total"] for media_list in media_types.values()),
+    }
+
+
+def _filter_home_media_types(media_types, predicate):
+    """Filter home media entries by predicate."""
+    filtered_media_types = {}
+    for media_type, media_list in media_types.items():
+        filtered_items = [media for media in media_list["items"] if predicate(media)]
+        if filtered_items:
+            filtered_media_types[media_type] = {
+                "items": filtered_items,
+                "total": len(filtered_items),
+            }
+    return filtered_media_types
+
+
+def _paginate_home_media_types(media_types, items_limit, page_start=0):
+    """Paginate already-grouped home media entries."""
+    paginated_media_types = {}
+    for media_type, media_list in media_types.items():
+        page_end = None if items_limit is None else page_start + items_limit
+        items = media_list["items"][page_start:page_end]
+
+        if items or (page_start > 0 and media_list["total"]):
+            paginated_media_types[media_type] = {
+                "items": items,
+                "total": media_list["total"],
+            }
+    return paginated_media_types
+
+
+def _is_incoming_media(media):
+    """Return True when media has a real upcoming release."""
+    return bool(media.next_event and not media.next_event.is_max_datetime)
+
+
+def _is_active_in_progress_media(media):
+    """Return True when media still has released backlog."""
+    if not _is_incoming_media(media):
+        return True
+
+    return media.max_progress is not None and media.progress < media.max_progress
+
+
+def _is_released_home_media(media, section_key):
+    """Return True when media should remain after hiding unreleased entries."""
+    if section_key == Status.IN_PROGRESS.value:
+        return _is_active_in_progress_media(media)
+
+    return not _is_incoming_media(media)
+
+
+def _get_home_section_media_types(
+    request,
+    sort_by,
+    section_key,
+    items_limit,
+    *,
+    hide_unreleased=False,
+):
+    """Return media types for a home section."""
+    media_types = BasicMedia.objects.get_home_status(
+        user=request.user,
+        status=section_key,
+        sort_by=sort_by,
+        items_limit=None if hide_unreleased else items_limit,
+    )
+
+    if not hide_unreleased:
+        return media_types
+
+    return _paginate_home_media_types(
+        _filter_home_media_types(
+            media_types,
+            lambda media: _is_released_home_media(media, section_key),
+        ),
+        items_limit,
+    )
+
+
+def _get_home_load_more_media_types(
+    request,
+    sort_by,
+    section_key,
+    items_limit,
+    media_type_to_load,
+    *,
+    hide_unreleased=False,
+):
+    """Return load-more payload for a specific home section/media type."""
+    media_types = BasicMedia.objects.get_home_status(
+        user=request.user,
+        status=section_key,
+        sort_by=sort_by,
+        items_limit=None if hide_unreleased else items_limit,
+        specific_media_type=media_type_to_load,
+    )
+
+    if not hide_unreleased:
+        return media_types
+
+    return _paginate_home_media_types(
+        _filter_home_media_types(
+            media_types,
+            lambda media: _is_released_home_media(media, section_key),
+        ),
+        items_limit,
+        page_start=items_limit,
+    )
+
+
+def _get_home_section_keys():
+    """Return ordered home section keys for current user."""
+    return [Status.IN_PROGRESS.value, Status.PLANNING.value]
+
+
 @require_GET
 def home(request):
     """Home page with media items in progress and planning."""
     sort_by = request.user.update_preference("home_sort", request.GET.get("sort"))
     media_type_to_load = request.GET.get("load_media_type")
-    status_to_load = request.GET.get("load_status", Status.IN_PROGRESS.value)
+    section_to_load = request.GET.get("load_status", Status.IN_PROGRESS.value)
+    hide_unreleased_param = request.GET.get("hide_unreleased")
+    if hide_unreleased_param is not None:
+        hide_unreleased = request.user.update_preference(
+            "home_hide_unreleased",
+            hide_unreleased_param == "1",
+        )
+    else:
+        hide_unreleased = request.user.home_hide_unreleased
     items_limit = 14
 
     # If this is an HTMX request to load more items for a specific media type
     if request.headers.get("HX-Request") and media_type_to_load:
-        list_by_type = BasicMedia.objects.get_home_status(
-            user=request.user,
-            status=status_to_load,
-            sort_by=sort_by,
-            items_limit=items_limit,
-            specific_media_type=media_type_to_load,
+        list_by_type = _get_home_load_more_media_types(
+            request,
+            sort_by,
+            section_to_load,
+            items_limit,
+            media_type_to_load,
+            hide_unreleased=hide_unreleased,
         )
-        context = {
-            "media_list": list_by_type.get(media_type_to_load, []),
-            "home_status": status_to_load,
-        }
-        return render(request, "app/components/home_grid.html", context)
-
-    home_sections = []
-    for status in (Status.IN_PROGRESS.value, Status.PLANNING.value):
-        media_types = BasicMedia.objects.get_home_status(
-            user=request.user,
-            status=status,
-            sort_by=sort_by,
-            items_limit=items_limit,
-        )
-        home_sections.append(
+        return render(
+            request,
+            "app/components/home_grid.html",
             {
-                "key": status,
-                "id": slugify(status),
-                "media_types": media_types,
-                "count": sum(
-                    media_list["total"] for media_list in media_types.values()
+                "media_list": list_by_type.get(
+                    media_type_to_load,
+                    {"items": [], "total": 0},
                 ),
+                "home_status": section_to_load,
+                "hide_unreleased": hide_unreleased,
             },
         )
+
+    home_sections = [
+        _build_home_section(
+            section_key,
+            _get_home_section_media_types(
+                request,
+                sort_by,
+                section_key,
+                items_limit,
+                hide_unreleased=hide_unreleased,
+            ),
+        )
+        for section_key in _get_home_section_keys()
+    ]
 
     context = {
         "home_sections": home_sections,
         "current_sort": sort_by,
         "sort_choices": HomeSortChoices.choices,
+        "hide_unreleased": hide_unreleased,
         "items_limit": items_limit,
     }
     return render(request, "app/home.html", context)
@@ -99,6 +236,8 @@ def home(request):
 def progress_edit(request, media_type, instance_id):
     """Increase or decrease the progress of a media item from home page."""
     operation = request.POST["operation"]
+    hide_unreleased = request.user.home_hide_unreleased
+    home_status = request.POST.get("home_status")
 
     media = helpers.get_owned_media_or_404(
         request, media_type, instance_id, prefetch=True
@@ -112,10 +251,34 @@ def progress_edit(request, media_type, instance_id):
     if media_type == MediaTypes.SEASON.value:
         # clear prefetch cache to get the updated episodes
         media.refresh_from_db()
-        prefetch_related_objects([media], "episodes")
+        prefetch_related_objects(
+            [media],
+            Prefetch(
+                "episodes",
+                queryset=Episode.objects.select_related("item"),
+            ),
+            Prefetch(
+                "item__event_set",
+                queryset=Event.objects.all(),
+                to_attr="prefetched_events",
+            ),
+        )
+
+    if hide_unreleased and home_status == Status.IN_PROGRESS.value:
+        if media_type == MediaTypes.SEASON.value:
+            BasicMedia.objects.annotate_max_progress([media], media_type)
+        BasicMedia.objects._annotate_next_event([media])
+
+        if not _is_active_in_progress_media(media):
+            response = HttpResponse()
+            response["HX-Retarget"] = f"#home-media-{media.item.media_type}-{media.id}"
+            response["HX-Reswap"] = "delete"
+            return response
 
     context = {
         "media": media,
+        "hide_unreleased": hide_unreleased,
+        "home_status": home_status,
     }
     return render(
         request,

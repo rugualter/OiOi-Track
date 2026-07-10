@@ -414,7 +414,7 @@ class MediaManager(models.Manager):
         user,
         status,
         sort_by,
-        items_limit,
+        items_limit=None,
         specific_media_type=None,
     ):
         """Get a home media list for a specific status grouped by media type."""
@@ -442,7 +442,9 @@ class MediaManager(models.Manager):
 
             # Apply pagination
             total_count = len(sorted_list)
-            if specific_media_type:
+            if items_limit is None:
+                paginated_list = sorted_list
+            elif specific_media_type:
                 paginated_list = sorted_list[items_limit:]
             else:
                 paginated_list = sorted_list[:items_limit]
@@ -668,9 +670,10 @@ class MediaManager(models.Manager):
         queryset = model.objects.filter(**params)
 
         queryset = self._apply_prefetch_related(queryset, media_type)
-        self.annotate_max_progress(queryset, media_type)
+        media = queryset.get()
+        self.annotate_max_progress([media], media_type)
 
-        return queryset.get()
+        return media
 
     def _get_media_params(
         self,
