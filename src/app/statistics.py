@@ -11,6 +11,7 @@ from django.db.models import (
     Q,
 )
 from django.utils import timezone
+from django.utils.dateparse import parse_date
 
 from app import config
 from app.models import TV, BasicMedia, Episode, MediaManager, MediaTypes, Season, Status
@@ -18,6 +19,36 @@ from app.templatetags import app_tags
 from users.models import WeekStartDayChoices
 
 logger = logging.getLogger(__name__)
+
+
+def parse_activity_date_range(request):
+    """Parse ``start-date``/``end-date`` params into an aware datetime range.
+
+    Defaults to the last year. ``all`` for both means no range (``None``).
+    """
+    timeformat = "%Y-%m-%d"
+    today = timezone.localdate()
+    # relativedelta clamps Feb 29 to Feb 28 instead of raising ValueError.
+    one_year_ago = today - relativedelta(years=1)
+
+    start_date_str = request.GET.get("start-date") or one_year_ago.strftime(timeformat)
+    end_date_str = request.GET.get("end-date") or today.strftime(timeformat)
+
+    if start_date_str == "all" and end_date_str == "all":
+        return None, None
+
+    start_date = parse_date(start_date_str)
+    end_date = parse_date(end_date_str)
+
+    if start_date and end_date:
+        start_date = timezone.make_aware(
+            datetime.datetime.combine(start_date, datetime.datetime.min.time()),
+        )
+        end_date = timezone.make_aware(
+            datetime.datetime.combine(end_date, datetime.datetime.max.time()),
+        )
+
+    return start_date, end_date
 
 
 def get_user_media(user, start_date, end_date):

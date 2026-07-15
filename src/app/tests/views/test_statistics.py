@@ -21,7 +21,6 @@ class StatisticsViewTests(TestCase):
         self.assertTemplateUsed(response, "app/statistics.html")
 
         self.assertIn("media_count", response.context)
-        self.assertIn("activity_data", response.context)
         self.assertIn("media_type_distribution", response.context)
         self.assertIn("score_distribution", response.context)
         self.assertIn("status_distribution", response.context)
@@ -41,7 +40,6 @@ class StatisticsViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
         self.assertIn("media_count", response.context)
-        self.assertIn("activity_data", response.context)
         self.assertIn("media_type_distribution", response.context)
         self.assertIn("score_distribution", response.context)
         self.assertIn("status_distribution", response.context)
