@@ -5,6 +5,7 @@ __pycache__
 .venv
 src/staticfiles
 site
+.vscode
 node_modules
 package-lock.json
 src/db/db.sqlite3
