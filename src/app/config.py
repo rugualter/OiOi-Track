@@ -1,6 +1,6 @@
 from django.urls import reverse
 from django.utils.http import urlencode
-
+from django.utils.translation import gettext_lazy as _
 from app.models import MediaTypes, Sources, Status
 
 # --- Color Constants ---
@@ -8,7 +8,6 @@ COLORS = {
     "emerald": {
         "text": "text-emerald-400",
         "background": "bg-emerald-400",
-        "background_strong": "bg-emerald-500",
         "hex": "#10b981",
     },
     "purple": {
@@ -19,13 +18,11 @@ COLORS = {
     "indigo": {
         "text": "text-indigo-400",
         "background": "bg-indigo-400",
-        "background_strong": "bg-indigo-500",
         "hex": "#6366f1",
     },
     "orange": {
         "text": "text-orange-400",
         "background": "bg-orange-400",
-        "background_strong": "bg-orange-500",
         "hex": "#f97316",
     },
     "blue": {
@@ -36,13 +33,11 @@ COLORS = {
     "red": {
         "text": "text-red-400",
         "background": "bg-red-400",
-        "background_strong": "bg-red-500",
         "hex": "#ef4444",
     },
     "yellow": {
         "text": "text-yellow-400",
         "background": "bg-yellow-400",
-        "background_strong": "bg-yellow-500",
         "hex": "#eab308",
     },
     "fuchsia": {
@@ -63,7 +58,6 @@ COLORS = {
     "sky": {
         "text": "text-sky-400",
         "background": "bg-sky-400",
-        "background_strong": "bg-sky-500",
         "hex": "#87ceeb",
     },
 }
@@ -71,11 +65,11 @@ COLORS = {
 # --- Central Configuration Dictionary ---
 MEDIA_TYPE_CONFIG = {
     MediaTypes.TV.value: {
-        "sources": [Sources.TMDB],
+        "sources": [Sources.TMDB, Sources.TVDB],
         "default_source": Sources.TMDB,
         "sample_query": "Breaking Bad",
         "unicode_icon": "📺",
-        "verb": ("watch", "watched"),
+        "verb": (_("watch"), _("watched"), _("watching")),
         "text_color": COLORS["emerald"]["text"],
         "stats_color": COLORS["emerald"]["hex"],
         "svg_icon": """
@@ -83,10 +77,10 @@ MEDIA_TYPE_CONFIG = {
             <polyline points="17 2 12 7 7 2"/>""",
     },
     MediaTypes.SEASON.value: {
-        "sources": [Sources.TMDB],
+        "sources": [Sources.TMDB, Sources.TVDB],
         "default_source": Sources.TMDB,
         "unicode_icon": "📺",
-        "verb": ("watch", "watched"),
+        "verb": (_("watch"), _("watched"), _("watching")),
         "text_color": COLORS["purple"]["text"],
         "stats_color": COLORS["purple"]["hex"],
         "svg_icon": """
@@ -97,20 +91,20 @@ MEDIA_TYPE_CONFIG = {
         "unit": ("E", "Episode"),
     },
     MediaTypes.EPISODE.value: {
-        "sources": [Sources.TMDB],
+        "sources": [Sources.TMDB, Sources.TVDB],
         "default_source": Sources.TMDB,
         "unicode_icon": "📺",
-        "verb": ("watch", "watched"),
+        "verb": (_("watch"), _("watched"), _("watching")),
         "text_color": COLORS["indigo"]["text"],
         "stats_color": COLORS["indigo"]["hex"],
         "svg_icon": """<polygon points="6 3 20 12 6 21 6 3"/>""",
     },
     MediaTypes.MOVIE.value: {
-        "sources": [Sources.TMDB],
+        "sources": [Sources.TMDB, Sources.TVDB],
         "default_source": Sources.TMDB,
         "sample_query": "The Shawshank Redemption",
         "unicode_icon": "🎬",
-        "verb": ("watch", "watched"),
+        "verb": (_("watch"), _("watched"), _("watching")),
         "text_color": COLORS["orange"]["text"],
         "stats_color": COLORS["orange"]["hex"],
         "svg_icon": """
@@ -129,7 +123,7 @@ MEDIA_TYPE_CONFIG = {
         "default_source": Sources.MAL,
         "sample_query": "Perfect Blue",
         "unicode_icon": "🎭",
-        "verb": ("watch", "watched"),
+        "verb": (_("watch"), _("watched"), _("watching")),
         "text_color": COLORS["blue"]["text"],
         "stats_color": COLORS["blue"]["hex"],
         "svg_icon": """
@@ -143,7 +137,7 @@ MEDIA_TYPE_CONFIG = {
         "default_source": Sources.MAL,
         "sample_query": "Berserk",
         "unicode_icon": "📚",
-        "verb": ("read", "read"),
+        "verb": (_("read"), _("read"), _("reading")),
         "text_color": COLORS["red"]["text"],
         "stats_color": COLORS["red"]["hex"],
         "svg_icon": """
@@ -161,7 +155,7 @@ MEDIA_TYPE_CONFIG = {
         "default_source": Sources.IGDB,
         "sample_query": "Half-Life",
         "unicode_icon": "🎮",
-        "verb": ("play", "played"),
+        "verb": (_("play"), _("played"), _("playing")),
         "text_color": COLORS["yellow"]["text"],
         "stats_color": COLORS["yellow"]["hex"],
         "svg_icon": """
@@ -183,7 +177,7 @@ MEDIA_TYPE_CONFIG = {
         "default_source": Sources.HARDCOVER,
         "sample_query": "The Great Gatsby",
         "unicode_icon": "📖",
-        "verb": ("read", "read"),
+        "verb": (_("read"), _("read"), _("reading")),
         "text_color": COLORS["fuchsia"]["text"],
         "stats_color": COLORS["fuchsia"]["hex"],
         "svg_icon": """
@@ -197,7 +191,7 @@ MEDIA_TYPE_CONFIG = {
         "default_source": Sources.COMICVINE,
         "sample_query": "Batman",
         "unicode_icon": "📕",
-        "verb": ("read", "read"),
+        "verb": (_("read"), _("read"), _("reading")),
         "text_color": COLORS["cyan"]["text"],
         "stats_color": COLORS["cyan"]["hex"],
         "svg_icon": """
@@ -212,7 +206,7 @@ MEDIA_TYPE_CONFIG = {
         "default_source": Sources.BGG,
         "sample_query": "Catan",
         "unicode_icon": "🎲",
-        "verb": ("play", "played"),
+        "verb": (_("play"), _("played"), _("playing")),
         "text_color": COLORS["lime"]["text"],
         "stats_color": COLORS["lime"]["hex"],
         "svg_icon": """
@@ -232,51 +226,26 @@ STATUS_CONFIG = {
         "text_color": COLORS["emerald"]["text"],
         "stats_color": COLORS["emerald"]["hex"],
         "background_color": COLORS["emerald"]["background"],
-        "background_color_strong": COLORS["emerald"]["background_strong"],
-        "icon": "app/icons/states/completed.svg",
     },
     Status.IN_PROGRESS.value: {
         "text_color": COLORS["indigo"]["text"],
         "stats_color": COLORS["indigo"]["hex"],
         "background_color": COLORS["indigo"]["background"],
-        "background_color_strong": COLORS["indigo"]["background_strong"],
-        "icon": "app/icons/states/in-progress.svg",
     },
     Status.PAUSED.value: {
         "text_color": COLORS["orange"]["text"],
         "stats_color": COLORS["orange"]["hex"],
         "background_color": COLORS["orange"]["background"],
-        "background_color_strong": COLORS["orange"]["background_strong"],
-        "icon": "app/icons/states/paused.svg",
     },
     Status.PLANNING.value: {
         "text_color": COLORS["sky"]["text"],
         "stats_color": COLORS["sky"]["hex"],
         "background_color": COLORS["sky"]["background"],
-        "background_color_strong": COLORS["sky"]["background_strong"],
-        "icon": "app/icons/states/planning.svg",
     },
     Status.DROPPED.value: {
         "text_color": COLORS["red"]["text"],
         "stats_color": COLORS["red"]["hex"],
         "background_color": COLORS["red"]["background"],
-        "background_color_strong": COLORS["red"]["background_strong"],
-        "icon": "app/icons/states/dropped.svg",
-    },
-}
-
-# --- Journal Accent Configuration ---
-# The journal badge is a filled circle with a white icon, so it uses each
-# status's stronger background and its icon from STATUS_CONFIG. Only the
-# non-status accents ("score", "default") are defined here.
-JOURNAL_ACCENT_EXTRA = {
-    "score": {
-        "background": COLORS["yellow"]["background_strong"],
-        "icon": "app/icons/star.svg",
-    },
-    "default": {
-        "background": "bg-slate-500",
-        "icon": "app/icons/history.svg",
     },
 }
 
@@ -328,10 +297,16 @@ def get_unicode_icon(media_type):
     return get_property(media_type, "unicode_icon")
 
 
-def get_verb(media_type, past_tense):
+def get_verb(media_type, past_tense=False, gerund=False):
     """Get the verb (present or past tense)."""
     verbs = get_property(media_type, "verb")
-    return verbs[1] if past_tense else verbs[0]
+    #if gerund verbs[2], if past_tense verbs[1], else verbs[0]
+    if gerund:
+        return verbs[2]
+    elif past_tense:
+        return verbs[1]
+    else:
+        return verbs[0]
 
 
 def get_text_color(media_type):
@@ -391,23 +366,3 @@ def get_status_stats_color(status):
 def get_status_background_color(status):
     """Get the background color for a status."""
     return get_status_property(status, "background_color")
-
-
-def get_status_icon(status):
-    """Get the icon template for a status."""
-    return get_status_property(status, "icon")
-
-
-def get_journal_accent(accent):
-    """Get the badge background class and icon template for a journal accent.
-
-    Status accents reuse the status colour and icon from :data:`STATUS_CONFIG`;
-    ``"score"`` and ``"default"`` are the non-status accents.
-    """
-    status = get_status_config(accent)
-    if status:
-        return {
-            "background": status["background_color_strong"],
-            "icon": status["icon"],
-        }
-    return JOURNAL_ACCENT_EXTRA.get(accent, JOURNAL_ACCENT_EXTRA["default"])

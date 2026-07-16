@@ -11,9 +11,11 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.template.defaultfilters import pluralize
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
 from django_celery_beat.models import PeriodicTask
+from django.utils import translation
+from django.utils.translation import gettext_lazy as _
 
-from app.models import Item, MediaTypes
-from app.providers import tmdb
+from app.models import Item, MediaTypes, Sources
+from app.providers import services
 from users.forms import NotificationSettingsForm, PasswordChangeForm, UserUpdateForm
 from users.models import (
     WATCH_PROVIDER_REGION_UNSET,
@@ -21,6 +23,7 @@ from users.models import (
     QuickWatchDateChoices,
     TimeFormatChoices,
     WeekStartDayChoices,
+    ThemeChoices,
 )
 
 logger = logging.getLogger(__name__)
@@ -39,7 +42,7 @@ def account(request):
 
             if user_form.is_valid():
                 user_form.save()
-                messages.success(request, "Your profile has been updated!")
+                messages.success(request, _("Your profile has been updated!"))
                 logger.info(
                     "Successful profile change for user: %s",
                     request.user.username,
@@ -64,7 +67,7 @@ def account(request):
                     request,
                     user,
                 )
-                messages.success(request, "Your password has been updated!")
+                messages.success(request, _("Your password has been updated!"))
                 logger.info(
                     "Successful password change for user: %s",
                     request.user.username,
@@ -91,7 +94,7 @@ def notifications(request):
         form = NotificationSettingsForm(request.POST, instance=request.user)
         if form.is_valid():
             form.save()
-            messages.success(request, "Notification settings updated successfully!")
+            messages.success(request, _("Notification settings updated successfully!"))
         else:
             for errors in form.errors.values():
                 for error in errors:
@@ -190,7 +193,7 @@ def test_notification(request):
             if url.strip()
         ]
         if not notification_urls:
-            messages.error(request, "No notification URLs configured.")
+            messages.error(request, _("No notification URLs configured."))
             return redirect("notifications")
 
         for url in notification_urls:
@@ -198,19 +201,19 @@ def test_notification(request):
 
         # Send test notification
         result = apobj.notify(
-            title="YamTrack Test Notification",
+            title=_("OiOi-Track Test Notification"),
             body=(
-                "This is a test notification from YamTrack. "
-                "If you're seeing this, your notifications are working correctly!"
+                _("This is a test notification from OiOi-Track. "),
+                _("If you're seeing this, your notifications are working correctly!")
             ),
         )
 
         if result:
-            messages.success(request, "Test notification sent successfully!")
+            messages.success(request, _("Test notification sent successfully!"))
         else:
-            messages.error(request, "Failed to send test notification.")
+            messages.error(request, _("Failed to send test notification."))
     except Exception:
-        logger.exception("Error sending notification")
+        logger.exception(_("Error sending notification"))
 
     return redirect("notifications")
 
@@ -220,8 +223,9 @@ def preferences(request):
     """Render the preferences settings page."""
     media_types = MediaTypes.values
     media_types.remove(MediaTypes.EPISODE.value)
-    watch_provider_regions = tmdb.watch_provider_regions()
-
+    watch_provider_regions_tmdb = services.get_media_metadata("watch_provider_regions", 1 , Sources.TMDB.value)
+    watch_provider_regions_tvdb = services.get_media_metadata("watch_provider_regions", 1 , Sources.TVDB.value)
+            
     if request.method == "GET":
         return render(
             request,
@@ -232,13 +236,16 @@ def preferences(request):
                 "date_format_choices": DateFormatChoices.choices,
                 "time_format_choices": TimeFormatChoices.choices,
                 "week_start_day_choices": WeekStartDayChoices.choices,
-                "watch_provider_choices": watch_provider_regions,
+                "theme_choices": ThemeChoices.choices,
+                "watch_provider_choices_tmdb": watch_provider_regions_tmdb,
+                "watch_provider_choices_tvdb": watch_provider_regions_tvdb,
+                "LANGUAGES": settings.LANGUAGES,
             },
         )
 
     # Prevent demo users from updating preferences
     if request.user.is_demo:
-        messages.error(request, "This section is view-only for demo accounts.")
+        messages.error(request, _("This section is view-only for demo accounts."))
         return redirect("preferences")
 
     # Process form submission
@@ -266,11 +273,17 @@ def preferences(request):
         request.user.week_start_day = week_start_day
     media_types_checked = request.POST.getlist("media_types_checkboxes")
 
-    provider_region = request.POST.get("watch_provider_region", "")
-    if provider_region in [region[0] for region in watch_provider_regions]:
-        request.user.watch_provider_region = provider_region
+    provider_region_tmdb = request.POST.get("watch_provider_region_tmdb", "")
+    if provider_region_tmdb in [region[0] for region in watch_provider_regions_tmdb]:
+        request.user.watch_provider_region_tmdb = provider_region_tmdb
     else:
-        request.user.watch_provider_region = WATCH_PROVIDER_REGION_UNSET
+        request.user.watch_provider_region_tmdb = WATCH_PROVIDER_REGION_UNSET
+        
+    provider_region_tvdb = request.POST.get("watch_provider_region_tvdb", "")
+    if provider_region_tvdb in [region[0] for region in watch_provider_regions_tvdb]:
+        request.user.watch_provider_region_tvdb = provider_region_tvdb
+    else:
+        request.user.watch_provider_region_tvdb = WATCH_PROVIDER_REGION_UNSET
 
     # Update user preferences for each media type
     for media_type in media_types:
@@ -279,10 +292,21 @@ def preferences(request):
             f"{media_type}_enabled",
             media_type in media_types_checked,
         )
+        
+    theme = request.POST.get("theme")
+    if theme in [theme_choice[0] for theme_choice in ThemeChoices.choices]:
+        request.user.theme = theme
+        
+    language = request.POST.get("language")
+
+    if language in [lang[0] for lang in settings.LANGUAGES]:
+        request.user.language = language
 
     # Save changes and redirect
     request.user.save()
-    messages.success(request, "Settings updated.")
+    translation.activate(language)
+    request.session["django_language"] = request.user.language
+    messages.success(request, _("Settings updated."))
 
     return redirect("preferences")
 
@@ -328,9 +352,9 @@ def delete_import_schedule(request):
             kwargs__contains=f'"user_id": {request.user.id}',
         )
         task.delete()
-        messages.success(request, "Import schedule deleted.")
+        messages.success(request, _("Import schedule deleted."))
     except PeriodicTask.DoesNotExist:
-        messages.error(request, "Import schedule not found.")
+        messages.error(request, _("Import schedule not found."))
     return redirect("import_data")
 
 
@@ -340,7 +364,7 @@ def regenerate_token(request):
     while True:
         try:
             request.user.regenerate_token()
-            messages.success(request, "Token regenerated successfully.")
+            messages.success(request, _("Token regenerated successfully."))
             break
         except IntegrityError:
             continue
@@ -365,7 +389,7 @@ def update_plex_usernames(request):
     if cleaned_usernames != request.user.plex_usernames:
         request.user.plex_usernames = cleaned_usernames
         request.user.save(update_fields=["plex_usernames"])
-        messages.success(request, "Plex usernames updated successfully")
+        messages.success(request, _("Plex usernames updated successfully"))
 
     return redirect("integrations")
 
@@ -385,7 +409,7 @@ def update_jellyfin_webhook_events(request):
             "jellyfin_mark_unplayed_enabled",
         ],
     )
-    messages.success(request, "Jellyfin webhook settings updated successfully")
+    messages.success(request, _("Jellyfin webhook settings updated successfully"))
 
     return redirect("integrations")
 
@@ -397,7 +421,9 @@ def clear_search_cache(request):
 
     messages.success(
         request,
-        f"Successfully cleared {deleted} search entr{pluralize(deleted, 'y,ies')}",
+        _("Successfully cleared %(count)s search entry(s)") % {
+            "count": deleted,
+        }
     )
     logger.info(
         "Successfully cleared %s search entries",

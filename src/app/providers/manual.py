@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy as _
 from app import models
 from app.models import MediaTypes, Sources
 
@@ -16,7 +17,7 @@ def metadata(media_id, media_type):
         "title": item.title,
         "max_progress": None,
         "image": item.image,
-        "synopsis": "No synopsis available.",
+        "synopsis": _("No synopsis available."),
         "score": None,
         "score_count": None,
         "details": {},
@@ -82,7 +83,9 @@ def build_season_response(season, episodes_response, season_episodes):
         "media_id": season.media_id,
         "media_type": MediaTypes.SEASON.value,
         "title": season.title,
-        "season_title": f"Season {season.season_number}",
+        "season_title": _("Season %(number)s") % {
+            "number": season.season_number,
+        },
         "image": season.image,
         "season_number": season.season_number,
         "episodes": episodes_response,
@@ -147,7 +150,7 @@ def process_episodes(season_metadata, episodes_in_db):
             "air_date": episode["air_date"],
             "image": episode["image"],
             "title": episode["title"],
-            "overview": "No synopsis available.",
+            "overview": _("No synopsis available."),
             "history": tracked_episodes.get(episode_number, []),
         }
         episodes_metadata.append(episode_data)
@@ -168,3 +171,23 @@ def build_episodes_response(season_episodes):
         }
         for episode in season_episodes
     ]
+
+def find_next_episode(episode_number, episodes_metadata):
+    """Find the next episode number."""
+    # Find the current episode in the sorted list
+    current_episode_index = None
+    for index, episode in enumerate(episodes_metadata):
+        if episode.get("episode_number") == episode_number:
+            current_episode_index = index
+            break
+
+    # If episode not found or it's the last episode, return None
+    if current_episode_index is None or current_episode_index + 1 >= len(
+        episodes_metadata,
+    ):
+        return None
+
+    if episodes_metadata:
+        return episodes_metadata[current_episode_index + 1]["episode_number"]
+    # Return the next episode number
+    return None

@@ -1,0 +1,3230 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-12 02:04-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+#: .\app\config.py:72 .\app\config.py:83 .\app\config.py:97 .\app\config.py:107
+#: .\app\config.py:126
+msgid "watch"
+msgstr "watch"
+
+#: .\app\config.py:72 .\app\config.py:83 .\app\config.py:97 .\app\config.py:107
+#: .\app\config.py:126
+msgid "watched"
+msgstr "watched"
+
+#: .\app\config.py:72 .\app\config.py:83 .\app\config.py:97 .\app\config.py:107
+#: .\app\config.py:126
+msgid "watching"
+msgstr "watching"
+
+#: .\app\config.py:140 .\app\config.py:180 .\app\config.py:194
+msgid "read"
+msgstr "read"
+
+#: .\app\config.py:140 .\app\config.py:180 .\app\config.py:194
+msgid "reading"
+msgstr "reading"
+
+#: .\app\config.py:158 .\app\config.py:209
+msgid "play"
+msgstr "play"
+
+#: .\app\config.py:158 .\app\config.py:209
+msgid "played"
+msgstr "played"
+
+#: .\app\config.py:158 .\app\config.py:209
+msgid "playing"
+msgstr "playing"
+
+#: .\app\forms.py:69
+msgid "Invalid time format"
+msgstr "Invalid time format"
+
+#: .\app\forms.py:76
+#, python-format
+msgid "Minutes must be between 0 and %(max_min)s."
+msgstr "Minutes must be between 0 and %(max_min)s."
+
+#: .\app\forms.py:90
+msgid ""
+"Invalid time format. Provide duration in hours (e.g., '5', '1.5'), hours and "
+"minutes (e.g., '5:30', '5h 30min'), or just minutes (e.g., '30min')."
+msgstr ""
+
+#: .\app\forms.py:101 .\templates\app\create_entry.html:137
+msgid "Parent TV Show"
+msgstr "Parent TV Show"
+
+#: .\app\forms.py:108 .\templates\app\create_entry.html:184
+msgid "Parent Season"
+msgstr "Parent Season"
+
+#: .\app\forms.py:157
+msgid "Parent TV show is required for seasons"
+msgstr "Parent TV show is required for seasons"
+
+#: .\app\forms.py:167
+msgid "Parent season is required for episodes"
+msgstr "Parent season is required for episodes"
+
+#: .\app\forms.py:175
+msgid "Title is required for this media type"
+msgstr "Title is required for this media type"
+
+#: .\app\forms.py:232 .\templates\app\create_entry.html:344
+msgid "Add any notes or comments..."
+msgstr "Add any notes or comments..."
+
+#: .\app\forms.py:245 .\app\forms.py:299 .\app\forms.py:313 .\app\forms.py:327
+#, python-format
+msgid "Progress (%(unit)s)"
+msgstr "Progress (%(unit)s)"
+
+#: .\app\forms.py:282
+msgid "Progress (Time Played)"
+msgstr "Progress (Time Played)"
+
+#: .\app\helpers.py:37
+msgid "Media not found"
+msgstr "Media not found"
+
+#: .\app\history_processor.py:165
+#, python-format
+msgid "Started on %(date)s"
+msgstr "Started on %(date)s"
+
+#: .\app\history_processor.py:181
+#, python-format
+msgid "Finished on %(date)s"
+msgstr "Finished on %(date)s"
+
+#: .\app\history_processor.py:220
+msgid "Marked as"
+msgstr "Marked as"
+
+#: .\app\history_processor.py:223
+#, python-format
+msgid "%(action)s currently %(verb)s"
+msgstr "%(action)s currently %(verb)s"
+
+#: .\app\history_processor.py:229
+#, python-format
+msgid "%(action)s finished"
+msgstr "%(action)s finished"
+
+#: .\app\history_processor.py:236
+#, python-format
+msgid "Added to %(verb)s list"
+msgstr "Added to %(verb)s list"
+
+#: .\app\history_processor.py:241
+#, python-format
+msgid "%(action)s dropped"
+msgstr "%(action)s dropped"
+
+#: .\app\history_processor.py:247
+#, python-format
+msgid "%(action)s paused"
+msgstr "%(action)s paused"
+
+#: .\app\history_processor.py:253 .\app\history_processor.py:336
+#, python-format
+msgid "Rated %(score)s"
+msgstr "Rated %(score)s"
+
+#: .\app\history_processor.py:261
+#, python-format
+msgid "%(verb)s for %(duration)s"
+msgstr "%(verb)s for %(duration)s"
+
+#: .\app\history_processor.py:268
+#, python-format
+msgid "%(verb)s up to %(unit)s %(value)s"
+msgstr "%(verb)s up to %(unit)s %(value)s"
+
+#: .\app\history_processor.py:275 .\templates\app\media_details.html:259
+#: .\templates\app\media_details.html:343
+#: .\templates\users\import_data.html:464
+msgid "Started"
+msgstr "Started"
+
+#: .\app\history_processor.py:275 .\app\providers\mal.py:245
+#: .\app\providers\mal.py:248 .\templates\app\media_details.html:347
+#: .\templates\users\import_data.html:458
+msgid "Finished"
+msgstr "Finished"
+
+#: .\app\history_processor.py:278
+#, python-format
+msgid "%(field)s on %(date)s"
+msgstr "%(field)s on %(date)s"
+
+#: .\app\history_processor.py:283
+#, python-format
+msgid "%(field)s without date"
+msgstr "%(field)s without date"
+
+#: .\app\history_processor.py:288 .\app\history_processor.py:386
+msgid "Added notes"
+msgstr "Added notes"
+
+#: .\app\history_processor.py:290
+#, python-format
+msgid "Set %(field)s to %(value)s"
+msgstr "Set %(field)s to %(value)s"
+
+#: .\app\history_processor.py:303
+#, python-format
+msgid "Currently %(verb)s"
+msgstr "Currently %(verb)s"
+
+#: .\app\history_processor.py:308
+#, python-format
+msgid "Finished %(verb)s"
+msgstr "Finished %(verb)s"
+
+#: .\app\history_processor.py:313
+#, python-format
+msgid "Paused %(verb)s"
+msgstr "Paused %(verb)s"
+
+#: .\app\history_processor.py:318
+#, python-format
+msgid "Resumed %(verb)s"
+msgstr "Resumed %(verb)s"
+
+#: .\app\history_processor.py:323
+#, python-format
+msgid "Stopped %(verb)s"
+msgstr "Stopped %(verb)s"
+
+#: .\app\history_processor.py:328
+#, python-format
+msgid "Changed status from %(old)s to %(new)s"
+msgstr "Changed status from %(old)s to %(new)s"
+
+#: .\app\history_processor.py:340
+#, python-format
+msgid "Changed rating from %(old)s to %(new)s"
+msgstr "Changed rating from %(old)s to %(new)s"
+
+#: .\app\history_processor.py:351
+#, python-format
+msgid "Added %(time)s of playtime"
+msgstr "Added %(time)s of playtime"
+
+#: .\app\history_processor.py:355
+#, python-format
+msgid "Removed %(time)s of playtime"
+msgstr "Removed %(time)s of playtime"
+
+#: .\app\history_processor.py:363
+#, python-format
+msgid "Progress set to %(value)s %(unit)s"
+msgstr "Progress set to %(value)s %(unit)s"
+
+#: .\app\history_processor.py:369
+msgid "Start"
+msgstr "Start"
+
+#: .\app\history_processor.py:369
+msgid "End"
+msgstr "End"
+
+#: .\app\history_processor.py:371
+#, python-format
+msgid "Removed %(field)s date"
+msgstr "Removed %(field)s date"
+
+#: .\app\history_processor.py:375
+#, python-format
+msgid "%(field)s date set on %(date)s"
+msgstr "%(field)s date set on %(date)s"
+
+#: .\app\history_processor.py:379
+#, python-format
+msgid "%(field)s date changed to %(date)s"
+msgstr "%(field)s date changed to %(date)s"
+
+#: .\app\history_processor.py:388
+msgid "Removed notes"
+msgstr "Removed notes"
+
+#: .\app\history_processor.py:389
+msgid "Updated notes"
+msgstr "Updated notes"
+
+#: .\app\history_processor.py:392
+#, python-format
+msgid "Updated %(field)s from %(old)s to %(new)s"
+msgstr "Updated %(field)s from %(old)s to %(new)s"
+
+#: .\app\models.py:42
+msgid "The Movie Database"
+msgstr "The Movie Database"
+
+#: .\app\models.py:43
+msgid "MyAnimeList"
+msgstr "MyAnimeList"
+
+#: .\app\models.py:44
+msgid "MangaUpdates"
+msgstr "MangaUpdates"
+
+#: .\app\models.py:45
+msgid "Internet Game Database"
+msgstr "Internet Game Database"
+
+#: .\app\models.py:46
+msgid "Open Library"
+msgstr "Open Library"
+
+#: .\app\models.py:47
+msgid "Hardcover"
+msgstr "Hardcover"
+
+#: .\app\models.py:48
+msgid "Comic Vine"
+msgstr "Comic Vine"
+
+#: .\app\models.py:49
+msgid "BoardGameGeek"
+msgstr "BoardGameGeek"
+
+#: .\app\models.py:50
+msgid "Manual"
+msgstr "Manual"
+
+#: .\app\models.py:56
+msgid "TV Show"
+msgstr "TV Show"
+
+#: .\app\models.py:57
+msgid "TV Season"
+msgstr "TV Season"
+
+#: .\app\models.py:58 .\app\providers\igdb.py:396
+#: .\templates\app\components\fill_track_episode.html:26
+msgid "Episode"
+msgstr "Episode"
+
+#: .\app\models.py:59 .\app\providers\tmdb.py:225 .\app\providers\tmdb.py:509
+msgid "Movie"
+msgstr "Movie"
+
+#: .\app\models.py:60
+msgid "Anime"
+msgstr "Anime"
+
+#: .\app\models.py:61
+msgid "Manga"
+msgstr "Manga"
+
+#: .\app\models.py:62
+msgid "Game"
+msgstr "Game"
+
+#: .\app\models.py:63
+msgid "Book"
+msgstr "Book"
+
+#: .\app\models.py:64
+msgid "Comic"
+msgstr "Comic"
+
+#: .\app\models.py:65
+msgid "Boardgame"
+msgstr "Boardgame"
+
+#: .\app\models.py:772
+msgid "Completed"
+msgstr "Completed"
+
+#: .\app\models.py:773
+msgid "In Progress"
+msgstr "In Progress"
+
+#: .\app\models.py:774
+msgid "Planning"
+msgstr "Planning"
+
+#: .\app\models.py:775
+msgid "Paused"
+msgstr "Paused"
+
+#: .\app\models.py:776
+msgid "Dropped"
+msgstr "Dropped"
+
+#: .\app\models.py:782 .\templates\users\import_data.html:460
+msgid "Success"
+msgstr "Success"
+
+#: .\app\models.py:783
+msgid "Warning"
+msgstr "Warning"
+
+#: .\app\models.py:784
+msgid "Error"
+msgstr "Error"
+
+#: .\app\models.py:785
+msgid "Info"
+msgstr "Info"
+
+#: .\app\models.py:1163 .\app\models.py:1410
+#, python-format
+msgid ""
+"had %(count)s released %(episode_label)s marked as watched automatically."
+msgstr ""
+
+#: .\app\models.py:1180
+msgid "was left in progress because unreleased episodes or seasons remain."
+msgstr "was left in progress because unreleased episodes or seasons remain."
+
+#: .\app\models.py:1287
+#, python-format
+msgid "Season %(season_number)s was marked as in progress automatically."
+msgstr "Season %(season_number)s was marked as in progress automatically."
+
+#: .\app\models.py:1325
+msgid ""
+"remains in progress because another season is still pending or has not aired "
+"yet."
+msgstr ""
+
+#: .\app\models.py:1339 .\app\models.py:1824
+msgid "was marked as completed automatically."
+msgstr "was marked as completed automatically."
+
+#: .\app\models.py:1406
+msgid "episode"
+msgstr "episode"
+
+#: .\app\models.py:1406
+msgid "episodes"
+msgstr "episodes"
+
+#: .\app\models.py:1431
+msgid "was left in progress because unreleased episodes remain."
+msgstr "was left in progress because unreleased episodes remain."
+
+#: .\app\providers\bgg.py:30
+msgid "BGG API requires authorization"
+msgstr "BGG API requires authorization"
+
+#: .\app\providers\bgg.py:193 .\app\providers\hardcover.py:234
+msgid "Unknown"
+msgstr "Unknown"
+
+#: .\app\providers\bgg.py:210
+msgid "No synopsis available"
+msgstr "No synopsis available"
+
+#: .\app\providers\bgg.py:228
+#, python-format
+msgid "%(count)s players"
+msgstr "%(count)s players"
+
+#: .\app\providers\bgg.py:231
+#, python-format
+msgid "%(min)s-%(max)s players"
+msgstr "%(min)s-%(max)s players"
+
+#: .\app\providers\hardcover.py:184 .\app\providers\igdb.py:348
+#: .\app\providers\mal.py:264 .\app\providers\manual.py:20
+#: .\app\providers\manual.py:153 .\app\providers\openlibrary.py:220
+#: .\app\providers\openlibrary.py:227 .\app\providers\tmdb.py:552
+msgid "No synopsis available."
+msgstr "No synopsis available."
+
+#: .\app\providers\igdb.py:390
+msgid "Main game"
+msgstr "Main game"
+
+#: .\app\providers\igdb.py:391
+msgid "DLC"
+msgstr "DLC"
+
+#: .\app\providers\igdb.py:392
+msgid "Expansion"
+msgstr "Expansion"
+
+#: .\app\providers\igdb.py:393
+msgid "Bundle"
+msgstr "Bundle"
+
+#: .\app\providers\igdb.py:394
+msgid "Standalone expansion"
+msgstr "Standalone expansion"
+
+#: .\app\providers\igdb.py:395
+msgid "Mod"
+msgstr "Mod"
+
+#: .\app\providers\igdb.py:397
+#: .\templates\app\components\search_parent_season.html:7
+msgid "Season"
+msgstr "Season"
+
+#: .\app\providers\igdb.py:398
+msgid "Remake"
+msgstr "Remake"
+
+#: .\app\providers\igdb.py:399
+msgid "Remaster"
+msgstr "Remaster"
+
+#: .\app\providers\igdb.py:400
+msgid "Expanded game"
+msgstr "Expanded game"
+
+#: .\app\providers\igdb.py:401
+msgid "Port"
+msgstr "Port"
+
+#: .\app\providers\igdb.py:402
+msgid "Fork"
+msgstr "Fork"
+
+#: .\app\providers\igdb.py:403
+msgid "Pack"
+msgstr "Pack"
+
+#: .\app\providers\igdb.py:404 .\templates\app\components\fill_track.html:70
+msgid "Update"
+msgstr "Update"
+
+#: .\app\providers\mal.py:30
+msgid "API key is missing"
+msgstr "API key is missing"
+
+#: .\app\providers\mal.py:35
+msgid "Invalid API key"
+msgstr "Invalid API key"
+
+#: .\app\providers\mal.py:246
+msgid "Airing"
+msgstr "Airing"
+
+#: .\app\providers\mal.py:247 .\app\providers\mal.py:250 .\users\models.py:27
+msgid "Upcoming"
+msgstr "Upcoming"
+
+#: .\app\providers\mal.py:249
+msgid "Publishing"
+msgstr "Publishing"
+
+#: .\app\providers\mal.py:251
+msgid "On Hiatus"
+msgstr "On Hiatus"
+
+#: .\app\providers\mal.py:252
+msgid "Discontinued"
+msgstr "Discontinued"
+
+#: .\app\providers\manual.py:86
+#, python-format
+msgid "Season %(number)s"
+msgstr "Season %(number)s"
+
+#: .\app\providers\openlibrary.py:281
+msgid "Unknown Author"
+msgstr "Unknown Author"
+
+#: .\app\providers\services.py:100
+#, python-format
+msgid "There was an error contacting the %(provider)s API"
+msgstr "There was an error contacting the %(provider)s API"
+
+#: .\app\providers\services.py:104
+msgid " (network error)"
+msgstr " (network error)"
+
+#: .\app\providers\services.py:106
+#, python-format
+msgid " (HTTP %(status_code)s)"
+msgstr " (HTTP %(status_code)s)"
+
+#: .\app\providers\services.py:111
+msgid ". Check the logs for more details."
+msgstr ". Check the logs for more details."
+
+#: .\app\providers\services.py:125
+#, python-format
+msgid "%(media_type)s with ID %(media_id)s not found"
+msgstr "%(media_type)s with ID %(media_id)s not found"
+
+#: .\app\providers\tmdb.py:329
+#, python-format
+msgid "Season %(season_number)s not found in %(source)s with ID %(media_id)s"
+msgstr "Season %(season_number)s not found in %(source)s with ID %(media_id)s"
+
+#: .\app\providers\tmdb.py:433 .\app\providers\tmdb.py:508
+msgid "TV"
+msgstr "TV"
+
+#: .\app\templatetags\app_tags.py:271
+#, python-format
+msgid "Today %(time)s"
+msgstr "Today %(time)s"
+
+#: .\app\templatetags\app_tags.py:276
+#, python-format
+msgid "Tomorrow %(time)s"
+msgstr "Tomorrow %(time)s"
+
+#: .\app\views.py:186
+msgid "User not found"
+msgstr "User not found"
+
+#: .\app\views.py:191
+msgid "User doesn't have any media types enabled"
+msgstr "User doesn't have any media types enabled"
+
+#: .\app\views.py:445
+msgid "Manual items cannot be synced."
+msgstr "Manual items cannot be synced."
+
+#: .\app\views.py:461
+msgid "The data was recently synced, please wait a few seconds."
+msgstr "The data was recently synced, please wait a few seconds."
+
+#: .\app\views.py:538
+#, python-format
+msgid "%(title)s was synced to %(source)s successfully."
+msgstr "%(title)s was synced to %(source)s successfully."
+
+#: .\app\views.py:779
+#, python-format
+msgid " - Season %(number)s"
+msgstr " - Season %(number)s"
+
+#: .\app\views.py:783
+#, python-format
+msgid " - Episode %(number)s"
+msgstr " - Episode %(number)s"
+
+#: .\app\views.py:790
+#, python-format
+msgid "%(media_name)s already exists in the database."
+msgstr "%(media_name)s already exists in the database."
+
+#: .\app\views.py:824
+#, python-format
+msgid "%(item)s added successfully."
+msgstr "%(item)s added successfully."
+
+#: .\events\admin.py:30
+msgid "Invalid date"
+msgstr "Invalid date"
+
+#: .\events\calendar\main.py:18
+msgid "Manual sources are not processed"
+msgstr "Manual sources are not processed"
+
+#: .\events\calendar\main.py:22
+msgid "No items to process"
+msgstr "No items to process"
+
+#: .\events\calendar\main.py:117
+#, python-format
+msgid ""
+"Processed %(processed_count)s items:\n"
+"%(processed_details)s\n"
+"\n"
+"Releases updated for %(updated_count)s items:\n"
+"%(success_details)s"
+msgstr ""
+
+#: .\events\calendar\main.py:127
+#, python-format
+msgid ""
+"Processed %(processed_count)s items:\n"
+"%(processed_details)s\n"
+"\n"
+"No releases have been updated."
+msgstr ""
+
+#: .\events\notifications.py:33
+msgid "No users with release notifications enabled"
+msgstr "No users with release notifications enabled"
+
+#: .\events\notifications.py:45
+msgid "No recent releases found"
+msgstr "No recent releases found"
+
+#: .\events\notifications.py:50
+msgid "🔔 OiOi-Track: New Releases Available! 🔔"
+msgstr "🔔 OiOi-Track: New Releases Available! 🔔"
+
+#: .\events\notifications.py:60
+#, python-format
+msgid "%(count)s recent releases processed"
+msgstr "%(count)s recent releases processed"
+
+#: .\events\notifications.py:94
+msgid "No users with daily digest enabled"
+msgstr "No users with daily digest enabled"
+
+#: .\events\notifications.py:105
+msgid "No releases scheduled for today"
+msgstr "No releases scheduled for today"
+
+#: .\events\notifications.py:107
+msgid "📆 OiOi-Track: Today's Releases 📆"
+msgstr "📆 OiOi-Track: Today's Releases 📆"
+
+#: .\events\notifications.py:115
+#, python-format
+msgid "Daily digest sent for %(count)s releases"
+msgstr "Daily digest sent for %(count)s releases"
+
+#: .\events\notifications.py:438
+#, python-format
+msgid "%(icon)s  TV Shows"
+msgstr "%(icon)s  TV Shows"
+
+#: .\events\notifications.py:457
+msgid "Enjoy your media!"
+msgstr "Enjoy your media!"
+
+#: .\events\views.py:113
+msgid "The task to refresh upcoming releases has been queued."
+msgstr "The task to refresh upcoming releases has been queued."
+
+#: .\integrations\imports\anilist.py:47
+msgid "Invalid Anilist secret key."
+msgstr "Invalid Anilist secret key."
+
+#: .\integrations\imports\anilist.py:82
+msgid "Invalid AniList access token."
+msgstr "Invalid AniList access token."
+
+#: .\integrations\imports\anilist.py:227 .\integrations\imports\mal.py:90
+#, python-format
+msgid "User %(username)s not found."
+msgstr "User %(username)s not found."
+
+#: .\integrations\imports\anilist.py:233
+#, python-format
+msgid "User %(username)s is private."
+msgstr "User %(username)s is private."
+
+#: .\integrations\imports\anilist.py:263
+#, python-format
+msgid "Error processing history entry: %(content)s"
+msgstr "Error processing history entry: %(content)s"
+
+#: .\integrations\imports\anilist.py:272
+#, python-format
+msgid "%(title)s: No matching MAL ID."
+msgstr "%(title)s: No matching MAL ID."
+
+#: .\integrations\imports\goodreads.py:60 .\integrations\imports\hltb.py:60
+msgid "Invalid file format. Please upload a CSV file."
+msgstr "Invalid file format. Please upload a CSV file."
+
+#: .\integrations\imports\goodreads.py:75
+#, python-format
+msgid "Error processing entry: %(row_description)s - %(error)s"
+msgstr "Error processing entry: %(row_description)s - %(error)s"
+
+#: .\integrations\imports\goodreads.py:82 .\integrations\imports\hltb.py:75
+#: .\integrations\imports\hltb.py:83 .\integrations\imports\oioitrack.py:82
+#, python-format
+msgid "Error processing entry: %(row)s"
+msgstr "Error processing entry: %(row)s"
+
+#: .\integrations\imports\goodreads.py:120
+#, python-format
+msgid "%(title)s: Couldn't find this book via Title or ISBN13 in %(source)s"
+msgstr "%(title)s: Couldn't find this book via Title or ISBN13 in %(source)s"
+
+#: .\integrations\imports\helpers.py:242
+msgid "Invalid import time."
+msgstr "Invalid import time."
+
+#: .\integrations\imports\helpers.py:249
+msgid "The same import task is already scheduled."
+msgstr "The same import task is already scheduled."
+
+#: .\integrations\imports\helpers.py:279
+#, python-format
+msgid "%(source)s import task scheduled."
+msgstr "%(source)s import task scheduled."
+
+#: .\integrations\imports\hltb.py:105
+#, python-format
+msgid "%(title)s: Couldn't find a game with this title in %(source)s"
+msgstr "%(title)s: Couldn't find a game with this title in %(source)s"
+
+#: .\integrations\imports\hltb.py:151
+#, python-format
+msgid ""
+"%(title_list)s: They were matched to the same ID %(media_id)s - none imported"
+msgstr ""
+
+#: .\integrations\imports\kitsu.py:101
+#, python-format
+msgid ""
+"Multiple users found for %(username)s, please use your user ID. User IDs can "
+"be found in the URL when viewing your Kitsu profile."
+msgstr ""
+
+#: .\integrations\imports\kitsu.py:253
+#, python-format
+msgid ""
+"Could not import unknown item - missing media data from Kitsu. Relationship: "
+"%(relationship)s"
+msgstr ""
+
+#: .\integrations\imports\mal.py:100
+#, python-format
+msgid "Error processing entry: %(content)s"
+msgstr "Error processing entry: %(content)s"
+
+#: .\integrations\imports\oioitrack.py:72
+#, python-format
+msgid "Error processing entry with ID %(media_id)s (%(media_type)s): %(error)s"
+msgstr "Error processing entry with ID %(media_id)s (%(media_type)s): %(error)s"
+
+#: .\integrations\imports\oioitrack.py:164
+#, python-format
+msgid "%(title)s (%(media_type)s): %(errors)s"
+msgstr "%(title)s (%(media_type)s): %(errors)s"
+
+#: .\integrations\imports\oioitrack.py:213
+#, python-format
+msgid "Missing metadata for: %(row)s"
+msgstr "Missing metadata for: %(row)s"
+
+#: .\integrations\imports\simkl.py:50 .\integrations\imports\simkl.py:75
+msgid "Invalid SIMKL secret key."
+msgstr "Invalid SIMKL secret key."
+
+#: .\integrations\imports\simkl.py:185 .\integrations\imports\simkl.py:356
+#, python-format
+msgid "%(title)s: No TMDB ID found"
+msgstr "%(title)s: No TMDB ID found"
+
+#: .\integrations\imports\simkl.py:193 .\integrations\imports\simkl.py:364
+#, python-format
+msgid "%(title)s (%(tmdb_id)s) already present in the import list"
+msgstr "%(title)s (%(tmdb_id)s) already present in the import list"
+
+#: .\integrations\imports\simkl.py:226 .\integrations\imports\simkl.py:389
+#: .\integrations\imports\trakt.py:355
+#, python-format
+msgid "%(title)s: not found in %(source)s with ID %(tmdb_id)s."
+msgstr "%(title)s: not found in %(source)s with ID %(tmdb_id)s."
+
+#: .\integrations\imports\simkl.py:264
+#, python-format
+msgid "Error processing entry: %(tv)s"
+msgstr "Error processing entry: %(tv)s"
+
+#: .\integrations\imports\simkl.py:423
+#, python-format
+msgid "Error processing entry: %(movie)s"
+msgstr "Error processing entry: %(movie)s"
+
+#: .\integrations\imports\simkl.py:442
+#, python-format
+msgid "%(title)s: No MyAnimeList ID found"
+msgstr "%(title)s: No MyAnimeList ID found"
+
+#: .\integrations\imports\simkl.py:448
+#, python-format
+msgid "%(title)s (%(mal_id)s) already present in the import list"
+msgstr "%(title)s (%(mal_id)s) already present in the import list"
+
+#: .\integrations\imports\simkl.py:473
+#, python-format
+msgid "%(title)s: not found in %(source)s with ID %(mal_id)s."
+msgstr "%(title)s: not found in %(source)s with ID %(mal_id)s."
+
+#: .\integrations\imports\simkl.py:511
+#, python-format
+msgid "Error processing entry: %(anime)s"
+msgstr "Error processing entry: %(anime)s"
+
+#: .\integrations\imports\steam.py:44
+msgid "Steam API key not configured in environment variables"
+msgstr "Steam API key not configured in environment variables"
+
+#: .\integrations\imports\steam.py:112
+msgid "Invalid response from Steam API"
+msgstr "Invalid response from Steam API"
+
+#: .\integrations\imports\steam.py:144
+msgid "Steam API rate limit exceeded. Please try again later."
+msgstr "Steam API rate limit exceeded. Please try again later."
+
+#: .\integrations\imports\steam.py:147
+msgid "Steam profile is private or invalid"
+msgstr "Steam profile is private or invalid"
+
+#: .\integrations\imports\steam.py:150
+msgid "Bad request to Steam API. Please check the Steam ID."
+msgstr "Bad request to Steam API. Please check the Steam ID."
+
+#: .\integrations\imports\steam.py:153
+msgid "Invalid Steam API key"
+msgstr "Invalid Steam API key"
+
+#: .\integrations\imports\steam.py:155
+#, python-format
+msgid "Steam API error: %(status_code)s"
+msgstr "Steam API error: %(status_code)s"
+
+#: .\integrations\imports\steam.py:158
+msgid "Steam API request failed after all retries"
+msgstr "Steam API request failed after all retries"
+
+#: .\integrations\imports\steam.py:180 .\integrations\imports\steam.py:253
+#, python-format
+msgid "%(name)s (%(appid)s): Couldn't find a match in %(source)s"
+msgstr "%(name)s (%(appid)s): Couldn't find a match in %(source)s"
+
+#: .\integrations\imports\steam.py:232
+msgid "Imported from Steam"
+msgstr "Imported from Steam"
+
+#: .\integrations\imports\trakt.py:51 .\integrations\imports\trakt.py:81
+#: .\integrations\imports\trakt.py:116
+msgid "Invalid Trakt secret key."
+msgstr "Invalid Trakt secret key."
+
+#: .\integrations\imports\trakt.py:256
+#, python-format
+msgid ""
+"User slug %(username)s not found. User slug can be found in your Trakt "
+"profile URL."
+msgstr ""
+
+#: .\integrations\imports\trakt.py:264
+msgid "This account is set to private, use OAuth import instead."
+msgstr "This account is set to private, use OAuth import instead."
+
+#: .\integrations\imports\trakt.py:317
+#, python-format
+msgid "Error processing history entry: %(entry)s"
+msgstr "Error processing history entry: %(entry)s"
+
+#: .\integrations\imports\trakt.py:330
+#, python-format
+msgid "%(title)s: No %(source)s ID found."
+msgstr "%(title)s: No %(source)s ID found."
+
+#: .\integrations\imports\trakt.py:490
+#, python-format
+msgid "%(item_identifier)s: not found in %(source)s with ID %(tmdb_id)s."
+msgstr "%(item_identifier)s: not found in %(source)s with ID %(tmdb_id)s."
+
+#: .\integrations\imports\trakt.py:604
+#, python-format
+msgid "Error processing watchlist entry: %(entry)s"
+msgstr "Error processing watchlist entry: %(entry)s"
+
+#: .\integrations\imports\trakt.py:623
+#, python-format
+msgid "Error processing rating entry: %(entry)s"
+msgstr "Error processing rating entry: %(entry)s"
+
+#: .\integrations\imports\trakt.py:640
+#, python-format
+msgid "Error processing comment entry: %(entry)s"
+msgstr "Error processing comment entry: %(entry)s"
+
+#: .\integrations\views.py:64
+msgid "Invalid or expired Trakt authorization request."
+msgstr "Invalid or expired Trakt authorization request."
+
+#: .\integrations\views.py:68
+msgid "Trakt authorization failed."
+msgstr "Trakt authorization failed."
+
+#: .\integrations\views.py:90 .\integrations\views.py:124
+msgid "The task to import media from Trakt has been queued."
+msgstr "The task to import media from Trakt has been queued."
+
+#: .\integrations\views.py:111
+msgid "Trakt username is required."
+msgstr "Trakt username is required."
+
+#: .\integrations\views.py:181
+msgid "The task to import media from Simkl has been queued."
+msgstr "The task to import media from Simkl has been queued."
+
+#: .\integrations\views.py:201
+msgid "MyAnimeList username is required."
+msgstr "MyAnimeList username is required."
+
+#: .\integrations\views.py:211
+msgid "The task to import media from MyAnimeList has been queued."
+msgstr "The task to import media from MyAnimeList has been queued."
+
+#: .\integrations\views.py:266 .\integrations\views.py:299
+msgid "AniList username is required."
+msgstr "AniList username is required."
+
+#: .\integrations\views.py:280 .\integrations\views.py:312
+msgid "AniList import queued."
+msgstr "AniList import queued."
+
+#: .\integrations\views.py:330
+msgid "Kitsu user ID is required."
+msgstr "Kitsu user ID is required."
+
+#: .\integrations\views.py:338
+msgid "The task to import media from Kitsu has been queued."
+msgstr "The task to import media from Kitsu has been queued."
+
+#: .\integrations\views.py:358
+msgid "OiOi-Track CSV file is required."
+msgstr "OiOi-Track CSV file is required."
+
+#: .\integrations\views.py:369
+msgid "The task to import media from OiOi-Track CSV file has been queued."
+msgstr "The task to import media from OiOi-Track CSV file has been queued."
+
+#: .\integrations\views.py:380
+msgid "HowLongToBeat CSV file is required."
+msgstr "HowLongToBeat CSV file is required."
+
+#: .\integrations\views.py:391
+msgid "The task to import media from HowLongToBeat CSV file has been queued."
+msgstr "The task to import media from HowLongToBeat CSV file has been queued."
+
+#: .\integrations\views.py:401
+msgid "Steam ID is required."
+msgstr "Steam ID is required."
+
+#: .\integrations\views.py:409
+msgid "The task to import media from Steam has been queued."
+msgstr "The task to import media from Steam has been queued."
+
+#: .\integrations\views.py:428
+msgid "IMDB CSV file is required."
+msgstr "IMDB CSV file is required."
+
+#: .\integrations\views.py:439
+msgid "The task to import media from IMDB CSV file has been queued."
+msgstr "The task to import media from IMDB CSV file has been queued."
+
+#: .\integrations\views.py:450
+msgid "GoodReads CSV file is required."
+msgstr "GoodReads CSV file is required."
+
+#: .\integrations\views.py:461
+msgid "The task to import media from GoodReads CSV file has been queued."
+msgstr "The task to import media from GoodReads CSV file has been queued."
+
+#: .\integrations\views.py:562
+msgid "Missing payload"
+msgstr "Missing payload"
+
+#: .\lists\admin.py:17
+msgid "Number of items"
+msgstr "Number of items"
+
+#: .\lists\admin.py:22
+msgid "Last updated"
+msgstr "Last updated"
+
+#: .\lists\admin.py:40 .\templates\app\create_entry.html:111
+#: .\templates\lists\list_detail.html:187 .\users\models.py:90
+msgid "Media Type"
+msgstr "Media Type"
+
+#: .\lists\views.py:99
+msgid "List not found"
+msgstr "List not found"
+
+#: .\lists\views.py:230
+msgid "You do not have permission to edit this list."
+msgstr "You do not have permission to edit this list."
+
+#: .\lists\views.py:244
+msgid "You do not have permission to delete this list."
+msgstr "You do not have permission to delete this list."
+
+#: .\templates\400.html:5 .\templates\403.html:5 .\templates\403_csrf.html:5
+msgid "Forbidden - OiOi-Track"
+msgstr "Forbidden - OiOi-Track"
+
+#: .\templates\400.html:13
+msgid "Bad Request"
+msgstr "Bad Request"
+
+#: .\templates\400.html:15
+msgid ""
+"The server could not understand the request due to invalid syntax or missing "
+"parameters."
+msgstr ""
+
+#: .\templates\400.html:18 .\templates\403.html:19 .\templates\403_csrf.html:28
+#: .\templates\404.html:16 .\templates\500.html:22
+msgid "If you believe this was a bug, please"
+msgstr "If you believe this was a bug, please"
+
+#: .\templates\400.html:19 .\templates\403.html:20 .\templates\403_csrf.html:29
+#: .\templates\404.html:17 .\templates\500.html:23
+msgid "report the issue."
+msgstr "report the issue."
+
+#: .\templates\400.html:26 .\templates\403.html:32 .\templates\403_csrf.html:41
+#: .\templates\404.html:24 .\templates\500.html:35
+#: .\templates\socialaccount\connections.html:95
+msgid "Back to Home"
+msgstr "Back to Home"
+
+#: .\templates\403.html:13 .\templates\403_csrf.html:13
+msgid "Access Forbidden"
+msgstr "Access Forbidden"
+
+#: .\templates\403.html:15 .\templates\403_csrf.html:15
+msgid ""
+"You don't have permission to access this resource. Please log in or contact "
+"an administrator."
+msgstr ""
+
+#: .\templates\403.html:27 .\templates\403_csrf.html:36
+msgid "Log In"
+msgstr "Log In"
+
+#: .\templates\403_csrf.html:18
+msgid "Using a Reverse Proxy?"
+msgstr "Using a Reverse Proxy?"
+
+#: .\templates\403_csrf.html:20
+msgid ""
+"If you're accessing OiOi-Track through a reverse proxy, you need to set the"
+msgstr ""
+
+#: .\templates\403_csrf.html:20
+msgid "environment variable to your application URL."
+msgstr "environment variable to your application URL."
+
+#: .\templates\403_csrf.html:24
+msgid "For example,"
+msgstr "For example,"
+
+#: .\templates\404.html:5
+msgid "Page not found - OiOi-Track"
+msgstr "Page not found - OiOi-Track"
+
+#: .\templates\404.html:13
+msgid "Page Not Found"
+msgstr "Page Not Found"
+
+#: .\templates\404.html:14
+msgid "The page you are looking for doesn't exist or has been moved."
+msgstr "The page you are looking for doesn't exist or has been moved."
+
+#: .\templates\500.html:5
+msgid "Server Error - OiOi-Track"
+msgstr "Server Error - OiOi-Track"
+
+#: .\templates\500.html:13
+msgid "Something Went Wrong"
+msgstr "Something Went Wrong"
+
+#: .\templates\500.html:18
+msgid "We're sorry, but there was an error processing your request."
+msgstr "We're sorry, but there was an error processing your request."
+
+#: .\templates\500.html:30
+msgid "Try Again"
+msgstr "Try Again"
+
+#: .\templates\account\login.html:7
+msgid "Login"
+msgstr "Login"
+
+#: .\templates\account\login.html:11
+msgid "Sign in to your account"
+msgstr "Sign in to your account"
+
+#: .\templates\account\login.html:28 .\templates\app\media_list.html:242
+msgid "Sign In"
+msgstr "Sign In"
+
+#: .\templates\account\login.html:41
+msgid "Need an account?"
+msgstr "Need an account?"
+
+#: .\templates\account\login.html:43
+msgid "Register now"
+msgstr "Register now"
+
+#: .\templates\account\signup.html:6
+msgid "Register"
+msgstr "Register"
+
+#: .\templates\account\signup.html:10
+msgid "Create your account"
+msgstr "Create your account"
+
+#: .\templates\account\signup.html:26
+msgid "Create Account"
+msgstr "Create Account"
+
+#: .\templates\account\signup.html:38
+msgid "Already have an account?"
+msgstr "Already have an account?"
+
+#: .\templates\account\signup.html:40
+msgid "Sign in"
+msgstr "Sign in"
+
+#: .\templates\allauth\elements\hr.html:4
+msgid "Or continue with"
+msgstr "Or continue with"
+
+#: .\templates\allauth\layouts\base.html:9
+msgid "- OiOi-Track"
+msgstr "- OiOi-Track"
+
+#: .\templates\app\components\cast_card.html:13
+msgid "Open TMDB page for"
+msgstr "Open TMDB page for"
+
+#: .\templates\app\components\fill_history.html:5
+#: .\templates\app\statistics.html:162
+msgid "Activity History"
+msgstr "Activity History"
+
+#: .\templates\app\components\fill_history.html:28
+msgid "You haven't started tracking it yet."
+msgstr "You haven't started tracking it yet."
+
+#: .\templates\app\components\fill_track.html:72
+#: .\templates\lists\components\list_item_button.html:16
+msgid "Add"
+msgstr "Add"
+
+#: .\templates\app\components\fill_track.html:78
+#: .\templates\app\components\fill_track_episode.html:61
+#: .\templates\lists\components\list_form.html:45
+msgid "Delete"
+msgstr "Delete"
+
+#: .\templates\app\components\fill_track_episode.html:13
+#: .\templates\app\media_details.html:613
+msgid "Track Episode"
+msgstr "Track Episode"
+
+#: .\templates\app\components\fill_track_episode.html:29
+msgid "Watched once"
+msgstr "Watched once"
+
+#: .\templates\app\components\fill_track_episode.html:31
+#: .\templates\app\media_details.html:684
+msgid "Watched"
+msgstr "Watched"
+
+#: .\templates\app\components\fill_track_episode.html:31
+#: .\templates\app\media_details.html:684
+msgid "times"
+msgstr "times"
+
+#: .\templates\app\components\fill_track_episode.html:34
+msgid "Not watched yet"
+msgstr "Not watched yet"
+
+#: .\templates\app\components\fill_track_episode.html:43
+msgid "Previous Watches"
+msgstr "Previous Watches"
+
+#: .\templates\app\components\fill_track_episode.html:51
+#: .\templates\app\media_details.html:682
+msgid "No date provided"
+msgstr "No date provided"
+
+#: .\templates\app\components\fill_track_episode.html:92
+msgid "Watch Date"
+msgstr "Watch Date"
+
+#: .\templates\app\components\fill_track_episode.html:113
+msgid "Add watched entry with current settings"
+msgstr "Add watched entry with current settings"
+
+#: .\templates\app\components\fill_track_episode.html:113
+msgid "Add watch"
+msgstr "Add watch"
+
+#: .\templates\app\components\fill_track_episode.html:139
+msgid "Fills in the current date and time"
+msgstr "Fills in the current date and time"
+
+#: .\templates\app\components\fill_track_episode.html:139
+msgid "Fill in current time"
+msgstr "Fill in current time"
+
+#: .\templates\app\components\fill_track_episode.html:146
+msgid "Fills in the date and time the episode will be finished if started now"
+msgstr "Fills in the date and time the episode will be finished if started now"
+
+#: .\templates\app\components\fill_track_episode.html:147
+msgid "Fill in end time"
+msgstr "Fill in end time"
+
+#: .\templates\app\components\fill_track_episode.html:156
+msgid "Fills in the air date of the episode, if available"
+msgstr "Fills in the air date of the episode, if available"
+
+#: .\templates\app\components\fill_track_episode.html:156
+msgid "Fill in air date"
+msgstr "Fill in air date"
+
+#: .\templates\app\components\home_grid.html:39
+#: .\templates\app\components\media_card.html:91
+#: .\templates\app\components\media_card_list.html:39
+msgid "Add to tracker"
+msgstr "Add to tracker"
+
+#: .\templates\app\components\home_grid.html:47
+#: .\templates\app\components\media_card.html:101
+#: .\templates\app\components\media_card_list.html:48
+#: .\templates\app\media_details.html:382
+#: .\templates\app\media_details.html:629
+msgid "Add to custom lists"
+msgstr "Add to custom lists"
+
+#: .\templates\app\components\home_grid.html:55
+#: .\templates\app\components\media_card.html:110
+#: .\templates\app\components\media_card_list.html:57
+#: .\templates\app\media_details.html:402
+#: .\templates\app\media_details.html:651
+msgid "View your activity history"
+msgstr "View your activity history"
+
+#: .\templates\app\components\home_section.html:58
+msgid "Load all"
+msgstr "Load all"
+
+#: .\templates\app\components\home_section.html:82
+msgid "Nothing is actively moving right now"
+msgstr "Nothing is actively moving right now"
+
+#: .\templates\app\components\home_section.html:84
+msgid "Your planning shelf is still empty"
+msgstr "Your planning shelf is still empty"
+
+#: .\templates\app\components\home_section.html:89
+msgid ""
+"Start a title and mark it as in progress to see quick updates and release "
+"reminders here."
+msgstr ""
+
+#: .\templates\app\components\home_section.html:91
+msgid "Add a few titles to planning to see them here."
+msgstr "Add a few titles to planning to see them here."
+
+#: .\templates\app\components\home_section.html:98
+msgid "Browse media"
+msgstr "Browse media"
+
+#: .\templates\app\components\search_parent_season.html:7
+msgid "of"
+msgstr "of"
+
+#: .\templates\app\components\search_parent_season.html:8
+msgid " - Season"
+msgstr " - Season"
+
+#: .\templates\app\components\search_parent_season.html:14
+msgid "No seasons found matching"
+msgstr "No seasons found matching"
+
+#: .\templates\app\components\search_parent_season.html:14
+#: .\templates\app\components\search_parent_tv.html:14
+msgid "Please try a different search term."
+msgstr "Please try a different search term."
+
+#: .\templates\app\components\search_parent_tv.html:14
+msgid "No TV shows found matching"
+msgstr "No TV shows found matching"
+
+#: .\templates\app\create_entry.html:6
+msgid "Create - OiOi-Track"
+msgstr "Create - OiOi-Track"
+
+#: .\templates\app\create_entry.html:12
+msgid "Create Custom Entry"
+msgstr "Create Custom Entry"
+
+#: .\templates\app\create_entry.html:13
+msgid ""
+"Add a custom media entry to your collection if it's not available in the "
+"database."
+msgstr ""
+
+#: .\templates\app\create_entry.html:127 .\templates\app\media_list.html:167
+#: .\templates\lists\list_detail.html:187 .\users\models.py:31
+#: .\users\models.py:45 .\users\models.py:89
+msgid "Title"
+msgstr "Title"
+
+#: .\templates\app\create_entry.html:129
+msgid "Enter title"
+msgstr "Enter title"
+
+#: .\templates\app\create_entry.html:142
+msgid "Search for a TV show..."
+msgstr "Search for a TV show..."
+
+#: .\templates\app\create_entry.html:159
+msgid "Season Number"
+msgstr "Season Number"
+
+#: .\templates\app\create_entry.html:189
+msgid "Search for a season..."
+msgstr "Search for a season..."
+
+#: .\templates\app\create_entry.html:206
+msgid "Episode Number"
+msgstr "Episode Number"
+
+#: .\templates\app\create_entry.html:231
+msgid "Image URL"
+msgstr "Image URL"
+
+#: .\templates\app\create_entry.html:236
+msgid "Enter image URL"
+msgstr "Enter image URL"
+
+#: .\templates\app\create_entry.html:252 .\templates\app\media_list.html:168
+msgid "Score"
+msgstr "Score"
+
+#: .\templates\app\create_entry.html:278 .\templates\app\media_details.html:273
+#: .\templates\app\media_details.html:335 .\templates\app\media_list.html:169
+#: .\users\models.py:46
+msgid "Progress"
+msgstr "Progress"
+
+#: .\templates\app\create_entry.html:308 .\templates\app\media_details.html:331
+#: .\templates\app\media_list.html:171
+msgid "Status"
+msgstr "Status"
+
+#: .\templates\app\create_entry.html:322 .\templates\app\media_list.html:172
+#: .\templates\app\statistics.html:62 .\users\models.py:47
+msgid "Start Date"
+msgstr "Start Date"
+
+#: .\templates\app\create_entry.html:331 .\templates\app\media_list.html:173
+#: .\templates\app\statistics.html:69 .\users\models.py:48
+msgid "End Date"
+msgstr "End Date"
+
+#: .\templates\app\create_entry.html:340
+msgid "Notes"
+msgstr "Notes"
+
+#: .\templates\app\create_entry.html:351
+msgid "Create Entry"
+msgstr "Create Entry"
+
+#: .\templates\app\home.html:6
+msgid "Home - OiOi-Track"
+msgstr "Home - OiOi-Track"
+
+#: .\templates\app\home.html:12 .\templates\base.html:93
+msgid "Home"
+msgstr "Home"
+
+#: .\templates\app\home.html:17
+msgid "Hide unreleased"
+msgstr "Hide unreleased"
+
+#: .\templates\app\media_details.html:122
+#: .\templates\app\media_details.html:142
+msgid "Show less"
+msgstr "Show less"
+
+#: .\templates\app\media_details.html:122
+#: .\templates\app\media_details.html:142
+msgid "Read more"
+msgstr "Read more"
+
+#: .\templates\app\media_details.html:131
+msgid "YOUR NOTES"
+msgstr "YOUR NOTES"
+
+#: .\templates\app\media_details.html:152
+msgid "SCORE"
+msgstr "SCORE"
+
+#: .\templates\app\media_details.html:162
+msgid "vote"
+msgstr "vote"
+
+#: .\templates\app\media_details.html:174
+msgid "YOUR SCORE"
+msgstr "YOUR SCORE"
+
+#: .\templates\app\media_details.html:187
+msgid "Click to edit"
+msgstr "Click to edit"
+
+#: .\templates\app\media_details.html:229
+msgid "Your History"
+msgstr "Your History"
+
+#: .\templates\app\media_details.html:239
+msgid "Add new consumption"
+msgstr "Add new consumption"
+
+#: .\templates\app\media_details.html:266
+msgid "Ended"
+msgstr "Ended"
+
+#: .\templates\app\media_details.html:289
+msgid "Show Repeats"
+msgstr "Show Repeats"
+
+#: .\templates\app\media_details.html:305
+msgid "Not rated"
+msgstr "Not rated"
+
+#: .\templates\app\media_details.html:377
+msgid "Actions"
+msgstr "Actions"
+
+#: .\templates\app\media_details.html:438
+msgid "Details"
+msgstr "Details"
+
+#: .\templates\app\media_details.html:441
+msgid "STREAMING"
+msgstr "STREAMING"
+
+#: .\templates\app\media_details.html:445
+msgid ""
+"Watch provider region is not configured. Set a region or disable this "
+"feature in the"
+msgstr ""
+
+#: .\templates\app\media_details.html:447
+msgid "preferences"
+msgstr "preferences"
+
+#: .\templates\app\media_details.html:459
+msgid "No watch providers"
+msgstr "No watch providers"
+
+#: .\templates\app\media_details.html:477
+msgid "SOURCE"
+msgstr "SOURCE"
+
+#: .\templates\app\media_details.html:484
+msgid "EXTERNAL LINKS"
+msgstr "EXTERNAL LINKS"
+
+#: .\templates\app\media_details.html:493
+msgid "No details available"
+msgstr "No details available"
+
+#: .\templates\app\media_details.html:498
+msgid "TIME TO BEAT"
+msgstr "TIME TO BEAT"
+
+#: .\templates\app\media_details.html:501
+msgid "HASTILY"
+msgstr "HASTILY"
+
+#: .\templates\app\media_details.html:507
+msgid "NORMALLY"
+msgstr "NORMALLY"
+
+#: .\templates\app\media_details.html:513
+msgid "COMPLETELY"
+msgstr "COMPLETELY"
+
+#: .\templates\app\media_details.html:524
+msgid "Cast"
+msgstr "Cast"
+
+#: .\templates\app\media_details.html:536
+msgid "View all"
+msgstr "View all"
+
+#: .\templates\app\media_details.html:537
+msgid "cast members"
+msgstr "cast members"
+
+#: .\templates\app\media_details.html:551
+msgid "DLCs"
+msgstr "DLCs"
+
+#: .\templates\app\media_details.html:574
+msgid "Episodes"
+msgstr "Episodes"
+
+#: .\templates\app\media_details.html:678
+msgid "Last watched:"
+msgstr "Last watched:"
+
+#: .\templates\app\media_list.html:7 .\templates\base.html:19
+#: .\templates\lists\list_detail.html:10
+msgid "OiOi-Track"
+msgstr "OiOi-Track"
+
+#: .\templates\app\media_list.html:41
+msgid "Search"
+msgstr "Search"
+
+#: .\templates\app\media_list.html:41
+msgid "in"
+msgstr "in"
+
+#: .\templates\app\media_list.html:41
+msgid "your"
+msgstr "your"
+
+#: .\templates\app\media_list.html:41
+msgid "list"
+msgstr "list"
+
+#: .\templates\app\media_list.html:147
+msgid "No"
+msgstr "No"
+
+#: .\templates\app\media_list.html:147
+msgid "Tracked Yet"
+msgstr "Tracked Yet"
+
+#: .\templates\app\media_list.html:150
+msgid "Start tracking your "
+msgstr "Start tracking your "
+
+#: .\templates\app\media_list.html:150
+msgid " to keep a record of what you've "
+msgstr " to keep a record of what you've "
+
+#: .\templates\app\media_list.html:154
+msgid "Browse"
+msgstr "Browse"
+
+#: .\templates\app\media_list.html:170
+msgid "Last Watched"
+msgstr "Last Watched"
+
+#: .\templates\app\search.html:6
+msgid "Search - OiOi-Track"
+msgstr "Search - OiOi-Track"
+
+#: .\templates\app\search.html:11
+msgid "Search Results"
+msgstr "Search Results"
+
+#: .\templates\app\search.html:13
+msgid "Source:"
+msgstr "Source:"
+
+#: .\templates\app\search.html:100
+msgid "No results found"
+msgstr "No results found"
+
+#: .\templates\app\search.html:102
+msgid "We couldn't find any matches for"
+msgstr "We couldn't find any matches for"
+
+#: .\templates\app\search.html:102
+msgid "Try checking your spelling or using different keywords."
+msgstr "Try checking your spelling or using different keywords."
+
+#: .\templates\app\statistics.html:7
+msgid "Statistics - OiOi-Track"
+msgstr "Statistics - OiOi-Track"
+
+#: .\templates\app\statistics.html:12 .\templates\base.html:150
+msgid "Statistics"
+msgstr "Statistics"
+
+#: .\templates\app\statistics.html:13
+msgid "Track your media consumption habits"
+msgstr "Track your media consumption habits"
+
+#: .\templates\app\statistics.html:36
+msgid "Predefined Ranges"
+msgstr "Predefined Ranges"
+
+#: .\templates\app\statistics.html:39
+msgid "Custom Range"
+msgstr "Custom Range"
+
+#: .\templates\app\statistics.html:80
+msgid "Cancel"
+msgstr "Cancel"
+
+#: .\templates\app\statistics.html:85
+msgid "Apply Range"
+msgstr "Apply Range"
+
+#: .\templates\app\statistics.html:101
+msgid "Completed Items"
+msgstr "Completed Items"
+
+#: .\templates\app\statistics.html:116
+msgid "Average Rating"
+msgstr "Average Rating"
+
+#: .\templates\app\statistics.html:131
+msgid "Most Active Day"
+msgstr "Most Active Day"
+
+#: .\templates\app\statistics.html:134
+msgid "of activity"
+msgstr "of activity"
+
+#: .\templates\app\statistics.html:145
+msgid "Current Streak"
+msgstr "Current Streak"
+
+#: .\templates\app\statistics.html:150
+msgid "Longest"
+msgstr "Longest"
+
+#: .\templates\app\statistics.html:207
+msgid "Less"
+msgstr "Less"
+
+#: .\templates\app\statistics.html:213
+msgid "More"
+msgstr "More"
+
+#: .\templates\app\statistics.html:221
+msgid "Media Type Distribution"
+msgstr "Media Type Distribution"
+
+#: .\templates\app\statistics.html:232
+msgid "No media types to display"
+msgstr "No media types to display"
+
+#: .\templates\app\statistics.html:233
+msgid "Add different types of media to see their distribution."
+msgstr "Add different types of media to see their distribution."
+
+#: .\templates\app\statistics.html:240
+msgid "Status Distribution"
+msgstr "Status Distribution"
+
+#: .\templates\app\statistics.html:251
+msgid "No status data to display"
+msgstr "No status data to display"
+
+#: .\templates\app\statistics.html:252
+msgid "Track media items with different statuses to see their distribution."
+msgstr "Track media items with different statuses to see their distribution."
+
+#: .\templates\app\statistics.html:259
+msgid "Status Distribution by Media Type"
+msgstr "Status Distribution by Media Type"
+
+#: .\templates\app\statistics.html:270
+msgid "No data available"
+msgstr "No data available"
+
+#: .\templates\app\statistics.html:272
+msgid ""
+"Add media items with different statuses to see their distribution by type."
+msgstr ""
+
+#: .\templates\app\statistics.html:280
+msgid "Score Distribution by Media Type"
+msgstr "Score Distribution by Media Type"
+
+#: .\templates\app\statistics.html:291 .\templates\app\statistics.html:313
+msgid "No ratings yet"
+msgstr "No ratings yet"
+
+#: .\templates\app\statistics.html:292 .\templates\app\statistics.html:314
+msgid "Rate your media items to see score distribution statistics."
+msgstr "Rate your media items to see score distribution statistics."
+
+#: .\templates\app\statistics.html:300
+msgid "Top Rated Media"
+msgstr "Top Rated Media"
+
+#: .\templates\app\statistics.html:321
+msgid "Media Timeline"
+msgstr "Media Timeline"
+
+#: .\templates\app\statistics.html:397
+msgid "Your timeline is empty"
+msgstr "Your timeline is empty"
+
+#: .\templates\app\statistics.html:398
+msgid "Consume media items to see them appear on your timeline."
+msgstr "Consume media items to see them appear on your timeline."
+
+#: .\templates\base.html:10
+msgid "OiOi-Track, Media Tracker"
+msgstr "OiOi-Track, Media Tracker"
+
+#: .\templates\base.html:11
+msgid "Search and track media on OiOi-Track."
+msgstr "Search and track media on OiOi-Track."
+
+#: .\templates\base.html:135
+msgid "Create Custom"
+msgstr "Create Custom"
+
+#: .\templates\base.html:165 .\templates\lists\custom_lists.html:17
+msgid "Lists"
+msgstr "Lists"
+
+#: .\templates\base.html:180 .\templates\events\calendar.html:11
+msgid "Calendar"
+msgstr "Calendar"
+
+#: .\templates\base.html:206 .\templates\users\base.html:8
+msgid "Settings"
+msgstr "Settings"
+
+#: .\templates\base.html:215
+msgid "Logout"
+msgstr "Logout"
+
+#: .\templates\events\calendar.html:6
+msgid "Calendar - OiOi-Track"
+msgstr "Calendar - OiOi-Track"
+
+#: .\templates\events\calendar.html:12
+msgid "Track upcoming releases from your list."
+msgstr "Track upcoming releases from your list."
+
+#: .\templates\events\calendar.html:33
+#: .\templates\events\components\calendar_list.html:11
+msgid "Today"
+msgstr "Today"
+
+#: .\templates\events\calendar.html:39
+msgid "Fetch New Releases"
+msgstr "Fetch New Releases"
+
+#: .\templates\events\calendar.html:71
+msgid "Export link"
+msgstr "Export link"
+
+#: .\templates\events\calendar.html:74
+msgid ""
+"This link can be used to integrate your calendar into any of your calendar "
+"applications."
+msgstr ""
+
+#: .\templates\lists\components\fill_lists.html:15
+msgid "You haven't created any lists yet."
+msgstr "You haven't created any lists yet."
+
+#: .\templates\lists\components\list_form.html:11
+#: .\templates\lists\list_detail.html:39
+msgid "Edit List"
+msgstr "Edit List"
+
+#: .\templates\lists\components\list_form.html:13
+msgid "Create New List"
+msgstr "Create New List"
+
+#: .\templates\lists\components\list_form.html:40
+msgid "Save"
+msgstr "Save"
+
+#: .\templates\lists\components\list_form.html:52
+msgid "Create List"
+msgstr "Create List"
+
+#: .\templates\lists\components\list_grid.html:18
+msgid "Edit list"
+msgstr "Edit list"
+
+#: .\templates\lists\components\list_grid.html:38
+#: .\templates\lists\list_detail.html:31
+msgid "item"
+msgstr "item"
+
+#: .\templates\lists\components\list_item_button.html:8
+msgid "Remove"
+msgstr "Remove"
+
+#: .\templates\lists\custom_lists.html:10
+msgid "Lists - OiOi-Track"
+msgstr "Lists - OiOi-Track"
+
+#: .\templates\lists\custom_lists.html:18
+msgid "Organize and share your media lists"
+msgstr "Organize and share your media lists"
+
+#: .\templates\lists\custom_lists.html:23
+msgid "New List"
+msgstr "New List"
+
+#: .\templates\lists\custom_lists.html:37
+msgid "Search lists..."
+msgstr "Search lists..."
+
+#: .\templates\lists\custom_lists.html:60 .\users\models.py:79
+msgid "Last Item Added"
+msgstr "Last Item Added"
+
+#: .\templates\lists\custom_lists.html:60 .\users\models.py:80
+msgid "Name"
+msgstr "Name"
+
+#: .\templates\lists\custom_lists.html:60 .\users\models.py:82
+msgid "Newest First"
+msgstr "Newest First"
+
+#: .\templates\lists\custom_lists.html:60 .\users\models.py:81
+msgid "Items Count"
+msgstr "Items Count"
+
+#: .\templates\lists\custom_lists.html:99
+msgid "No Lists Created Yet"
+msgstr "No Lists Created Yet"
+
+#: .\templates\lists\custom_lists.html:100
+msgid ""
+"Create custom lists to organize your media collection and share with friends."
+msgstr ""
+
+#: .\templates\lists\custom_lists.html:103
+msgid "Create Your First List"
+msgstr "Create Your First List"
+
+#: .\templates\lists\list_detail.html:29
+msgid "collaborator"
+msgstr "collaborator"
+
+#: .\templates\lists\list_detail.html:46
+msgid "All Types"
+msgstr "All Types"
+
+#: .\templates\lists\list_detail.html:66
+msgid "Search in collection..."
+msgstr "Search in collection..."
+
+#: .\templates\lists\list_detail.html:166 .\users\models.py:54
+msgid "All"
+msgstr "All"
+
+#: .\templates\lists\list_detail.html:187 .\users\models.py:88
+msgid "Date Added"
+msgstr "Date Added"
+
+#: .\templates\lists\list_detail.html:223
+msgid "No items in this list yet"
+msgstr "No items in this list yet"
+
+#: .\templates\lists\list_detail.html:224
+msgid "Start adding your favorite media to build your collection"
+msgstr "Start adding your favorite media to build your collection"
+
+#: .\templates\lists\list_detail.html:227
+msgid "Browse Media"
+msgstr "Browse Media"
+
+#: .\templates\socialaccount\connections.html:7
+#: .\templates\socialaccount\connections.html:11
+msgid "Account Connections"
+msgstr "Account Connections"
+
+#: .\templates\socialaccount\connections.html:18
+msgid ""
+"You can sign in to your account using any of the following third-party "
+"accounts:"
+msgstr ""
+
+#: .\templates\socialaccount\connections.html:66
+msgid "Remove Selected"
+msgstr "Remove Selected"
+
+#: .\templates\socialaccount\connections.html:75
+msgid "You currently have no third-party accounts connected to this account."
+msgstr "You currently have no third-party accounts connected to this account."
+
+#: .\templates\socialaccount\connections.html:83
+msgid "Add a Third-Party Account"
+msgstr "Add a Third-Party Account"
+
+#: .\templates\users\about.html:8
+msgid "About - OiOi-Track"
+msgstr "About - OiOi-Track"
+
+#: .\templates\users\about.html:13
+msgid "About OiOi-Track"
+msgstr "About OiOi-Track"
+
+#: .\templates\users\about.html:19
+msgid "Description"
+msgstr "Description"
+
+#: .\templates\users\about.html:22
+msgid ""
+"OiOi-Track is an open-source media tracker that helps you organize and track "
+"your media."
+msgstr ""
+
+#: .\templates\users\about.html:29
+msgid "Links"
+msgstr "Links"
+
+#: .\templates\users\about.html:37
+msgid "Source Code"
+msgstr "Source Code"
+
+#: .\templates\users\about.html:46
+msgid "Documentation"
+msgstr "Documentation"
+
+#: .\templates\users\about.html:55
+msgid "Bug Reports"
+msgstr "Bug Reports"
+
+#: .\templates\users\about.html:64
+msgid "License"
+msgstr "License"
+
+#: .\templates\users\about.html:67
+msgid "OiOi-Track is licensed under the"
+msgstr "OiOi-Track is licensed under the"
+
+#: .\templates\users\about.html:79
+msgid "Attribution"
+msgstr "Attribution"
+
+#: .\templates\users\about.html:82
+msgid "Movie and TV streaming providers from"
+msgstr "Movie and TV streaming providers from"
+
+#: .\templates\users\about.html:95
+msgid "Version:"
+msgstr "Version:"
+
+#: .\templates\users\account.html:8
+msgid "Account - OiOi-Track"
+msgstr "Account - OiOi-Track"
+
+#: .\templates\users\account.html:16
+msgid "Profile Information"
+msgstr "Profile Information"
+
+#: .\templates\users\account.html:29 .\templates\users\import_data.html:427
+msgid "Username"
+msgstr "Username"
+
+#: .\templates\users\account.html:42
+msgid "Profile visibility"
+msgstr "Profile visibility"
+
+#: .\templates\users\account.html:47
+msgid "Private profile"
+msgstr "Private profile"
+
+#: .\templates\users\account.html:49
+msgid "Hide your profile and media lists from anonymous visitors."
+msgstr "Hide your profile and media lists from anonymous visitors."
+
+#: .\templates\users\account.html:68 .\templates\users\integrations.html:148
+#: .\templates\users\integrations.html:274
+msgid "Save Changes"
+msgstr "Save Changes"
+
+#: .\templates\users\account.html:77
+msgid "Change Password"
+msgstr "Change Password"
+
+#: .\templates\users\account.html:92
+msgid "Current Password"
+msgstr "Current Password"
+
+#: .\templates\users\account.html:116
+msgid "New Password"
+msgstr "New Password"
+
+#: .\templates\users\account.html:140
+msgid "Confirm New Password"
+msgstr "Confirm New Password"
+
+#: .\templates\users\account.html:166
+msgid "Update Password"
+msgstr "Update Password"
+
+#: .\templates\users\account.html:177
+msgid "Third-Party Connections"
+msgstr "Third-Party Connections"
+
+#: .\templates\users\account.html:179
+msgid "Manage your connected third-party accounts for easier sign-in."
+msgstr "Manage your connected third-party accounts for easier sign-in."
+
+#: .\templates\users\account.html:183
+msgid "Manage Account Connections"
+msgstr "Manage Account Connections"
+
+#: .\templates\users\advanced.html:8
+msgid "Advanced - OiOi-Track"
+msgstr "Advanced - OiOi-Track"
+
+#: .\templates\users\advanced.html:17 .\templates\users\base.html:61
+msgid "Advanced"
+msgstr "Advanced"
+
+#: .\templates\users\advanced.html:23 .\templates\users\advanced.html:39
+msgid "Clear Search Cache"
+msgstr "Clear Search Cache"
+
+#: .\templates\users\advanced.html:26
+msgid ""
+"OiOi-Track stores your search results in a cache to speed up performance and "
+"reduce API calls."
+msgstr ""
+
+#: .\templates\users\advanced.html:28
+msgid "Normally, these cached results expire automatically after 24 hours."
+msgstr "Normally, these cached results expire automatically after 24 hours."
+
+#: .\templates\users\advanced.html:29
+msgid ""
+"If your search results appear outdated, you can clear the cache manually."
+msgstr ""
+
+#: .\templates\users\advanced.html:31
+msgid "Your next search may be slightly slower as fresh data is retrieved."
+msgstr "Your next search may be slightly slower as fresh data is retrieved."
+
+#: .\templates\users\base.html:9
+msgid "Configure your account and preferences"
+msgstr "Configure your account and preferences"
+
+#: .\templates\users\base.html:19
+msgid "Account"
+msgstr "Account"
+
+#: .\templates\users\base.html:26 .\templates\users\preferences.html:13
+msgid "Preferences"
+msgstr "Preferences"
+
+#: .\templates\users\base.html:33 .\templates\users\notifications.html:15
+msgid "Notifications"
+msgstr "Notifications"
+
+#: .\templates\users\base.html:40
+msgid "Integrations"
+msgstr "Integrations"
+
+#: .\templates\users\base.html:47
+msgid "Import Data"
+msgstr "Import Data"
+
+#: .\templates\users\base.html:54 .\templates\users\export_data.html:11
+msgid "Export Data"
+msgstr "Export Data"
+
+#: .\templates\users\base.html:68
+msgid "About"
+msgstr "About"
+
+#: .\templates\users\components\excluded_items.html:3
+msgid "Currently Excluded:"
+msgstr "Currently Excluded:"
+
+#: .\templates\users\components\excluded_items.html:29
+msgid "No media items excluded yet"
+msgstr "No media items excluded yet"
+
+#: .\templates\users\components\search_results.html:21
+msgid "Exclude"
+msgstr "Exclude"
+
+#: .\templates\users\components\search_results.html:27
+msgid "No matching items found"
+msgstr "No matching items found"
+
+#: .\templates\users\export_data.html:4
+msgid "Export - OiOi-Track"
+msgstr "Export - OiOi-Track"
+
+#: .\templates\users\export_data.html:13
+msgid "Back up your data or export it for use with other services."
+msgstr "Back up your data or export it for use with other services."
+
+#: .\templates\users\export_data.html:14
+msgid "Your export will include all your media items."
+msgstr "Your export will include all your media items."
+
+#: .\templates\users\export_data.html:18
+msgid "Export as CSV"
+msgstr "Export as CSV"
+
+#: .\templates\users\import_data.html:6
+msgid "Import - OiOi-Track"
+msgstr "Import - OiOi-Track"
+
+#: .\templates\users\import_data.html:17
+msgid "Import Settings"
+msgstr "Import Settings"
+
+#: .\templates\users\import_data.html:19
+msgid "Configure your import preferences."
+msgstr "Configure your import preferences."
+
+#: .\templates\users\import_data.html:23
+msgid "Import Frequency"
+msgstr "Import Frequency"
+
+#: .\templates\users\import_data.html:27
+msgid "One Time Import"
+msgstr "One Time Import"
+
+#: .\templates\users\import_data.html:28 .\users\helpers.py:73
+msgid "Every Day"
+msgstr "Every Day"
+
+#: .\templates\users\import_data.html:29
+msgid "Every 2 Days"
+msgstr "Every 2 Days"
+
+#: .\templates\users\import_data.html:34
+msgid "Import Time"
+msgstr "Import Time"
+
+#: .\templates\users\import_data.html:41
+msgid "Import Mode"
+msgstr "Import Mode"
+
+#: .\templates\users\import_data.html:45
+msgid "Only Sync New Items"
+msgstr "Only Sync New Items"
+
+#: .\templates\users\import_data.html:46
+msgid "Sync New Items and Overwrite Existing"
+msgstr "Sync New Items and Overwrite Existing"
+
+#: .\templates\users\import_data.html:59
+msgid "Import Sources"
+msgstr "Import Sources"
+
+#: .\templates\users\import_data.html:62
+msgid "Some of these require additional configuration, check the"
+msgstr "Some of these require additional configuration, check the"
+
+#: .\templates\users\import_data.html:65
+msgid "import configuration guide"
+msgstr "import configuration guide"
+
+#: .\templates\users\import_data.html:73
+msgid "Import TV shows and movies"
+msgstr "Import TV shows and movies"
+
+#: .\templates\users\import_data.html:80 .\templates\users\import_data.html:173
+msgid "Import private profile (requires authentication)"
+msgstr "Import private profile (requires authentication)"
+
+#: .\templates\users\import_data.html:94
+msgid "Public Trakt username"
+msgstr "Public Trakt username"
+
+#: .\templates\users\import_data.html:101
+#: .\templates\users\import_data.html:156
+#: .\templates\users\import_data.html:194
+#: .\templates\users\import_data.html:242
+#: .\templates\users\import_data.html:335
+msgid "Import"
+msgstr "Import"
+
+#: .\templates\users\import_data.html:117
+msgid "Connect with Trakt & Import"
+msgstr "Connect with Trakt & Import"
+
+#: .\templates\users\import_data.html:125
+msgid "Import TV shows, movies and anime"
+msgstr "Import TV shows, movies and anime"
+
+#: .\templates\users\import_data.html:133
+msgid "Connect with Simkl & Import"
+msgstr "Connect with Simkl & Import"
+
+#: .\templates\users\import_data.html:141
+#: .\templates\users\import_data.html:166
+#: .\templates\users\import_data.html:218
+msgid "Import anime and manga"
+msgstr "Import anime and manga"
+
+#: .\templates\users\import_data.html:150
+msgid "MAL username"
+msgstr "MAL username"
+
+#: .\templates\users\import_data.html:187
+msgid "Public AniList username"
+msgstr "Public AniList username"
+
+#: .\templates\users\import_data.html:210
+msgid "Connect with AniList & Import"
+msgstr "Connect with AniList & Import"
+
+#: .\templates\users\import_data.html:227
+msgid "Kitsu user ID"
+msgstr "Kitsu user ID"
+
+#: .\templates\users\import_data.html:234
+msgid "Find it on your Kitsu profile URL:"
+msgstr "Find it on your Kitsu profile URL:"
+
+#: .\templates\users\import_data.html:254
+msgid "View CSV format documentation"
+msgstr "View CSV format documentation"
+
+#: .\templates\users\import_data.html:257
+msgid "Import from OiOi-Track backup"
+msgstr "Import from OiOi-Track backup"
+
+#: .\templates\users\import_data.html:257
+#: .\templates\users\import_data.html:284
+#: .\templates\users\import_data.html:346
+#: .\templates\users\import_data.html:373
+msgid "File uploads are not available for periodic imports"
+msgstr "File uploads are not available for periodic imports"
+
+#: .\templates\users\import_data.html:275
+#: .\templates\users\import_data.html:302
+#: .\templates\users\import_data.html:364
+#: .\templates\users\import_data.html:391
+msgid "Select CSV File"
+msgstr "Select CSV File"
+
+#: .\templates\users\import_data.html:284
+msgid "Import games"
+msgstr "Import games"
+
+#: .\templates\users\import_data.html:310
+msgid "Import games from your Steam library"
+msgstr "Import games from your Steam library"
+
+#: .\templates\users\import_data.html:319
+msgid "Steam 64-bit ID"
+msgstr "Steam 64-bit ID"
+
+#: .\templates\users\import_data.html:326
+msgid "Find it on your Steam account details page under your username."
+msgstr "Find it on your Steam account details page under your username."
+
+#: .\templates\users\import_data.html:329
+msgid ""
+"Your profile must be public if the API key you are using is not linked to "
+"the steamid you are requesting."
+msgstr ""
+
+#: .\templates\users\import_data.html:346
+msgid "Import movies and TV shows from your ratings"
+msgstr "Import movies and TV shows from your ratings"
+
+#: .\templates\users\import_data.html:373
+msgid "Import from GoodReads backup"
+msgstr "Import from GoodReads backup"
+
+#: .\templates\users\import_data.html:403
+msgid "Active Periodic Imports"
+msgstr "Active Periodic Imports"
+
+#: .\templates\users\import_data.html:406
+msgid ""
+"Automated imports that run on a schedule. These will continue to sync your "
+"media until disabled."
+msgstr ""
+
+#: .\templates\users\import_data.html:428
+msgid "Mode"
+msgstr "Mode"
+
+#: .\templates\users\import_data.html:429
+msgid "Last Import"
+msgstr "Last Import"
+
+#: .\templates\users\import_data.html:430
+msgid "Next Import"
+msgstr "Next Import"
+
+#: .\templates\users\import_data.html:435
+msgid "No periodic imports configured"
+msgstr "No periodic imports configured"
+
+#: .\templates\users\import_data.html:436
+msgid "Set up an import with a daily or 2-day frequency to see it here"
+msgstr "Set up an import with a daily or 2-day frequency to see it here"
+
+#: .\templates\users\import_data.html:446
+msgid "Import History"
+msgstr "Import History"
+
+#: .\templates\users\import_data.html:449
+msgid "Showing import activity from the last 7 days."
+msgstr "Showing import activity from the last 7 days."
+
+#: .\templates\users\import_data.html:466
+msgid "Failed"
+msgstr "Failed"
+
+#: .\templates\users\import_data.html:468
+msgid "Pending"
+msgstr "Pending"
+
+#: .\templates\users\import_data.html:484
+msgid "Hide failed items"
+msgstr "Hide failed items"
+
+#: .\templates\users\import_data.html:484
+msgid "Show failed items"
+msgstr "Show failed items"
+
+#: .\templates\users\import_data.html:489
+msgid "Hide traceback"
+msgstr "Hide traceback"
+
+#: .\templates\users\import_data.html:489
+msgid "Show traceback"
+msgstr "Show traceback"
+
+#: .\templates\users\import_data.html:504
+msgid "No imports in the last 7 days"
+msgstr "No imports in the last 7 days"
+
+#: .\templates\users\import_data.html:505
+msgid "Import your media from any source to see the history here"
+msgstr "Import your media from any source to see the history here"
+
+#: .\templates\users\integrations.html:6
+msgid "Integrations - OiOi-Track"
+msgstr "Integrations - OiOi-Track"
+
+#: .\templates\users\integrations.html:20
+msgid "Token"
+msgstr "Token"
+
+#: .\templates\users\integrations.html:22
+msgid ""
+"This token is used to authenticate webhook requests from your media servers."
+msgstr ""
+
+#: .\templates\users\integrations.html:31
+#: .\templates\users\integrations.html:167
+#: .\templates\users\integrations.html:197
+#: .\templates\users\integrations.html:232
+#: .\templates\users\integrations.html:302
+#: .\templates\users\integrations.html:338
+msgid "Copy"
+msgstr "Copy"
+
+#: .\templates\users\integrations.html:40
+msgid "Regenerating will invalidate the previous token"
+msgstr "Regenerating will invalidate the previous token"
+
+#: .\templates\users\integrations.html:48
+msgid "Regenerate"
+msgstr "Regenerate"
+
+#: .\templates\users\integrations.html:57
+msgid "Media Servers"
+msgstr "Media Servers"
+
+#: .\templates\users\integrations.html:59
+msgid ""
+"Connect your media servers to automatically track your watching progress."
+msgstr ""
+
+#: .\templates\users\integrations.html:63
+msgid "Integration services"
+msgstr "Integration services"
+
+#: .\templates\users\integrations.html:71
+#: .\templates\users\integrations.html:96
+msgid "Jellyfin"
+msgstr "Jellyfin"
+
+#: .\templates\users\integrations.html:80
+#: .\templates\users\integrations.html:251
+msgid "Plex"
+msgstr "Plex"
+
+#: .\templates\users\integrations.html:89
+#: .\templates\users\integrations.html:318
+msgid "Emby"
+msgstr "Emby"
+
+#: .\templates\users\integrations.html:98
+msgid "Connect Jellyfin to automatically track your watching progress."
+msgstr "Connect Jellyfin to automatically track your watching progress."
+
+#: .\templates\users\integrations.html:100
+msgid "Webhook Events"
+msgstr "Webhook Events"
+
+#: .\templates\users\integrations.html:102
+msgid ""
+"Play and Stop events are always processed. Enable these to sync manual "
+"watched changes from the unofficial Webhooks plugin."
+msgstr ""
+
+#: .\templates\users\integrations.html:112
+msgid "Process MarkPlayed events"
+msgstr "Process MarkPlayed events"
+
+#: .\templates\users\integrations.html:114
+msgid "Mark media as watched when it is manually marked played in Jellyfin."
+msgstr "Mark media as watched when it is manually marked played in Jellyfin."
+
+#: .\templates\users\integrations.html:129
+msgid "Process MarkUnplayed events"
+msgstr "Process MarkUnplayed events"
+
+#: .\templates\users\integrations.html:132
+msgid ""
+"Remove watched progress when it is manually marked unplayed in Jellyfin. "
+"This event can delete media from oioitrack."
+msgstr ""
+
+#: .\templates\users\integrations.html:154
+msgid "Official Webhook Plugin"
+msgstr "Official Webhook Plugin"
+
+#: .\templates\users\integrations.html:156
+#: .\templates\users\integrations.html:209
+msgid "You will need to have TMDB and TVDB as metadata providers in Jellyfin."
+msgstr "You will need to have TMDB and TVDB as metadata providers in Jellyfin."
+
+#: .\templates\users\integrations.html:157
+msgid ""
+"Install the Webhook plugin from the 'Jellyfin Stable' repo via your server's "
+"Plugin Catalog."
+msgstr ""
+
+#: .\templates\users\integrations.html:159
+msgid "Restart your server, then configure the plugin:"
+msgstr "Restart your server, then configure the plugin:"
+
+#: .\templates\users\integrations.html:161
+msgid "Click on the \\"
+msgstr "Click on the \\"
+
+#: .\templates\users\integrations.html:162
+msgid "Name: oioitrack"
+msgstr "Name: oioitrack"
+
+#: .\templates\users\integrations.html:173
+msgid "Notification Type: Playback Start and Playback Stop"
+msgstr "Notification Type: Playback Start and Playback Stop"
+
+#: .\templates\users\integrations.html:174
+msgid "User Filter: Your Jellyfin User"
+msgstr "User Filter: Your Jellyfin User"
+
+#: .\templates\users\integrations.html:175
+msgid "Finally, under the \\"
+msgstr "Finally, under the \\"
+
+#: .\templates\users\integrations.html:207
+msgid "Unofficial Webhooks Plugin"
+msgstr "Unofficial Webhooks Plugin"
+
+#: .\templates\users\integrations.html:211
+msgid "Add this repository"
+msgstr "Add this repository"
+
+#: .\templates\users\integrations.html:215
+msgid "link"
+msgstr "link"
+
+#: .\templates\users\integrations.html:216
+msgid "to your \\"
+msgstr "to your \\"
+
+#: .\templates\users\integrations.html:219
+msgid "From your \\"
+msgstr "From your \\"
+
+#: .\templates\users\integrations.html:223
+msgid "Unofficial Webhooks plugin"
+msgstr "Unofficial Webhooks plugin"
+
+#: .\templates\users\integrations.html:226
+msgid "Restart your server, then configure the plugin: "
+msgstr "Restart your server, then configure the plugin: "
+
+#: .\templates\users\integrations.html:238
+msgid "Payload format: Default"
+msgstr "Payload format: Default"
+
+#: .\templates\users\integrations.html:239
+msgid "Listen to events only for: Your Jellyfin User"
+msgstr "Listen to events only for: Your Jellyfin User"
+
+#: .\templates\users\integrations.html:240
+msgid "Events: Play, Stop, MarkPlayed and MarkUnplayed"
+msgstr "Events: Play, Stop, MarkPlayed and MarkUnplayed"
+
+#: .\templates\users\integrations.html:253
+msgid "Connect Plex to automatically track your watching progress."
+msgstr "Connect Plex to automatically track your watching progress."
+
+#: .\templates\users\integrations.html:255
+msgid "Plex Usernames"
+msgstr "Plex Usernames"
+
+#: .\templates\users\integrations.html:262
+msgid ""
+"This username (or several, comma separated) will be used to filter which "
+"events are sent to your webhook."
+msgstr ""
+
+#: .\templates\users\integrations.html:267
+msgid "username1, username2, username3"
+msgstr "username1, username2, username3"
+
+#: .\templates\users\integrations.html:280
+#: .\templates\users\integrations.html:322
+msgid "Setup Instructions"
+msgstr "Setup Instructions"
+
+#: .\templates\users\integrations.html:282
+msgid "You will need to have a PlexPass in order to have webhooks enabled"
+msgstr "You will need to have a PlexPass in order to have webhooks enabled"
+
+#: .\templates\users\integrations.html:283
+msgid "Go to Settings > Server > Network and enable Webhooks"
+msgstr "Go to Settings > Server > Network and enable Webhooks"
+
+#: .\templates\users\integrations.html:285
+msgid "In Plex settings, go to"
+msgstr "In Plex settings, go to"
+
+#: .\templates\users\integrations.html:289
+msgid "Webhooks"
+msgstr "Webhooks"
+
+#: .\templates\users\integrations.html:292
+msgid "In the Webhooks section, click on \\"
+msgstr "In the Webhooks section, click on \\"
+
+#: .\templates\users\integrations.html:320
+msgid "Connect Emby to automatically track your watching progress."
+msgstr "Connect Emby to automatically track your watching progress."
+
+#: .\templates\users\integrations.html:324
+msgid "In Emby, go to Settings > Notifications"
+msgstr "In Emby, go to Settings > Notifications"
+
+#: .\templates\users\integrations.html:325
+msgid "In the Notifications section, click on \\"
+msgstr "In the Notifications section, click on \\"
+
+#: .\templates\users\integrations.html:327
+msgid "In the Notification settings:"
+msgstr "In the Notification settings:"
+
+#: .\templates\users\integrations.html:345
+msgid "Request content type: multipart/form-data"
+msgstr "Request content type: multipart/form-data"
+
+#: .\templates\users\integrations.html:346
+msgid "Events: Play and Stop"
+msgstr "Events: Play and Stop"
+
+#: .\templates\users\integrations.html:347
+msgid "Limit user events to: Your Emby User"
+msgstr "Limit user events to: Your Emby User"
+
+#: .\templates\users\integrations.html:348
+msgid "\\"
+msgstr "\\"
+
+#: .\templates\users\notifications.html:6
+msgid "Notifications - OiOi-Track"
+msgstr "Notifications - OiOi-Track"
+
+#: .\templates\users\notifications.html:18
+msgid "Configure how you want to receive notifications about your media."
+msgstr "Configure how you want to receive notifications about your media."
+
+#: .\templates\users\notifications.html:26
+msgid "Apprise URLs"
+msgstr "Apprise URLs"
+
+#: .\templates\users\notifications.html:38
+msgid "Apprise"
+msgstr "Apprise"
+
+#: .\templates\users\notifications.html:38
+msgid "is a notification service that supports"
+msgstr "is a notification service that supports"
+
+#: .\templates\users\notifications.html:42
+msgid "many platforms"
+msgstr "many platforms"
+
+#: .\templates\users\notifications.html:42
+msgid "including:"
+msgstr "including:"
+
+#: .\templates\users\notifications.html:45
+msgid "Discord"
+msgstr "Discord"
+
+#: .\templates\users\notifications.html:46
+msgid "Telegram"
+msgstr "Telegram"
+
+#: .\templates\users\notifications.html:47
+msgid "Slack"
+msgstr "Slack"
+
+#: .\templates\users\notifications.html:48
+msgid "Email"
+msgstr "Email"
+
+#: .\templates\users\notifications.html:49
+msgid "Pushover"
+msgstr "Pushover"
+
+#: .\templates\users\notifications.html:50
+msgid "ntfy"
+msgstr "ntfy"
+
+#: .\templates\users\notifications.html:51
+msgid "And many more..."
+msgstr "And many more..."
+
+#: .\templates\users\notifications.html:54
+msgid "Enter one URL per line. Example: "
+msgstr "Enter one URL per line. Example: "
+
+#: .\templates\users\notifications.html:60
+msgid ""
+"Enter each Apprise URL on a separate line to send notifications to multiple "
+"services."
+msgstr ""
+
+#: .\templates\users\notifications.html:65
+msgid "Notification Settings"
+msgstr "Notification Settings"
+
+#: .\templates\users\notifications.html:74
+msgid "Enable Daily Digest"
+msgstr "Enable Daily Digest"
+
+#: .\templates\users\notifications.html:77
+msgid ""
+"Receive a single notification each day with all media scheduled to release "
+"that day"
+msgstr ""
+
+#: .\templates\users\notifications.html:96 .\users\models.py:419
+msgid "Receive notifications for recently released media"
+msgstr "Receive notifications for recently released media"
+
+#: .\templates\users\notifications.html:98
+msgid "Get notified when new episodes, chapters, or other media are released"
+msgstr "Get notified when new episodes, chapters, or other media are released"
+
+#: .\templates\users\notifications.html:118
+msgid "Test Notifications"
+msgstr "Test Notifications"
+
+#: .\templates\users\notifications.html:123
+msgid "Save Settings"
+msgstr "Save Settings"
+
+#: .\templates\users\notifications.html:133
+msgid "Excluded Media Items"
+msgstr "Excluded Media Items"
+
+#: .\templates\users\notifications.html:136
+msgid "Exclude specific media items from notifications:"
+msgstr "Exclude specific media items from notifications:"
+
+#: .\templates\users\notifications.html:139
+msgid "Search for media to exclude..."
+msgstr "Search for media to exclude..."
+
+#: .\templates\users\preferences.html:6
+msgid "Preferences - OiOi-Track"
+msgstr "Preferences - OiOi-Track"
+
+#: .\templates\users\preferences.html:15
+msgid "Customize the look and behavior of the application."
+msgstr "Customize the look and behavior of the application."
+
+#: .\templates\users\preferences.html:26
+msgid "Language"
+msgstr "Language"
+
+#: .\templates\users\preferences.html:29
+msgid ""
+"Main Language preference for the application. This will affect the language "
+"of the interface and any content and component that supports multiple "
+"languages."
+msgstr ""
+
+#: .\templates\users\preferences.html:50
+msgid "Theme"
+msgstr "Theme"
+
+#: .\templates\users\preferences.html:53
+msgid "Choose a theme for the application interface."
+msgstr "Choose a theme for the application interface."
+
+#: .\templates\users\preferences.html:72
+msgid "Hide Hover Overlay on Touch Devices"
+msgstr "Hide Hover Overlay on Touch Devices"
+
+#: .\templates\users\preferences.html:75
+msgid ""
+"Hide the media card hover overlay with action buttons on touch devices for a "
+"cleaner mobile experience."
+msgstr ""
+
+#: .\templates\users\preferences.html:76
+msgid ""
+"On desktop, the overlay will still appear when you hover your mouse over "
+"media cards."
+msgstr ""
+
+#: .\templates\users\preferences.html:96
+msgid "Obfuscate Unseen Episodes"
+msgstr "Obfuscate Unseen Episodes"
+
+#: .\templates\users\preferences.html:99
+msgid "When enabled, unseen episode images and descriptions will be blurred."
+msgstr "When enabled, unseen episode images and descriptions will be blurred."
+
+#: .\templates\users\preferences.html:119
+msgid "Bulk Completion Date"
+msgstr "Bulk Completion Date"
+
+#: .\templates\users\preferences.html:122
+msgid ""
+"When marking a TV show or season as completed, its episodes will be marked "
+"as completed with this date."
+msgstr ""
+
+#: .\templates\users\preferences.html:141
+msgid "Show progress bar on media items"
+msgstr "Show progress bar on media items"
+
+#: .\templates\users\preferences.html:144
+msgid ""
+"Display a progress bar on media items. Items which don't have max progress "
+"will be using a dotted line."
+msgstr ""
+
+#: .\templates\users\preferences.html:164 .\users\models.py:366
+msgid "Hide completed media in recommendations"
+msgstr "Hide completed media in recommendations"
+
+#: .\templates\users\preferences.html:167
+msgid ""
+"Hide media you've already completed from the recommendations section on "
+"detail pages."
+msgstr ""
+
+#: .\templates\users\preferences.html:187
+msgid "Hide zero ratings"
+msgstr "Hide zero ratings"
+
+#: .\templates\users\preferences.html:190
+msgid "Hide the rating badge from media cards when the rating is zero."
+msgstr "Hide the rating badge from media cards when the rating is zero."
+
+#: .\templates\users\preferences.html:210
+msgid "Date Format"
+msgstr "Date Format"
+
+#: .\templates\users\preferences.html:213
+msgid "Choose how dates are displayed throughout the application."
+msgstr "Choose how dates are displayed throughout the application."
+
+#: .\templates\users\preferences.html:232
+msgid "Time Format"
+msgstr "Time Format"
+
+#: .\templates\users\preferences.html:235
+msgid "Choose between 12-hour or 24-hour clock display."
+msgstr "Choose between 12-hour or 24-hour clock display."
+
+#: .\templates\users\preferences.html:254
+msgid "Week Start Day"
+msgstr "Week Start Day"
+
+#: .\templates\users\preferences.html:257
+msgid "Choose which day the week starts on for calendars and statistics."
+msgstr "Choose which day the week starts on for calendars and statistics."
+
+#: .\templates\users\preferences.html:276
+msgid "Watch provider region"
+msgstr "Watch provider region"
+
+#: .\templates\users\preferences.html:279
+msgid ""
+"Choose the region to show watch providers for. Setting this to disabled will "
+"hide the box from the media page."
+msgstr ""
+
+#: .\templates\users\preferences.html:298
+msgid "Media Types"
+msgstr "Media Types"
+
+#: .\templates\users\preferences.html:301
+msgid ""
+"Control which media types are visible throughout the app (sidebar, search, "
+"calendar, notifications)."
+msgstr ""
+
+#: .\templates\users\preferences.html:331
+msgid "Save Preferences"
+msgstr "Save Preferences"
+
+#: .\users\admin.py:45
+msgid "Permissions"
+msgstr "Permissions"
+
+#: .\users\forms.py:20
+msgid "Enter your username"
+msgstr "Enter your username"
+
+#: .\users\forms.py:22
+msgid "Enter your password"
+msgstr "Enter your password"
+
+#: .\users\forms.py:35
+msgid "Confirm Password"
+msgstr "Confirm Password"
+
+#: .\users\forms.py:36
+msgid "Confirm your password"
+msgstr "Confirm your password"
+
+#: .\users\forms.py:46
+msgid "Changing the username is not allowed for the demo account."
+msgstr "Changing the username is not allowed for the demo account."
+
+#: .\users\forms.py:69
+msgid "Changing the password is not allowed for the demo account."
+msgstr "Changing the password is not allowed for the demo account."
+
+#: .\users\forms.py:117
+#, python-format
+msgid "'%(url)s' is not a valid Apprise URL."
+msgstr "'%(url)s' is not a valid Apprise URL."
+
+#: .\users\helpers.py:20
+msgid "Unexpected error occurred while processing the task."
+msgstr "Unexpected error occurred while processing the task."
+
+#: .\users\helpers.py:23
+msgid "This task is currently running."
+msgstr "This task is currently running."
+
+#: .\users\helpers.py:40
+msgid "This task has been queued and is waiting to run."
+msgstr "This task has been queued and is waiting to run."
+
+#: .\users\helpers.py:57
+msgid "Only New Items"
+msgstr "Only New Items"
+
+#: .\users\helpers.py:57
+msgid "Overwrite Existing"
+msgstr "Overwrite Existing"
+
+#: .\users\helpers.py:75
+msgid "Every 2 days"
+msgstr "Every 2 days"
+
+#: .\users\models.py:28
+msgid "Recent"
+msgstr "Recent"
+
+#: .\users\models.py:29
+msgid "Completion"
+msgstr "Completion"
+
+#: .\users\models.py:30
+msgid "Episodes Left"
+msgstr "Episodes Left"
+
+#: .\users\models.py:37
+msgid "Dark"
+msgstr "Dark"
+
+#: .\users\models.py:38
+msgid "Light"
+msgstr "Light"
+
+#: .\users\models.py:44
+msgid "Rating"
+msgstr "Rating"
+
+#: .\users\models.py:65 .\users\models.py:72
+msgid "Grid"
+msgstr "Grid"
+
+#: .\users\models.py:66
+msgid "Table"
+msgstr "Table"
+
+#: .\users\models.py:73
+msgid "List"
+msgstr "List"
+
+#: .\users\models.py:96
+msgid "Current Date"
+msgstr "Current Date"
+
+#: .\users\models.py:97
+msgid "Release Date"
+msgstr "Release Date"
+
+#: .\users\models.py:98
+msgid "No Date"
+msgstr "No Date"
+
+#: .\users\models.py:104
+msgid "2026-01-18 (ISO)"
+msgstr "2026-01-18 (ISO)"
+
+#: .\users\models.py:105
+msgid "18/01/2026 (EU)"
+msgstr "18/01/2026 (EU)"
+
+#: .\users\models.py:106
+msgid "01/18/2026 (US)"
+msgstr "01/18/2026 (US)"
+
+#: .\users\models.py:107
+msgid "Jan 18, 2026"
+msgstr "Jan 18, 2026"
+
+#: .\users\models.py:108
+msgid "18 Jan, 2026"
+msgstr "18 Jan, 2026"
+
+#: .\users\models.py:114
+msgid "14:30 (24-hour)"
+msgstr "14:30 (24-hour)"
+
+#: .\users\models.py:115
+msgid "2:30 PM (12-hour)"
+msgstr "2:30 PM (12-hour)"
+
+#: .\users\models.py:121
+msgid "Monday"
+msgstr "Monday"
+
+#: .\users\models.py:122
+msgid "Sunday"
+msgstr "Sunday"
+
+#: .\users\models.py:131
+msgid "Toggle profile visibility to anonymous users"
+msgstr "Toggle profile visibility to anonymous users"
+
+#: .\users\models.py:153
+msgid "Hide unreleased media from the home page"
+msgstr "Hide unreleased media from the home page"
+
+#: .\users\models.py:321
+msgid "Hide hover overlay on touch devices"
+msgstr "Hide hover overlay on touch devices"
+
+#: .\users\models.py:326
+msgid "Blur unseen episode images and descriptions"
+msgstr "Blur unseen episode images and descriptions"
+
+#: .\users\models.py:334
+msgid "Date to use when bulk-marking media as completed"
+msgstr "Date to use when bulk-marking media as completed"
+
+#: .\users\models.py:341
+msgid "Preferred date display format"
+msgstr "Preferred date display format"
+
+#: .\users\models.py:347
+msgid "Preferred time display format"
+msgstr "Preferred time display format"
+
+#: .\users\models.py:354
+msgid "First day of the week"
+msgstr "First day of the week"
+
+#: .\users\models.py:360
+msgid "Show progress bar"
+msgstr "Show progress bar"
+
+#: .\users\models.py:372
+msgid "Hide zero ratings from media cards"
+msgstr "Hide zero ratings from media cards"
+
+#: .\users\models.py:379
+msgid "Region to show watch providers for"
+msgstr "Region to show watch providers for"
+
+#: .\users\models.py:409
+msgid "Apprise URLs for notifications"
+msgstr "Apprise URLs for notifications"
+
+#: .\users\models.py:415
+msgid "Items excluded from notifications"
+msgstr "Items excluded from notifications"
+
+#: .\users\models.py:423
+msgid "Receive a daily digest of upcoming releases"
+msgstr "Receive a daily digest of upcoming releases"
+
+#: .\users\models.py:437
+msgid "Token for external integrations"
+msgstr "Token for external integrations"
+
+#: .\users\models.py:441
+msgid "Comma-separated list of Plex usernames for webhook matching"
+msgstr "Comma-separated list of Plex usernames for webhook matching"
+
+#: .\users\models.py:445
+msgid "Process Jellyfin MarkPlayed webhook events"
+msgstr "Process Jellyfin MarkPlayed webhook events"
+
+#: .\users\models.py:449
+msgid "Process Jellyfin MarkUnplayed webhook events"
+msgstr "Process Jellyfin MarkUnplayed webhook events"
+
+#: .\users\models.py:676
+msgid "Import from Trakt"
+msgstr "Import from Trakt"
+
+#: .\users\models.py:677
+msgid "Import from SIMKL"
+msgstr "Import from SIMKL"
+
+#: .\users\models.py:678
+msgid "Import from MyAnimeList"
+msgstr "Import from MyAnimeList"
+
+#: .\users\models.py:679
+msgid "Import from AniList"
+msgstr "Import from AniList"
+
+#: .\users\models.py:680
+msgid "Import from Kitsu"
+msgstr "Import from Kitsu"
+
+#: .\users\models.py:681
+msgid "Import from OiOi-Track"
+msgstr "Import from OiOi-Track"
+
+#: .\users\models.py:682
+msgid "Import from HowLongToBeat"
+msgstr "Import from HowLongToBeat"
+
+#: .\users\models.py:683
+msgid "Import from Steam"
+msgstr "Import from Steam"
+
+#: .\users\models.py:684
+msgid "Import from IMDB"
+msgstr "Import from IMDB"
+
+#: .\users\models.py:685
+msgid "Import from GoodReads"
+msgstr "Import from GoodReads"
+
+#: .\users\views.py:44
+msgid "Your profile has been updated!"
+msgstr "Your profile has been updated!"
+
+#: .\users\views.py:69
+msgid "Your password has been updated!"
+msgstr "Your password has been updated!"
+
+#: .\users\views.py:96
+msgid "Notification settings updated successfully!"
+msgstr "Notification settings updated successfully!"
+
+#: .\users\views.py:195
+msgid "No notification URLs configured."
+msgstr "No notification URLs configured."
+
+#: .\users\views.py:203
+msgid "OiOi-Track Test Notification"
+msgstr "OiOi-Track Test Notification"
+
+#: .\users\views.py:205
+msgid "This is a test notification from OiOi-Track. "
+msgstr "This is a test notification from OiOi-Track. "
+
+#: .\users\views.py:206
+msgid "If you're seeing this, your notifications are working correctly!"
+msgstr "If you're seeing this, your notifications are working correctly!"
+
+#: .\users\views.py:211
+msgid "Test notification sent successfully!"
+msgstr "Test notification sent successfully!"
+
+#: .\users\views.py:213
+msgid "Failed to send test notification."
+msgstr "Failed to send test notification."
+
+#: .\users\views.py:215
+msgid "Error sending notification"
+msgstr "Error sending notification"
+
+#: .\users\views.py:245
+msgid "This section is view-only for demo accounts."
+msgstr "This section is view-only for demo accounts."
+
+#: .\users\views.py:300
+msgid "Settings updated."
+msgstr "Settings updated."
+
+#: .\users\views.py:346
+msgid "Import schedule deleted."
+msgstr "Import schedule deleted."
+
+#: .\users\views.py:348
+msgid "Import schedule not found."
+msgstr "Import schedule not found."
+
+#: .\users\views.py:358
+msgid "Token regenerated successfully."
+msgstr "Token regenerated successfully."
+
+#: .\users\views.py:383
+msgid "Plex usernames updated successfully"
+msgstr "Plex usernames updated successfully"
+
+#: .\users\views.py:403
+msgid "Jellyfin webhook settings updated successfully"
+msgstr "Jellyfin webhook settings updated successfully"
+
+#: .\users\views.py:415
+#, python-format
+msgid "Successfully cleared %(count)s search entry(s)"
+msgstr "Successfully cleared %(count)s search entry(s)"

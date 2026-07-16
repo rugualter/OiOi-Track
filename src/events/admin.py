@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.utils import timezone
 
 from events.models import Event
-
+from django.utils.translation import gettext_lazy as _
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
@@ -27,4 +27,4 @@ class EventAdmin(admin.ModelAdmin):
         try:
             return timezone.localtime(obj.datetime).strftime("%Y-%m-%d %H:%M")
         except (OverflowError, ValueError):
-            return "Invalid date"
+            return _("Invalid date")

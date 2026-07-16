@@ -11,6 +11,7 @@ from django.shortcuts import redirect
 from django.utils import timezone
 from django.utils.encoding import iri_to_uri
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.translation import gettext_lazy as _
 
 from app.models import BasicMedia, Item, MediaTypes, Status
 
@@ -33,7 +34,7 @@ def get_owned_media_or_404(request, media_type, instance_id, *, prefetch=False):
             instance_id,
         )
     except ObjectDoesNotExist as exc:
-        msg = "Media not found"
+        msg = _("Media not found")
         raise Http404(msg) from exc
 
 

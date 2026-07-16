@@ -1,22 +1,22 @@
 {% load static %}
 {% load app_tags %}
-
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="en" class="scheme-dark bg-[#212529]">
   <head>
     {# Required meta tags #}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="keywords" content="Yamtrack, Media Tracker">
-    <meta name="description" content="Search and track media on Yamtrack.">
+    <meta name="keywords" content="{% trans 'OiOi-Track, Media Tracker' %}">
+    <meta name="description" content="{% trans 'Search and track media on OiOi-Track.' %}">
 
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="mobile-web-app-title" content="Yamtrack">
+    <meta name="mobile-web-app-title" content="OiOi-Track">
 
     <title>
       {% block title %}
-        Yamtrack
+        {% trans "OiOi-Track" %}
       {% endblock title %}
     </title>
 
@@ -68,7 +68,14 @@
         <aside class="fixed top-0 left-0 z-40 h-screen w-64 bg-[#1a1d20] transform transition-transform duration-300 ease-in-out border-r border-[#2c3136] -translate-x-full lg:translate-x-0 lg:sticky flex flex-col"
                :class="isMobileMenuOpen ? 'translate-x-0' : ''">
           <div class="h-16 border-b border-[#2c3136] flex items-center px-6">
-            <h1 class="text-2xl font-semibold text-gray-100">Yamtrack</h1>
+            <h1 class="text-2xl font-semibold text-gray-100">
+                {% if user.is_authenticated and user.theme == 'light' %}
+                    <img src="{% static 'img/oioitrack-purple.png' %}" alt="OiOi-Track" class="w-auto" style="height: 40px;">
+                {% else %}
+                    <!-- Default to dark theme (white logo) for non-logged in users or dark theme users -->
+                    <img src="{% static 'img/oioitrack-white.png' %}" alt="OiOi-Track" class="w-auto" style="height: 40px;">
+                {% endif %}
+            </h1>
           </div>
           <nav class="p-4 flex-1 overflow-y-auto">
             {% block sidebar_own_media %}
@@ -83,7 +90,7 @@
                       {% include "app/icons/house.svg" with classes="w-5 h-5" %}
 
                     {% endif %}
-                    <span>Home</span>
+                    <span>{% trans "Home" %}</span>
                   </a>
                 </li>
 
@@ -125,7 +132,7 @@
                         {% include "app/icons/circle-plus.svg" with classes="w-5 h-5" %}
 
                       {% endif %}
-                      <span>Create Custom</span>
+                      <span>{% trans "Create Custom" %}</span>
                     </a>
                   </li>
 
@@ -140,22 +147,7 @@
                         {% include "app/icons/bars-pyramid.svg" with classes="w-5 h-5" %}
 
                       {% endif %}
-                      <span>Statistics</span>
-                    </a>
-                  </li>
-
-                  {% url 'journal' as journal_url %}
-                  <li>
-                    <a href="{{ journal_url }}"
-                       class="flex items-center space-x-3 px-4 py-2 rounded-md transition-colors duration-200 text-sm {% if request.path == journal_url %}text-white bg-[#2c3136]{% else %}text-gray-400 hover:text-white hover:bg-[#23272b]{% endif %}">
-                      {% if request.path|str_equals:journal_url %}
-                        {% include "app/icons/history.svg" with classes="w-5 h-5 text-indigo-400 " %}
-
-                      {% else %}
-                        {% include "app/icons/history.svg" with classes="w-5 h-5" %}
-
-                      {% endif %}
-                      <span>Journal</span>
+                      <span>{% trans "Statistics" %}</span>
                     </a>
                   </li>
 
@@ -170,7 +162,7 @@
                         {% include "app/icons/folder-plus.svg" with classes="w-5 h-5" %}
 
                       {% endif %}
-                      <span>Lists</span>
+                      <span>{% trans "Lists" %}</span>
                     </a>
                   </li>
 
@@ -185,7 +177,7 @@
                         {% include "app/icons/calendar.svg" with classes="w-5 h-5" %}
 
                       {% endif %}
-                      <span>Calendar</span>
+                      <span>{% trans "Calendar" %}</span>
                     </a>
                   </li>
                 </ul>
@@ -211,7 +203,7 @@
                     {% include "app/icons/settings.svg" with classes="w-5 h-5" %}
 
                   {% endif %}
-                  <span>Settings</span>
+                  <span>{% trans "Settings" %}</span>
                 </a>
 
                 <form method="post" action="{% url 'account_logout' %}" class="w-full">
@@ -220,7 +212,7 @@
                           class="w-full flex items-center space-x-3 px-4 py-2 rounded-md text-gray-400 hover:bg-[#23272b] hover:text-white transition-colors duration-200 text-sm cursor-pointer">
                     {% include "app/icons/logout.svg" with classes="w-5 h-5" %}
 
-                    <span>Logout</span>
+                    <span>{% trans "Logout" %}</span>
                   </button>
                 </form>
               </div>
@@ -274,6 +266,9 @@
                         </div>
 
                         <input type="hidden" name="media_type" :value="selectedType.value">
+                        {% if source %}
+                            <input type="hidden" name="source" value="{{ source }}">
+                        {% endif %}
 
                         {# Media type dropdown #}
                         <button type="button"

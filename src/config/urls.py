@@ -1,4 +1,4 @@
-"""Yamtrack base URL Configuration.
+"""OiOi-Track base URL Configuration.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/stable/topics/http/urls/
@@ -14,16 +14,20 @@ from django.contrib.auth.decorators import login_not_required
 from django.urls import include, path
 from health_check.views import HealthCheckView
 from redis.asyncio import Redis as RedisClient
+from django.conf.urls.i18n import i18n_patterns
+from config.views import health_check
 
-urlpatterns = [
-    path("", include("app.urls")),
+urlpatterns = []
+urlpatterns += i18n_patterns(
+       path("", include("app.urls")),
     path("", include("integrations.urls")),
     path("", include("users.urls")),
     path("", include("lists.urls")),
     path("", include("events.urls")),
     path("select2/", include("django_select2.urls")),
+    path("health/", login_not_required(health_check), name="health"),
     path(
-        "health/",
+        "health/full/",
         login_not_required(
             HealthCheckView.as_view(
                 checks=[
@@ -41,10 +45,12 @@ urlpatterns = [
                 ]
             )
         ),
+        name="health_full",
     ),
-]
+)
 
 # Build the accounts URLs
+
 account_patterns = [
     # see allauth/account/urls.py
     # login, logout, signup, account_inactive
@@ -88,11 +94,11 @@ account_patterns = [
 ]
 
 # Add the accounts URLs to the main urlpatterns
-urlpatterns.append(path("accounts/", include(account_patterns)))
+urlpatterns.extend(i18n_patterns(path("accounts/", include(account_patterns))))
 
 if settings.ADMIN_ENABLED:
-    urlpatterns.append(path("admin/", admin.site.urls))
+    urlpatterns.extend(i18n_patterns(path("admin/", admin.site.urls)))
 
 # Add debug toolbar if in DEBUG mode
 if settings.DEBUG:
-    urlpatterns.append(path("__debug__/", include("debug_toolbar.urls")))
+    urlpatterns.extend(i18n_patterns(path("__debug__/", include("debug_toolbar.urls"))))

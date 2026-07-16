@@ -3,6 +3,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import Group
 from django.db.models import Field
+from django.utils.translation import gettext_lazy as _
 
 from users.models import User
 
@@ -34,14 +35,14 @@ class CustomUserAdmin(UserAdmin):
     list_display = ("username", "is_staff", "is_active", "is_demo", "last_login")
     list_filter = ("is_staff", "is_active", "is_demo")
 
-    def get_fieldsets(self, _, obj=None):
+    def get_fieldsets(self, request, obj=None):
         """Customize the fieldsets for the User model in the admin interface."""
         if not obj:
             return self.add_fieldsets
 
         fieldsets = [
             (None, {"fields": ("username", "password")}),
-            ("Permissions", {"fields": ("is_staff", "is_active")}),
+            (_("Permissions"), {"fields": ("is_staff", "is_active")}),
         ]
 
         field_groups = {}
@@ -49,20 +50,16 @@ class CustomUserAdmin(UserAdmin):
             if not isinstance(field, Field):
                 continue
 
-            # Skip fields already included
             if field.name in {"username", "password", "is_staff", "is_active", "id"}:
                 continue
 
-            # Group fields by prefix (everything before first underscore)
             prefix = field.name.split("_")[0]
             field_groups.setdefault(prefix, []).append(field.name)
 
-        # Add grouped fields to fieldsets
         for prefix, fields in field_groups.items():
             fieldsets.append((prefix.title(), {"fields": tuple(fields)}))
 
         return fieldsets
-
     search_fields = ("username",)
     ordering = ("username",)
 

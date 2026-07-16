@@ -7,6 +7,8 @@ from django.urls import reverse
 from django.utils import formats, timezone
 from django.utils.dateparse import parse_date
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
+from django.utils.translation import gettext_lazy as _
 from unidecode import unidecode
 
 from app import config, helpers
@@ -241,27 +243,9 @@ def media_color(media_type):
 
 
 @register.filter
-def journal_accent(accent):
-    """Return the badge background class and icon template for a journal accent."""
-    return config.get_journal_accent(accent)
-
-
-@register.filter
-def status_config(status):
-    """Return the config dict for a status, or None if it is unrecognized."""
-    return config.get_status_config(status)
-
-
-@register.filter
 def status_color(status):
     """Return the color associated with the status."""
     return config.get_status_text_color(status)
-
-
-@register.filter
-def status_icon(status):
-    """Return the icon template associated with the status."""
-    return config.get_status_icon(status)
 
 
 @register.filter
@@ -285,9 +269,14 @@ def natural_day(datetime, user):
     days = (datetime_date - today).days
 
     if days == 0:
-        return f"Today {formatted_time}"
+        return _("Today %(time)s") % {
+            "time": formatted_time,
+        }
+
     if days == 1:
-        return f"Tomorrow {formatted_time}"
+        return _("Tomorrow %(time)s") % {
+            "time": formatted_time,
+        }
 
     return f"{formatted_date} {formatted_time}"
 
@@ -414,7 +403,7 @@ def icon(name, is_active, extra_classes="w-5 h-5"):
         extra_classes=extra_classes,
     )
 
-    return format_html(svg)
+    return mark_safe(svg)
 
 
 @register.filter
@@ -486,7 +475,6 @@ def show_media_score(rating, user):
     """
     return rating is not None and (not user.hide_zero_rating or rating > 0)
 
-
 @register.simple_tag
 def media_section_count(
     media,
@@ -515,7 +503,6 @@ def media_section_count(
     if media.get("time_to_beat"):
         count += 1
     return count
-
 
 @register.filter
 def seconds_to_duration(seconds):

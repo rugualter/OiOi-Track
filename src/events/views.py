@@ -11,7 +11,7 @@ from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
-
+from django.utils.translation import gettext_lazy as _
 from events import tasks
 from events.models import Event
 from users.models import User, WeekStartDayChoices
@@ -110,7 +110,7 @@ def calendar(request):
 def reload_calendar(request):
     """Refresh the calendar with the latest dates."""
     tasks.reload_calendar.delay(request.user)
-    messages.info(request, "The task to refresh upcoming releases has been queued.")
+    messages.info(request, _("The task to refresh upcoming releases has been queued."))
     return redirect("calendar")
 
 
@@ -139,7 +139,7 @@ def download_calendar(_, token: str):
 
     # Create iCalendar object
     cal = icalendar.Calendar()
-    cal.add("prodid", "-//Yamtrack//EN")
+    cal.add("prodid", "-//OiOi-Track//EN")
     cal.add("version", "2.0")
 
     for release in releases:

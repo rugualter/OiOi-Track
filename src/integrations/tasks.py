@@ -2,7 +2,7 @@ import logging
 
 from celery import shared_task
 from django.contrib.auth import get_user_model
-
+from django.utils.translation import gettext_lazy as _
 import events
 from app.mixins import disable_fetch_releases
 from app.models import MediaTypes
@@ -18,11 +18,12 @@ from integrations.imports import (
     simkl,
     steam,
     trakt,
-    yamtrack,
+    tvtime,
+    oioitrack,
 )
 
 logger = logging.getLogger(__name__)
-ERROR_TITLE = "\n\n\n Couldn't import the following media: \n\n"
+ERROR_TITLE = _("Couldn't import the following media: \n\n")
 
 
 def format_media_type_display(count, media_type):
@@ -31,7 +32,13 @@ def format_media_type_display(count, media_type):
         return None
     if count == 1:
         return f"{count} {dict(MediaTypes.choices).get(media_type, media_type)}"
-    return f"{count} {app_tags.media_type_readable_plural(media_type)}"
+    
+    try:
+        plural = app_tags.media_type_readable_plural(media_type)
+    except ValueError:
+        # Not a MediaTypes value (e.g. custom lists); fall back to a simple "s".
+        plural = f"{dict(MediaTypes.choices).get(media_type, media_type)}s"
+    return f"{count} {plural}"
 
 
 def format_import_message(imported_counts, warning_messages=None):
@@ -125,10 +132,10 @@ def import_kitsu(username, user_id, mode):
     return import_media(kitsu.importer, username, user_id, mode)
 
 
-@shared_task(name="Import from Yamtrack")
-def import_yamtrack(file, user_id, mode):
-    """Celery task for importing media data from Yamtrack."""
-    return import_media(yamtrack.importer, file, user_id, mode)
+@shared_task(name="Import from oioitrack")
+def import_oioitrack(file, user_id, mode):
+    """Celery task for importing media data from oioitrack."""
+    return import_media(oioitrack.importer, file, user_id, mode)
 
 
 @shared_task(name="Import from HowLongToBeat")
@@ -153,3 +160,8 @@ def import_imdb(file, user_id, mode):
 def import_goodreads(file, user_id, mode):
     """Celery task for importing media data from GoodReads."""
     return import_media(goodreads.importer, file, user_id, mode)
+
+@shared_task(name="Import from TV Time")
+def import_tvtime(file, user_id, mode, password=None):
+    """Celery task for importing media data from a TV Time export."""
+    return import_media(tvtime.importer, file, user_id, mode, password=password)

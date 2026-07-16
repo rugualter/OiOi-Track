@@ -3,6 +3,7 @@ import uuid
 
 from django.apps import apps
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 from django.core.validators import (
     DecimalValidator,
     MaxValueValidator,
@@ -38,30 +39,31 @@ logger = logging.getLogger(__name__)
 class Sources(models.TextChoices):
     """Choices for the source of the item."""
 
-    TMDB = "tmdb", "The Movie Database"
-    MAL = "mal", "MyAnimeList"
-    MANGAUPDATES = "mangaupdates", "MangaUpdates"
-    IGDB = "igdb", "Internet Game Database"
-    OPENLIBRARY = "openlibrary", "Open Library"
-    HARDCOVER = "hardcover", "Hardcover"
-    COMICVINE = "comicvine", "Comic Vine"
-    BGG = "bgg", "BoardGameGeek"
-    MANUAL = "manual", "Manual"
+    TMDB = "tmdb", _("The Movie Database")
+    TVDB = "tvdb", _("TheTVDB")
+    MAL = "mal", _("MyAnimeList")
+    MANGAUPDATES = "mangaupdates", _("MangaUpdates")
+    IGDB = "igdb", _("Internet Game Database")
+    OPENLIBRARY = "openlibrary", _("Open Library")
+    HARDCOVER = "hardcover", _("Hardcover")
+    COMICVINE = "comicvine", _("Comic Vine")
+    BGG = "bgg", _("BoardGameGeek")
+    MANUAL = "manual", _("Manual")
 
 
 class MediaTypes(models.TextChoices):
     """Choices for the media type of the item."""
 
-    TV = "tv", "TV Show"
-    SEASON = "season", "TV Season"
-    EPISODE = "episode", "Episode"
-    MOVIE = "movie", "Movie"
-    ANIME = "anime", "Anime"
-    MANGA = "manga", "Manga"
-    GAME = "game", "Game"
-    BOOK = "book", "Book"
-    COMIC = "comic", "Comic"
-    BOARDGAME = "boardgame", "Boardgame"
+    TV = "tv", _("TV Show")
+    SEASON = "season", _("TV Season")
+    EPISODE = "episode", _("Episode")
+    MOVIE = "movie", _("Movie")
+    ANIME = "anime", _("Anime")
+    MANGA = "manga", _("Manga")
+    GAME = "game", _("Game")
+    BOOK = "book", _("Book")
+    COMIC = "comic", _("Comic")
+    BOARDGAME = "boardgame", _("Boardgame")
 
 
 class Item(CalendarTriggerMixin, models.Model):
@@ -223,7 +225,7 @@ class MediaManager(models.Manager):
         """Return list of historical model names."""
         return [f"historical{media_type}" for media_type in MediaTypes.values]
 
-    def get_media_list(self, user, media_type, status_filter, sort_filter, search=None):
+    def get_media_list(self, user, media_type, status_filter, sort_filter, search=None, *, prefetch_events=False, event_queryset=None, prefetch_related=True):
         """Get media list based on filters, sorting and search."""
         model = apps.get_model(app_label="app", model_name=media_type)
         queryset = model.objects.filter(user=user.id)
@@ -247,16 +249,25 @@ class MediaManager(models.Manager):
         ).filter(row_number=1)
 
         queryset = queryset.select_related("item")
-        queryset = self._apply_prefetch_related(queryset, media_type)
+        if prefetch_related:
+            queryset = self._apply_prefetch_related(
+                queryset,
+                media_type,
+                prefetch_events=prefetch_events,
+                event_queryset=event_queryset,
+                prefetch_tv_children=False,
+            )
 
         if sort_filter:
             return self._sort_media_list(queryset, sort_filter, media_type)
         return queryset
 
-    def _apply_prefetch_related(self, queryset, media_type):
+    def _apply_prefetch_related(self, queryset, media_type, *, prefetch_events=False, event_queryset=None, prefetch_tv_children=True):
         """Apply appropriate prefetch_related based on media type."""
         # Apply media-specific prefetches
         if media_type == MediaTypes.TV.value:
+            if not prefetch_tv_children:
+                return queryset
             return queryset.prefetch_related(
                 Prefetch(
                     "seasons",
@@ -268,13 +279,15 @@ class MediaManager(models.Manager):
                 ),
             )
 
-        base_queryset = queryset.prefetch_related(
-            Prefetch(
-                "item__event_set",
-                queryset=events.models.Event.objects.all(),
-                to_attr="prefetched_events",
-            ),
-        )
+        base_queryset = queryset
+        if prefetch_events:
+            base_queryset = base_queryset.prefetch_related(
+                Prefetch(
+                    "item__event_set",
+                    queryset=event_queryset or events.models.Event.objects.all(),
+                    to_attr="prefetched_events",
+                ),
+            )
 
         if media_type == MediaTypes.SEASON.value:
             return base_queryset.prefetch_related(
@@ -297,14 +310,11 @@ class MediaManager(models.Manager):
 
     def _sort_tv_media_list(self, queryset, sort_filter):
         """Sort TV media list based on the sort criteria."""
+        
+        queryset = self._annotate_tv_media_list(queryset)
+        
         if sort_filter == "start_date":
             # Annotate with the minimum start_date from related seasons/episodes
-            queryset = queryset.annotate(
-                calculated_start_date=models.Min(
-                    "seasons__episodes__end_date",
-                    filter=models.Q(seasons__item__season_number__gt=0),
-                ),
-            )
             return queryset.order_by(
                 models.F("calculated_start_date").asc(nulls_last=True),
                 models.functions.Lower("item__title"),
@@ -312,12 +322,6 @@ class MediaManager(models.Manager):
 
         if sort_filter == "end_date":
             # Annotate with the maximum end_date from related seasons/episodes
-            queryset = queryset.annotate(
-                calculated_end_date=models.Max(
-                    "seasons__episodes__end_date",
-                    filter=models.Q(seasons__item__season_number__gt=0),
-                ),
-            )
             return queryset.order_by(
                 models.F("calculated_end_date").desc(nulls_last=True),
                 models.functions.Lower("item__title"),
@@ -325,13 +329,6 @@ class MediaManager(models.Manager):
 
         if sort_filter == "progress":
             # Annotate with the sum of episodes watched (excluding season 0)
-            queryset = queryset.annotate(
-                # Count episodes in regular seasons (season_number > 0)
-                calculated_progress=models.Count(
-                    "seasons__episodes",
-                    filter=models.Q(seasons__item__season_number__gt=0),
-                ),
-            )
             return queryset.order_by(
                 "-calculated_progress",
                 models.functions.Lower("item__title"),
@@ -340,6 +337,24 @@ class MediaManager(models.Manager):
         # Default to generic sorting
         return self._sort_generic_media_list(queryset, sort_filter)
 
+    def _annotate_tv_media_list(self, queryset):
+        """Annotate TV list rollups used by media cards and list sorting."""
+        regular_season_filter = models.Q(seasons__item__season_number__gt=0)
+        return queryset.annotate(
+            calculated_progress=models.Count(
+                "seasons__episodes",
+                filter=regular_season_filter,
+            ),
+            calculated_start_date=models.Min(
+                "seasons__episodes__end_date",
+                filter=regular_season_filter,
+            ),
+            calculated_end_date=models.Max(
+                "seasons__episodes__end_date",
+                filter=regular_season_filter,
+            ),
+        )
+    
     def _sort_season_media_list(self, queryset, sort_filter):
         """Sort Season media list based on the sort criteria."""
         if sort_filter == "start_date":
@@ -423,18 +438,40 @@ class MediaManager(models.Manager):
 
         for media_type in media_types:
             # Get base media list for the requested status
+            current_time = timezone.now()
+            if items_limit is not None and sort_by in (
+                users.models.HomeSortChoices.RECENT,
+                users.models.HomeSortChoices.TITLE,
+            ):
+                home_page = self._get_limited_home_media(
+                    user=user,
+                    media_type=media_type,
+                    status=status,
+                    sort_by=sort_by,
+                    items_limit=items_limit,
+                    specific_media_type=specific_media_type,
+                    current_time=current_time,
+                )
+                if home_page:
+                    list_by_type[media_type] = home_page
+                continue
+            
             media_list = self.get_media_list(
                 user=user,
                 media_type=media_type,
                 status_filter=status,
                 sort_filter=None,
+                prefetch_events=True,
+                event_queryset=events.models.Event.objects.filter(
+                    datetime__gt=current_time,
+                ).order_by("datetime"),
             )
 
             if not media_list:
                 continue
 
             # Annotate with max_progress and next_event
-            self.annotate_max_progress(media_list, media_type)
+            self.annotate_max_progress(media_list, media_type, current_time)
             self._annotate_next_event(media_list)
 
             # Sort the media list
@@ -456,6 +493,85 @@ class MediaManager(models.Manager):
 
         return list_by_type
 
+    def _get_limited_home_media(
+        self,
+        user,
+        media_type,
+        status,
+        sort_by,
+        items_limit,
+        specific_media_type,
+        current_time,
+    ):
+        """Return a DB-limited home page for sorts that do not need full lists."""
+        queryset = self.get_media_list(
+            user=user,
+            media_type=media_type,
+            status_filter=status,
+            sort_filter=None,
+            prefetch_related=False,
+        )
+        queryset = self._order_limited_home_queryset(queryset, media_type, sort_by)
+
+        total_count = queryset.count()
+        if not total_count:
+            return None
+
+        page_start = items_limit if specific_media_type else 0
+        page_end = None if specific_media_type else items_limit
+        media_list = list(queryset[page_start:page_end])
+        media_list = self._prefetch_home_media(media_list, media_type, current_time)
+        self.annotate_max_progress(media_list, media_type, current_time)
+        self._annotate_next_event(media_list)
+
+        return {
+            "items": media_list,
+            "total": total_count,
+        }
+        
+    def _order_limited_home_queryset(self, queryset, media_type, sort_by):
+        """Apply database ordering for limited home-page sorts."""
+        if sort_by == users.models.HomeSortChoices.TITLE:
+            return queryset.order_by(models.functions.Lower("item__title"))
+
+        if media_type == MediaTypes.SEASON.value:
+            queryset = queryset.annotate(
+                calculated_progressed_at=models.Max("episodes__end_date"),
+            )
+            return queryset.order_by(
+                models.F("calculated_progressed_at").desc(nulls_last=True),
+                "-created_at",
+                models.functions.Lower("item__title"),
+            )
+
+        return queryset.order_by(
+            models.F("progressed_at").desc(nulls_last=True),
+            "-created_at",
+            models.functions.Lower("item__title"),
+        )
+        
+    def _prefetch_home_media(self, media_list, media_type, current_time):
+        """Prefetch only the objects needed to render a limited home page."""
+        if not media_list:
+            return media_list
+
+        queryset = self._apply_prefetch_related(
+            apps.get_model("app", media_type).objects.filter(
+                id__in=[media.id for media in media_list],
+            ).select_related("item"),
+            media_type,
+            prefetch_events=True,
+            event_queryset=events.models.Event.objects.filter(
+                datetime__gt=current_time,
+            ).order_by("datetime"),
+        )
+        media_by_id = {media.id: media for media in queryset}
+        return [
+            media_by_id[media.id]
+            for media in media_list
+            if media.id in media_by_id
+        ]
+    
     def _get_media_types_to_process(self, user, specific_media_type):
         """Determine which media types to process based on user settings."""
         if specific_media_type:
@@ -474,15 +590,12 @@ class MediaManager(models.Manager):
 
         for media in media_list:
             # Get future events sorted by datetime
-            future_events = sorted(
-                [
-                    event
-                    for event in getattr(media.item, "prefetched_events", [])
-                    if event.datetime > current_time
-                ],
-                key=lambda e: e.datetime,
-            )
-
+            future_events = [
+                event
+                for event in getattr(media.item, "prefetched_events", [])
+                if event.datetime > current_time
+            ]
+            future_events.sort(key=lambda event: event.datetime)
             media.next_event = future_events[0] if future_events else None
 
     def _sort_home_media(self, media_list, sort_by):
@@ -526,9 +639,10 @@ class MediaManager(models.Manager):
             ),
         )
 
-    def annotate_max_progress(self, media_list, media_type):
+    def annotate_max_progress(self, media_list, media_type, current_datetime=None):
         """Annotate max_progress for all media items."""
-        current_datetime = timezone.now()
+        if current_datetime is None:
+            current_datetime = timezone.now()
 
         if media_type == MediaTypes.MOVIE.value:
             for media in media_list:
@@ -572,15 +686,15 @@ class MediaManager(models.Manager):
             item__season_number__gt=0,
             datetime__lte=current_datetime,
             content_number__isnull=False,
-        ).select_related("item")
+        ).values("item__media_id", "item__season_number", "content_number")
 
         # Create a dictionary to store max episode numbers per season per show
         released_episodes = {}
 
         for event in released_events:
-            media_id = event.item.media_id
-            season_number = event.item.season_number
-            episode_number = event.content_number
+            media_id = event["item__media_id"]
+            season_number = event["item__season_number"]
+            episode_number = event["content_number"]
 
             if media_id not in released_episodes:
                 released_episodes[media_id] = {}
@@ -768,20 +882,20 @@ class MediaManager(models.Manager):
 class Status(models.TextChoices):
     """Choices for item status."""
 
-    COMPLETED = "Completed", "Completed"
-    IN_PROGRESS = "In progress", "In Progress"
-    PLANNING = "Planning", "Planning"
-    PAUSED = "Paused", "Paused"
-    DROPPED = "Dropped", "Dropped"
+    COMPLETED = "Completed", _("Completed")
+    IN_PROGRESS = "In progress", _("In Progress")
+    PLANNING = "Planning", _("Planning")
+    PAUSED = "Paused", _("Paused")
+    DROPPED = "Dropped", _("Dropped")
 
 
 class UserMessageLevel(models.TextChoices):
     """Choices for persistent user messages."""
 
-    SUCCESS = "success", "Success"
-    WARNING = "warning", "Warning"
-    ERROR = "error", "Error"
-    INFO = "info", "Info"
+    SUCCESS = "success", _("Success")
+    WARNING = "warning", _("Warning")
+    ERROR = "error", _("Error")
+    INFO = "info", _("Info")
 
 
 class UserMessage(models.Model):
@@ -1000,6 +1114,10 @@ class TV(Media):
     @property
     def progress(self):
         """Return the total episodes watched for the TV show."""
+        
+        if hasattr(self, "calculated_progress"):
+            return self.calculated_progress or 0
+        
         return sum(
             season.progress
             for season in self.seasons.all()
@@ -1044,6 +1162,9 @@ class TV(Media):
     @property
     def start_date(self):
         """Return the date of the first episode watched."""
+        if hasattr(self, "calculated_start_date"):
+            return self.calculated_start_date
+        
         dates = [
             season.start_date
             for season in self.seasons.all()
@@ -1054,6 +1175,9 @@ class TV(Media):
     @property
     def end_date(self):
         """Return the date of the last episode watched."""
+        if hasattr(self, "calculated_end_date"):
+            return self.calculated_end_date
+        
         dates = [
             season.end_date
             for season in self.seasons.all()
@@ -1158,8 +1282,13 @@ class TV(Media):
             created_episodes_count = len(episodes_to_create)
             episode_label = "episode" if created_episodes_count == 1 else "episodes"
             self.create_user_message(
-                f"had {created_episodes_count} released {episode_label} marked "
-                "as watched automatically.",
+                _(
+                    "had %(count)s released %(episode_label)s marked as watched automatically."
+                )
+                % {
+                    "count": created_episodes_count,
+                    "episode_label": episode_label,
+                },
                 level=UserMessageLevel.INFO,
             )
 
@@ -1171,7 +1300,7 @@ class TV(Media):
                 fields=["status"],
             )
             self.create_user_message(
-                "was left in progress because unreleased episodes or seasons remain.",
+                _("was left in progress because unreleased episodes or seasons remain."),
                 level=UserMessageLevel.WARNING,
             )
 
@@ -1278,8 +1407,10 @@ class TV(Media):
 
         if started_season_number is not None:
             self.create_user_message(
-                f"Season {started_season_number} was marked as in progress "
-                "automatically.",
+                _("Season %(season_number)s was marked as in progress automatically.")
+                % {
+                    "season_number": started_season_number,
+                },
                 level=UserMessageLevel.INFO,
             )
 
@@ -1313,8 +1444,10 @@ class TV(Media):
                 fields=["status"],
             )
             self.create_user_message(
-                "remains in progress because another season is still "
-                "pending or has not aired yet.",
+                _(
+                    "remains in progress because another season is still "
+                    "pending or has not aired yet."
+                ),
                 level=UserMessageLevel.INFO,
             )
 
@@ -1326,7 +1459,7 @@ class TV(Media):
                 fields=["status"],
             )
             self.create_user_message(
-                "was marked as completed automatically.",
+                _("was marked as completed automatically."),
                 level=UserMessageLevel.SUCCESS,
             )
 
@@ -1393,11 +1526,16 @@ class Season(Media):
                     )
                     created_episodes_count = len(episodes_to_create)
                     episode_label = (
-                        "episode" if created_episodes_count == 1 else "episodes"
+                        _("episode") if created_episodes_count == 1 else _("episodes")
                     )
                     self.create_user_message(
-                        f"had {created_episodes_count} released {episode_label} "
-                        "marked as watched automatically.",
+                        _(
+                            "had %(count)s released %(episode_label)s marked as watched automatically."
+                        )
+                        % {
+                            "count": created_episodes_count,
+                            "episode_label": episode_label,
+                        },
                         level=UserMessageLevel.INFO,
                     )
 
@@ -1413,7 +1551,7 @@ class Season(Media):
                         fields=["status"],
                     )
                     self.create_user_message(
-                        "was left in progress because unreleased episodes remain.",
+                        _("was left in progress because unreleased episodes remain."),
                         level=UserMessageLevel.WARNING,
                     )
 
@@ -1559,9 +1697,11 @@ class Season(Media):
             # start watching from the first episode
             next_episode_number = episodes[0]["episode_number"]
         else:
-            next_episode_number = providers.tmdb.find_next_episode(
-                self.progress,
+            next_episode_number = providers.services.get_media_metadata(
+                "find_next_episode",
                 episodes,
+                self.item.source,
+                self.progress,
             )
 
         now = timezone.now().replace(second=0, microsecond=0)
@@ -1647,7 +1787,7 @@ class Season(Media):
 
             item, _ = Item.objects.get_or_create(
                 media_id=self.item.media_id,
-                source=Sources.TMDB.value,
+                source=self.item.source,
                 media_type=MediaTypes.TV.value,
                 defaults={
                     "title": tv_metadata["title"],
@@ -1720,10 +1860,12 @@ class Season(Media):
         image = settings.IMG_NONE
         for episode in season_metadata["episodes"]:
             if episode["episode_number"] == int(episode_number):
-                if episode.get("still_path"):
+                if episode.get("still_path") and self.item.source == Sources.TMDB.value:
                     image = (
                         f"https://image.tmdb.org/t/p/original{episode['still_path']}"
                     )
+                elif episode.get("still_path") and self.item.source == Sources.TVDB.value:
+                    image = episode['still_path']
                 elif "image" in episode:
                     # for manual seasons
                     image = episode["image"]
@@ -1806,7 +1948,7 @@ class Episode(models.Model):
                 )
                 season_just_completed = True
                 self.related_season.create_user_message(
-                    "was marked as completed automatically.",
+                    _("was marked as completed automatically."),
                     level=UserMessageLevel.SUCCESS,
                 )
 

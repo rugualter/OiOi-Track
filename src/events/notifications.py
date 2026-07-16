@@ -6,7 +6,7 @@ from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.utils import timezone
-
+from django.utils.translation import gettext_lazy as _
 from app.models import TV, MediaTypes, Season
 from app.templatetags import app_tags
 from events.models import INACTIVE_TRACKING_STATUSES, Event
@@ -30,7 +30,7 @@ def send_releases():
     )
 
     if not users.exists():
-        return "No users with release notifications enabled"
+        return _("No users with release notifications enabled")
 
     # Find events that were released recently and haven't been notified yet
     base_queryset = Event.objects.filter(
@@ -42,12 +42,12 @@ def send_releases():
     events = Event.objects.sort_with_sentinel_last(base_queryset)
 
     if not events.exists():
-        return "No recent releases found"
+        return _("No recent releases found")
 
     result = send_notifications(
         events=events,
         users=users,
-        title="🔔 YamTrack: New Releases Available! 🔔",
+        title=_("🔔 OiOi-Track: New Releases Available! 🔔"),
     )
 
     # Mark events as notified
@@ -57,7 +57,9 @@ def send_releases():
         )
         logger.info("Marked %s events as notified", len(result["event_ids"]))
 
-    return f"{result['event_count']} recent releases processed"
+    return _("%(count)s recent releases processed") % {
+        "count": result["event_count"],
+    }
 
 
 def send_daily_digest():
@@ -89,7 +91,7 @@ def send_daily_digest():
     )
 
     if not users.exists():
-        return "No users with daily digest enabled"
+        return _("No users with daily digest enabled")
 
     # Get today's events using the converted UTC times
     base_queryset = Event.objects.filter(
@@ -100,9 +102,9 @@ def send_daily_digest():
     events = Event.objects.sort_with_sentinel_last(base_queryset)
 
     if not events.exists():
-        return "No releases scheduled for today"
+        return _("No releases scheduled for today")
 
-    title = "📆 YamTrack: Today's Releases 📆"
+    title = _("📆 OiOi-Track: Today's Releases 📆")
 
     result = send_notifications(
         events=events,
@@ -110,7 +112,9 @@ def send_daily_digest():
         title=title,
     )
 
-    return f"Daily digest sent for {result['event_count']} releases"
+    return _("Daily digest sent for %(count)s releases") % {
+        "count": result["event_count"],
+    }
 
 
 def send_notifications(events, users, title):
@@ -431,7 +435,9 @@ def format_notification(releases):
 
         # Add a header for each media type with icon
         if media_type == MediaTypes.SEASON.value:
-            notification_body.append(f"{icon}  TV Shows")
+            notification_body.append(_("%(icon)s  TV Shows") % {
+                "icon": icon,
+            })
         else:
             notification_body.append(f"{icon}  {media_type.upper()}")
 
@@ -448,7 +454,7 @@ def format_notification(releases):
         # Add a blank line between media types
         notification_body.append("")
 
-    notification_body.append("Enjoy your media!")
+    notification_body.append(_("Enjoy your media!"))
 
     return "\n".join(notification_body)
 

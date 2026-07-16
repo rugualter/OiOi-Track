@@ -8,7 +8,7 @@ import requests
 from bs4 import BeautifulSoup
 from django.conf import settings
 from django.core.cache import cache
-
+from django.utils.translation import gettext_lazy as _
 from app import helpers
 from app.models import MediaTypes, Sources
 from app.providers import services
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 base_url = "https://openlibrary.org/api"
 search_url = "https://openlibrary.org/search.json"
-headers = {"User-Agent": "Yamtrack/1.0 (github@fuzzygrim.com)"}
+headers = {"User-Agent": "OiOi-Track/1.0"}
 
 
 def handle_error(error):
@@ -217,14 +217,14 @@ def get_description(response_book, response_work):
     elif "description" in response_work:
         description = response_work["description"]
     else:
-        description = "No synopsis available."
+        description = _("No synopsis available.")
 
     # sometimes the description is a dict
     # like {'type': '/type/text', 'value': '...'}
     if isinstance(description, dict):
         description = description["value"]
 
-    if description != "No synopsis available.":
+    if description != _("No synopsis available."):
         soup = BeautifulSoup(description, "html.parser")
         text = soup.get_text(separator=" ")
         description = " ".join(text.split())
@@ -278,7 +278,7 @@ async def get_authors(response):
 
         author_data_list = await asyncio.gather(*tasks)
         authors = [
-            data.get("name", "Unknown Author") for data in author_data_list if data
+            data.get("name", _("Unknown Author")) for data in author_data_list if data
         ]
 
     return authors or None

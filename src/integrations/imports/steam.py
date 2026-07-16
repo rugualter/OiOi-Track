@@ -4,7 +4,7 @@ from collections import defaultdict
 
 import requests
 from django.conf import settings
-
+from django.utils.translation import gettext_lazy as _
 import app
 from app.models import MediaTypes, Sources, Status
 from app.providers import services
@@ -41,7 +41,7 @@ class SteamImporter:
         self.api_key = settings.STEAM_API_KEY
 
         if not self.api_key:
-            msg = "Steam API key not configured in environment variables"
+            msg = _("Steam API key not configured in environment variables")
             raise MediaImportError(msg)
 
         self.existing_media = helpers.get_existing_media(user)
@@ -109,7 +109,7 @@ class SteamImporter:
                 response = services.api_request("STEAM", "GET", url, params=params)
 
                 if "response" not in response:
-                    msg = "Invalid response from Steam API"
+                    msg = _("Invalid response from Steam API")
                     raise MediaImportError(msg)
 
                 if "games" not in response["response"]:
@@ -141,21 +141,21 @@ class SteamImporter:
                         )
                         time.sleep(delay)
                         continue
-                    msg = "Steam API rate limit exceeded. Please try again later."
+                    msg = _("Steam API rate limit exceeded. Please try again later.")
                     raise MediaImportError(msg) from e
                 if e.response.status_code == requests.codes.forbidden:
-                    msg = "Steam profile is private or invalid"
+                    msg = _("Steam profile is private or invalid")
                     raise MediaImportError(msg) from e
                 if e.response.status_code == requests.codes.bad_request:
-                    msg = "Bad request to Steam API. Please check the Steam ID."
+                    msg = _("Bad request to Steam API. Please check the Steam ID.")
                     raise MediaImportError(msg) from e
                 if e.response.status_code == requests.codes.unauthorized:
-                    msg = "Invalid Steam API key"
+                    msg = _("Invalid Steam API key")
                     raise MediaImportError(msg) from e
-                msg = f"Steam API error: {e.response.status_code}"
+                msg = _("Steam API error: %(status_code)s") % {"status_code": e.response.status_code}
                 raise MediaImportError(msg) from e
 
-        msg = "Steam API request failed after all retries"
+        msg = _("Steam API request failed after all retries")
         raise MediaImportUnexpectedError(msg)
 
     def _process_game(self, game_data):
@@ -177,7 +177,11 @@ class SteamImporter:
                     appid,
                 )
                 self.warnings.append(
-                    f"{name} ({appid}): Couldn't find a match in {Sources.IGDB.label}",
+                    _("%(name)s (%(appid)s): Couldn't find a match in %(source)s") % {
+                        "name": name,
+                        "appid": appid,
+                        "source": Sources.IGDB.label,
+                    }
                 )
                 return
 
@@ -225,7 +229,7 @@ class SteamImporter:
                 status=status,
                 score=None,
                 progress=playtime_forever,
-                notes="Imported from Steam",
+                notes=_("Imported from Steam"),
                 start_date=None,
                 end_date=None,
             )
@@ -246,7 +250,11 @@ class SteamImporter:
                 e,
             )
             self.warnings.append(
-                f"{name} ({appid}): Couldn't find a match in {Sources.IGDB.label}"
+                _("%(name)s (%(appid)s): Couldn't find a match in %(source)s") % {
+                    "name": name,
+                    "appid": appid,
+                    "source": Sources.IGDB.label,
+                }
             )
 
         except (ValueError, KeyError, TypeError) as e:
@@ -315,19 +323,6 @@ class SteamImporter:
             Sources.IGDB.value,
         )
 
-        logger.debug(
-            "Matched Steam game %s (appid: %s) with IGDB ID %s via external_game",
-            game_name,
-            steam_appid,
-            igdb_game_id,
-        )
-        return {
-            "media_id": igdb_game_id,
-            "source": Sources.IGDB.value,
-            "media_type": MediaTypes.GAME.value,
-            "title": game_details.get("title", game_name),
-            "image": game_details["image"],
-        }
         logger.debug(
             "Matched Steam game %s (appid: %s) with IGDB ID %s via external_game",
             game_name,

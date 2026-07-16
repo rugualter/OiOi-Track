@@ -1,5 +1,5 @@
 {% load app_tags %}
-
+{% load i18n %}
 <div class="{% if secondary_color %}bg-[#39404b]{% else %}bg-[#2a2f35]{% endif %} rounded-lg overflow-hidden shadow-lg relative {% if active %}ring-[1.5px] ring-slate-400{% endif %}"
      x-data="{ trackOpen: false, listsOpen: false, historyOpen: false }">
   <div class="relative">
@@ -12,9 +12,29 @@
     {% with user=target_user|default:user %}
       {% if media.status %}
         <div class="absolute top-2 left-2 bg-gray-900/90 text-white text-xs px-2 py-1 rounded-md flex items-center shadow-md">
-          {% if media.status|status_config %}
-            <div class="w-4 h-4 {{ media.status|status_color }} {% if media.start_date or media.end_date %}mr-1.5{% endif %}">
-              {% include media.status|status_icon %}
+          {% if media.status == Status.COMPLETED.value %}
+            <div class="w-4 h-4 {{ Status.COMPLETED.value|status_color }} {% if media.start_date or media.end_date %}mr-1.5{% endif %}">
+              {% include "app/icons/states/completed.svg" %}
+            </div>
+
+          {% elif media.status == Status.IN_PROGRESS.value %}
+            <div class="w-4 h-4 {{ Status.IN_PROGRESS.value|status_color }} {% if media.start_date or media.end_date %}mr-1.5{% endif %}">
+              {% include "app/icons/states/in-progress.svg" %}
+            </div>
+
+          {% elif media.status == Status.PAUSED.value %}
+            <div class="w-4 h-4 {{ Status.PAUSED.value|status_color }} {% if media.start_date or media.end_date %}mr-1.5{% endif %}">
+              {% include "app/icons/states/paused.svg" %}
+            </div>
+
+          {% elif media.status == Status.PLANNING.value %}
+            <div class="w-4 h-4 {{ Status.PLANNING.value|status_color }} {% if media.start_date or media.end_date %}mr-1.5{% endif %}">
+              {% include "app/icons/states/planning.svg" %}
+            </div>
+
+          {% elif media.status == Status.DROPPED.value %}
+            <div class="w-4 h-4 {{ Status.DROPPED.value|status_color }} {% if media.start_date or media.end_date %}mr-1.5{% endif %}">
+              {% include "app/icons/states/dropped.svg" %}
             </div>
           {% endif %}
 
@@ -68,7 +88,7 @@
             {% else %}
               {# Track Button #}
               <button class="p-2.5 bg-indigo-600 text-white rounded-full hover:bg-indigo-500 hover:scale-110 hover:shadow-[0_0_15px_rgba(99,102,241,0.5)] transition-all duration-200 cursor-pointer"
-                      title="Add to tracker"
+                      title="{% trans 'Add to tracker' %}"
                       hx-get="{% media_view_url 'track_modal' item %}"
                       hx-vals='{"return_url": "{{ request.get_full_path|urlencode }}", "instance_id": "{{ media.id }}"}'
                       hx-target="#{% component_id 'track' item media.id %}"
@@ -78,7 +98,7 @@
 
             {# Lists Button #}
             <button class="p-2.5 bg-emerald-600 text-white rounded-full hover:bg-emerald-500 hover:scale-110 hover:shadow-[0_0_15px_rgba(16,185,129,0.5)] transition-all duration-200 cursor-pointer"
-                    title="Add to custom lists"
+                    title="{% trans 'Add to custom lists' %}"
                     hx-get="{% media_view_url 'lists_modal' item %}"
                     hx-vals='{"return_url": "{{ request.get_full_path|urlencode }}"}'
                     hx-target="#{% component_id 'lists' item %}"
@@ -87,7 +107,7 @@
 
             {# History Button #}
             <button class="p-2.5 bg-amber-600 text-white rounded-full hover:bg-amber-500 hover:scale-110 hover:shadow-[0_0_15px_rgba(245,158,11,0.5)] transition-all duration-200 cursor-pointer"
-                    title="View your activity history"
+                    title="{% trans 'View your activity history' %}"
                     hx-get="{% media_view_url 'history_modal' item %}"
                     hx-vals='{"return_url": "{{ request.get_full_path|urlencode }}"}'
                     hx-target="#{% component_id 'history' item %}"
@@ -103,6 +123,9 @@
     <a href="{{ item|media_url }}"
        class="text-sm font-semibold text-white hover:text-indigo-400 transition duration-300 line-clamp-1"
        title="{{ title }}">{{ title }}</a>
+    {% if item.release_year %}
+      <div class="text-xs text-gray-400 mt-1 line-clamp-1">{{ item.release_year }}</div>
+    {% endif %}
   </div>
 
   {% if item.media_type == MediaTypes.EPISODE.value %}

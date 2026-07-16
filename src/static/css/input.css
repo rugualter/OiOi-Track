@@ -11,6 +11,7 @@
 .htmx-indicator {
   display: none;
 }
+
 .htmx-request .htmx-indicator,
 .htmx-request.htmx-indicator {
   display: block;
@@ -31,13 +32,22 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
 
 
 .media-grid {
-  @apply grid grid-cols-2 xs:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+@media (min-width: 30rem) {
+  .media-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
 }
 
 /* https://tailwindcss.com/docs/upgrade-guide#hover-styles-on-mobile */
@@ -84,43 +94,31 @@
 }
 
 /* Multiple selection list */
-.select2-container--tailwindcss-4
-  .select2-selection--multiple
-  .select2-selection__rendered {
+.select2-container--tailwindcss-4 .select2-selection--multiple .select2-selection__rendered {
   @apply flex flex-row flex-wrap gap-1.5 m-0 p-0 list-none;
 }
 
 /* Multiple selection choices */
-.select2-container--tailwindcss-4
-  .select2-selection--multiple
-  .select2-selection__choice {
+.select2-container--tailwindcss-4 .select2-selection--multiple .select2-selection__choice {
   @apply flex flex-row-reverse items-center gap-1 bg-[#454d5a] text-gray-200 pl-2 pr-1 py-1 rounded-md text-sm border border-indigo-500/20;
 }
 
 /* Remove button */
-.select2-container--tailwindcss-4
-  .select2-selection--multiple
-  .select2-selection__choice__remove {
+.select2-container--tailwindcss-4 .select2-selection--multiple .select2-selection__choice__remove {
   @apply mr-1 h-4 w-4 pb-[0.10rem] items-center flex justify-center rounded-full hover:bg-red-400/10 hover:text-red-400 cursor-pointer;
 }
 
 /* Search field in multiple selection */
-.select2-container--tailwindcss-4
-  .select2-selection--multiple
-  .select2-search--inline {
+.select2-container--tailwindcss-4 .select2-selection--multiple .select2-search--inline {
   @apply block my-0.5;
 }
 
-.select2-container--tailwindcss-4
-  .select2-selection--multiple
-  .select2-search--inline
-  .select2-search__field {
+.select2-container--tailwindcss-4 .select2-selection--multiple .select2-search--inline .select2-search__field {
   @apply h-6 p-0 m-0 text-sm/6 bg-transparent border-0 focus:outline-hidden focus:ring-0 placeholder:text-gray-500 placeholder:text-sm/6 placeholder:font-sans;
 }
 
 /* Focus styles for keyboard navigation */
-.select2-container--tailwindcss-4.select2-container--focus
-  .select2-selection--multiple {
+.select2-container--tailwindcss-4.select2-container--focus .select2-selection--multiple {
   @apply outline-none ring-2 ring-[#4a9eff] appearance-none;
 }
 

@@ -1,6 +1,6 @@
 {
-    "name": "Yamtrack - Media Tracker",
-    "short_name": "Yamtrack",
+    "name": "OiOi-Track - Media Tracker",
+    "short_name": "OiOi-Track",
     "description": "Track your movies, TV shows, anime, manga, games and books",
     "start_url": "/",
     "id": "/",
@@ -40,13 +40,13 @@
     ],
     "screenshots": [
         {
-            "src": "https://cdn.fuzzygrim.com/file/fuzzygrim/yamtrack/homepage.png?v2",
+            "src": "https://cdn.fuzzygrim.com/file/fuzzygrim/oioitrack/homepage.png?v2",
             "sizes": "2305x1350",
             "type": "image/png",
             "label": "Home screen showing main navigation and featured content"
         },
         {
-            "src": "https://cdn.fuzzygrim.com/file/fuzzygrim/yamtrack/statistics.png",
+            "src": "https://cdn.fuzzygrim.com/file/fuzzygrim/oioitrack/statistics.png",
             "sizes": "2305x1350",
             "type": "image/png",
             "form_factor": "wide",

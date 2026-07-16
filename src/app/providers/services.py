@@ -4,6 +4,7 @@ import time
 import requests
 from defusedxml import ElementTree
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 from pyrate_limiter import RedisBucket
 from redis import Redis
 from requests.adapters import HTTPAdapter
@@ -20,6 +21,7 @@ from app.providers import (
     manual,
     openlibrary,
     tmdb,
+    tvdb,
 )
 
 logger = logging.getLogger(__name__)
@@ -96,14 +98,18 @@ class ProviderAPIError(Exception):
         error_text = getattr(response, "text", str(error))
         logger.error("%s error: %s", provider_label, error_text)
 
-        message = f"There was an error contacting the {provider_label} API"
+        message = _("There was an error contacting the %(provider)s API") % {
+            "provider": provider_label,
+        }
         if self.status_code is None:
-            message += " (network error)"
+            message += _(" (network error)")
         else:
-            message += f" (HTTP {self.status_code})"
+            message += _(" (HTTP %(status_code)s)") % {
+                "status_code": self.status_code,
+            }
         if details:
             message += f": {details}"
-        message += ". Check the logs for more details."
+        message += _(". Check the logs for more details.")
         super().__init__(message)
 
 
@@ -116,7 +122,12 @@ def raise_not_found_error(provider, media_id, media_type="item"):
         media_id: The media ID that was not found
         media_type: The type of media (e.g., "comic", "game", "book")
     """
-    error_msg = f"{media_type.capitalize()} with ID {media_id} not found"
+    error_msg = _(
+    "%(media_type)s with ID %(media_id)s not found"
+    ) % {
+        "media_type": media_type.capitalize(),
+        "media_id": media_id,
+    }
     logger.error("%s: %s", provider, error_msg)
 
     # Create a mock 404 error response
@@ -201,12 +212,14 @@ def api_request(
         raise error from None
 
 
+
 def get_media_metadata(
     media_type,
     media_id,
     source,
     season_numbers=None,
     episode_number=None,
+    order_type=None,
 ):
     """Return the metadata for the selected media."""
     if source == Sources.MANUAL.value:
@@ -216,6 +229,10 @@ def get_media_metadata(
             return manual.episode(media_id, season_numbers[0], episode_number)
         if media_type == "tv_with_seasons":
             media_type = MediaTypes.TV.value
+        if media_type == "find_next_episode": 
+            return manual.find_next_episode(season_numbers, media_id)
+        if media_type == "process_episodes":
+            return manual.process_episodes(media_id, season_numbers)
         return manual.metadata(media_id, media_type)
 
     metadata_retrievers = {
@@ -225,17 +242,61 @@ def get_media_metadata(
             if source == Sources.MANGAUPDATES.value
             else mal.manga(media_id)
         ),
-        MediaTypes.TV.value: lambda: tmdb.tv(media_id),
-        "tv_with_seasons": lambda: tmdb.tv_with_seasons(media_id, season_numbers),
-        MediaTypes.SEASON.value: lambda: tmdb.tv_with_seasons(media_id, season_numbers)[
-            f"season/{season_numbers[0]}"
-        ],
-        MediaTypes.EPISODE.value: lambda: tmdb.episode(
-            media_id,
-            season_numbers[0],
-            episode_number,
+        MediaTypes.TV.value: lambda: (
+            tmdb.tv(media_id, order_type)
+            if source == Sources.TMDB.value
+            else tvdb.tv(media_id, order_type)
         ),
-        MediaTypes.MOVIE.value: lambda: tmdb.movie(media_id),
+        "tv_with_seasons": lambda: (
+            tmdb.tv_with_seasons(media_id, season_numbers, order_type)
+            if source == Sources.TMDB.value
+            else tvdb.tv_with_seasons(media_id, season_numbers, order_type)
+        ),
+        "find_next_episode": lambda: (
+            tmdb.find_next_episode(season_numbers, media_id)
+            if source == Sources.TMDB.value
+            else tvdb.find_next_episode(season_numbers, media_id)
+        ),
+        "filter_providers": lambda: (
+            tmdb.filter_providers(media_id, season_numbers)
+            if source == Sources.TMDB.value
+            else tvdb.filter_providers(media_id, season_numbers)
+        ),
+        "process_episodes": lambda: (
+            tmdb.process_episodes(media_id, season_numbers)
+            if source == Sources.TMDB.value
+            else tvdb.process_episodes(media_id, season_numbers)
+        ),
+        "watch_provider_regions": lambda: (
+            tmdb.watch_provider_regions()
+            if source == Sources.TMDB.value
+            else tvdb.watch_provider_regions()
+        ),
+        "get_changed_tv_ids": lambda: (
+            tmdb.tv_changes()
+            if source == Sources.TMDB.value
+            else tvdb.tv_changes()
+        ),
+        "get_changed_movie_ids": lambda: (
+            tmdb.movie_changes()
+            if source == Sources.TMDB.value
+            else tvdb.movie_changes()
+        ),
+        MediaTypes.SEASON.value: lambda: (
+            tmdb.tv_with_seasons(media_id, season_numbers)[ f"season/{season_numbers[0]}", order_type]
+            if source == Sources.TMDB.value
+            else tvdb.tv_with_seasons(media_id, season_numbers)[ f"season/{season_numbers[0]}", order_type]
+        ),
+        MediaTypes.EPISODE.value: lambda: (
+            tmdb.episode(media_id, season_numbers[0], episode_number, order_type)
+            if source == Sources.TMDB.value
+            else tvdb.episode(media_id, season_numbers[0], episode_number, order_type)
+        ),
+        MediaTypes.MOVIE.value: lambda: (
+            tmdb.movie(media_id)
+            if source == Sources.TMDB.value
+            else tvdb.movie(media_id)
+        ),
         MediaTypes.GAME.value: lambda: igdb.game(media_id),
         MediaTypes.BOOK.value: lambda: (
             hardcover.book(media_id)
@@ -256,11 +317,28 @@ def search(media_type, query, page, source=None):
             if source == Sources.MANGAUPDATES.value
             else mal.search(media_type, query, page)
         ),
+        
         MediaTypes.ANIME.value: lambda: mal.search(media_type, query, page),
-        MediaTypes.TV.value: lambda: tmdb.search(media_type, query, page),
-        MediaTypes.MOVIE.value: lambda: tmdb.search(media_type, query, page),
-        MediaTypes.SEASON.value: lambda: tmdb.search(MediaTypes.TV.value, query, page),
-        MediaTypes.EPISODE.value: lambda: tmdb.search(MediaTypes.TV.value, query, page),
+        MediaTypes.TV.value: lambda: (
+            tmdb.search(media_type, query, page)
+            if source == Sources.TMDB.value
+            else tvdb.search(media_type, query, page)
+        ),
+        MediaTypes.MOVIE.value: lambda: (
+            tmdb.search(media_type, query, page)
+            if source == Sources.TMDB.value
+            else tvdb.search(media_type, query, page)
+        ),
+        MediaTypes.SEASON.value: lambda: (
+            tmdb.search(MediaTypes.TV.value, query, page)
+            if source == Sources.TMDB.value
+            else tvdb.search(MediaTypes.TV.value, query, page)
+        ),
+        MediaTypes.EPISODE.value: lambda: (
+            tmdb.search(MediaTypes.TV.value, query, page)
+            if source == Sources.TMDB.value
+            else tvdb.search(MediaTypes.TV.value, query, page)
+        ),
         MediaTypes.GAME.value: lambda: igdb.search(query, page),
         MediaTypes.BOOK.value: lambda: (
             openlibrary.search(query, page)
