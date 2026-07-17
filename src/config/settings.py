@@ -218,6 +218,17 @@ else:
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": BASE_DIR / "db" / "db.sqlite3",
+            "OPTIONS": {
+                "timeout": 10,
+                "transaction_mode": "IMMEDIATE",
+                "init_command": (
+                    "PRAGMA journal_mode=WAL;"
+                    "PRAGMA synchronous=NORMAL;"
+                    "PRAGMA mmap_size=134217728;"
+                    "PRAGMA journal_size_limit=27103364;"
+                    "PRAGMA cache_size=2000;"
+                ),
+            },
         },
     }
 
