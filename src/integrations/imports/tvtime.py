@@ -1,7 +1,7 @@
 """Importer for TV Time GDPR export archives.
 
 TV Time identifies TV shows and episodes with TheTVDB ids, which map to
-Yamtrack's TMDB source through TMDB's ``/find?external_source=tvdb_id``
+OiOi-Track's TMDB source through TMDB's ``/find?external_source=tvdb_id``
 endpoint (see ``TVTimeImporter._map_series``). Movies are only exported with a
 title and release date (no TheTVDB/TMDB/IMDb id), so they are matched to TMDB
 by title search instead (see ``TVTimeImporter._search_movie``).
@@ -1059,7 +1059,7 @@ class TVTimeImporter:
         return str(best["media_id"]), best["title"], best["image"]
 
     def _process_lists(self, files):
-        """Import TV Time custom lists as Yamtrack custom lists."""
+        """Import TV Time custom lists as OiOi-Track custom lists."""
         rows = files.get(FILE_LISTS)
         if not rows:
             return
