@@ -510,6 +510,13 @@ def fetch_and_cache_seasons(media_id, season_numbers, tv_data, order_type=None):
             except Exception as error:
                 errors.append(error)
 
+    result_data = dict(
+        sorted(
+            result_data.items(),
+            key=lambda item: int(item[1]["season_number"]),
+        )
+    )
+        
     if errors:
         handle_error(errors[0])
 
@@ -541,6 +548,13 @@ def tv_with_seasons(media_id, season_numbers, order_type=None):
 
         cached_seasons.update(fetched_seasons)
 
+    cached_seasons = dict(
+        sorted(
+            cached_seasons.items(),
+            key=lambda item: int(item[1]["season_number"])
+        )
+    )
+    
     return tv_data | cached_seasons
 
 def tv(media_id, order_type=None):
@@ -577,6 +591,7 @@ def process_tv(response, order_type=None):
     last_episode = response.get("last_episode_to_air")
     
     new_seasons = add_season_translations(response.get("id"), response.get("seasons", []))
+    new_seasons.sort(key=lambda season: int(season.get("number",0)))
     recommendations = response.get("recommendations", {}).get("results", [])
     recommendations = add_recommendation_translations(recommendations[:8])
     
@@ -928,6 +943,7 @@ def process_season(response, providers_response, translations, media_id):
     total_runtime = get_readable_duration(total_runtime) if total_runtime else None
     
     new_epp = add_episode_translations(media_id, response.get("season_number"), response.get("episodes", []))
+    new_epp.sort(key=lambda episode: int(episode["number"]))
     
     return {
         "source": Sources.TMDB.value,
@@ -1308,6 +1324,10 @@ def get_related(related_medias, media_type, parent_response=None):
             data["original_title"] = get_title_original(media)
             data["release_year"] = get_release_year(media)
         related.append(data)
+    
+    if media_type == MediaTypes.SEASON.value:
+        related.sort(key=lambda media: int(media.get("season_number", 0)))    
+    
     return related
 
 def get_collection(collection_response):
@@ -1392,6 +1412,9 @@ def process_episodes(season_metadata, episodes_in_db):
                 "runtime_minutes": episode.get("runtime"),
             },
         )
+        
+    episodes_metadata.sort(key=lambda episode: int(episode.get("episode_number", 0)))    
+    
     return episodes_metadata
 
 def find_next_episode(episode_number, episodes_metadata):

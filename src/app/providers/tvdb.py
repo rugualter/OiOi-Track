@@ -1177,7 +1177,7 @@ def get_cached_seasons(media_id, season_numbers):
     cached_data = {}
     uncached_seasons = []
 
-    for season_number in season_numbers:
+    for season_number in sorted(season_numbers, key=int):
         season_cache_key = (
             f"{Sources.TVDB.value}_{MediaTypes.SEASON.value}_{media_id}_{season_number}"
         )
@@ -1277,6 +1277,7 @@ def fetch_and_cache_seasons(media_id, season_numbers, tv_data, order_type=None):
         return season_number, season_data
 
     errors = []
+    season_results = []
 
     with ThreadPoolExecutor(max_workers=min(max_workers_seasons, len(seasons_to_fetch))) as executor:
         futures = {
@@ -1291,11 +1292,14 @@ def fetch_and_cache_seasons(media_id, season_numbers, tv_data, order_type=None):
                 continue
             
             try:
-                season_number, season_data = result
-                result_data[f"season/{season_number}"] = season_data
+                season_results.append(result)
             except Exception as error:
                 errors.append((season_number, error))
 
+    
+    for season_number, season_data in sorted(season_results, key=lambda x: x[0]):
+        result_data[f"season/{season_number}"] = season_data
+    
     if errors:
         season_number, error = errors[0]
 
@@ -1345,6 +1349,13 @@ def tv_with_seasons(media_id, season_numbers, order_type=None):
 
         cached_seasons.update(fetched_seasons)
 
+    cached_seasons = dict(
+        sorted(
+            cached_seasons.items(),
+            key=lambda item: int(item[1]["season_number"])
+        )
+    )
+    
     return tv_data | cached_seasons
 
 def tv(media_id, order_type=None):
@@ -1402,6 +1413,8 @@ def get_related(related_medias):
             "max_progress": len(media.get("episodes", []))
         }
         related.append(data)
+    
+    related.sort(key=lambda x: int(x["season_number"]))
     
     return related
 
@@ -1520,11 +1533,19 @@ def process_tv(response, media_id, order_type=None):
             episodes.extend(season_response.get("episodes", []))
             seasons.append(season_response)
     
-    
+    seasons.sort(key=lambda season: int(season.get("number", 0)))
     valid_episodes = []
     last_aired_episode_season = None
     next_episode_season = None
     if episodes:
+        
+        episodes.sort(
+            key=lambda ep: (
+                int(ep.get("seasonNumber", 0)),
+                int(ep.get("number", 0)),
+            )
+        )
+        
         # Remove episodes without a season/episode number
         valid_episodes = [
             episode
@@ -1730,6 +1751,7 @@ def process_season(response, primary_language):
     
     # Remove failed episodes
     season_episodes = [ep for ep in season_episodes if ep is not None]
+    season_episodes.sort(key=lambda ep: int(ep.get("episode_number", 0)))
     
     avg_runtime = (
         get_readable_duration(sum(runtimes) / len(runtimes)) if runtimes else None
@@ -1844,6 +1866,9 @@ def process_episodes(season_metadata, episodes_in_db):
                 "runtime_minutes": episode.get("runtime"),
             },
         )
+        
+    episodes_metadata.sort(key=lambda ep: int(ep["episode_number"]))
+    
     return episodes_metadata
 
 def find_next_episode(episode_number, episodes_metadata):
