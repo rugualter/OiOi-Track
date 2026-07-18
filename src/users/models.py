@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from django_celery_beat.models import PeriodicTask
 from django_celery_results.models import TaskResult
 
-from app.models import Item, MediaTypes, Status
+from app.models import Item, MediaTypes, Status, Sources
 from users import helpers
 
 EXCLUDED_SEARCH_TYPES = [MediaTypes.SEASON.value, MediaTypes.EPISODE.value]
@@ -38,6 +38,53 @@ class ThemeChoices(models.TextChoices):
 
     DARK = "dark", _("Dark")
     LIGHT = "light", _("Light")
+
+
+class TVDBAirOrderChoices(models.TextChoices):
+    """Choices for home page sort options."""
+
+    OFFICIAL = "official", _("Offical")
+    AIRED = "aired", _("Aired")
+    DVD = "dvd", _("DVD")
+    ABSOLUTE = "absolute", _("Absolute")
+    ALT = "alternate", _("Alternate")
+    ALTTWO = "alttwo", _("Alternate Variant")
+    REGIONAL = "regional", _("Regional")
+    DIGUTAL = "digital", _("Digital")
+
+class MovieSourceChoices(models.TextChoices):
+    TMDB = Sources.TMDB.value, Sources.TMDB.label
+    TVDB = Sources.TVDB.value, Sources.TVDB.label
+
+class TVSourceChoices(models.TextChoices):
+    TMDB = Sources.TMDB.value, Sources.TMDB.label
+    TVDB = Sources.TVDB.value, Sources.TVDB.label
+
+
+class AnimeSourceChoices(models.TextChoices):
+    MAL = Sources.MAL.value, Sources.MAL.label
+
+
+class MangaSourceChoices(models.TextChoices):
+    MANGAUPDATES = Sources.MANGAUPDATES.value, Sources.MANGAUPDATES.label
+
+
+class GameSourceChoices(models.TextChoices):
+    IGDB = Sources.IGDB.value, Sources.IGDB.label
+
+
+class BookSourceChoices(models.TextChoices):
+    HARDCOVER = Sources.HARDCOVER.value, Sources.HARDCOVER.label
+    OPENLIBRARY = Sources.OPENLIBRARY.value, Sources.OPENLIBRARY.label
+    
+
+
+class ComicSourceChoices(models.TextChoices):
+    COMICVINE = Sources.COMICVINE.value, Sources.COMICVINE.label
+
+
+class BoardGameSourceChoices(models.TextChoices):
+    BGG = Sources.BGG.value, Sources.BGG.label
 
 
 class MediaSortChoices(models.TextChoices):
@@ -153,6 +200,61 @@ class User(AbstractUser):
     home_hide_unreleased = models.BooleanField(
         default=False,
         help_text= _("Hide unreleased media from the home page"),
+    )
+    
+    
+    default_movie_source = models.CharField(
+        max_length=20,
+        choices=MovieSourceChoices,
+        default=MovieSourceChoices.TMDB,
+    )
+
+    default_tv_source = models.CharField(
+        max_length=20,
+        choices=TVSourceChoices,
+        default=TVSourceChoices.TMDB,
+    )
+
+    default_anime_source = models.CharField(
+        max_length=20,
+        choices=AnimeSourceChoices,
+        default=AnimeSourceChoices.MAL,
+    )
+
+    default_manga_source = models.CharField(
+        max_length=20,
+        choices=MangaSourceChoices,
+        default=MangaSourceChoices.MANGAUPDATES,
+    )
+    
+    default_game_source = models.CharField(
+        max_length=20,
+        choices=GameSourceChoices,
+        default=GameSourceChoices.IGDB,
+    )
+    
+    default_book_source = models.CharField(
+        max_length=20,
+        choices=BookSourceChoices,
+        default=BookSourceChoices.HARDCOVER,
+    )
+    
+    default_comic_source = models.CharField(
+        max_length=20,
+        choices=ComicSourceChoices,
+        default=ComicSourceChoices.COMICVINE,
+    )
+    
+    default_boardgame_source = models.CharField(
+        max_length=20,
+        choices=BoardGameSourceChoices,
+        default=BoardGameSourceChoices.BGG,
+    )
+    
+    prefered_tvdb_air_order = models.CharField(
+        max_length=20,
+        choices=TVDBAirOrderChoices,
+        default=TVDBAirOrderChoices.OFFICIAL,
     )
 
     # Media type preferences: TV Shows

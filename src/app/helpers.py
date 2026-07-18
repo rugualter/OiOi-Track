@@ -249,3 +249,22 @@ def _should_skip_completed_recommendation(user, section_name, media_item):
         and media_item is not None
         and media_item.status == Status.COMPLETED.value
     )
+
+
+def get_default_source(user, media_type):
+    """Return the user's preferred source for a media type."""
+
+    mapping = {
+        MediaTypes.MOVIE.value: user.default_movie_source,
+        MediaTypes.TV.value: user.default_tv_source,
+        MediaTypes.SEASON.value: user.default_tv_source,
+        MediaTypes.EPISODE.value: user.default_tv_source,
+        MediaTypes.ANIME.value: user.default_anime_source,
+        MediaTypes.MANGA.value: user.default_manga_source,
+        MediaTypes.GAME.value: user.default_game_source,
+        MediaTypes.BOOK.value: user.default_book_source,
+        MediaTypes.COMIC.value: user.default_comic_source,
+        MediaTypes.BOARDGAME.value: user.default_boardgame_source,
+    }
+
+    return mapping.get(media_type)

@@ -23,7 +23,17 @@ from users.models import (
     QuickWatchDateChoices,
     TimeFormatChoices,
     WeekStartDayChoices,
+    MovieSourceChoices,
     ThemeChoices,
+    TVSourceChoices,
+    AnimeSourceChoices,
+    MangaSourceChoices,
+    GameSourceChoices,
+    BookSourceChoices,
+    ComicSourceChoices,
+    BoardGameSourceChoices,
+    TVDBAirOrderChoices,
+    
 )
 
 logger = logging.getLogger(__name__)
@@ -237,6 +247,15 @@ def preferences(request):
                 "time_format_choices": TimeFormatChoices.choices,
                 "week_start_day_choices": WeekStartDayChoices.choices,
                 "theme_choices": ThemeChoices.choices,
+                "movie_source_choices": MovieSourceChoices.choices,
+                "tv_source_choices": TVSourceChoices.choices,
+                "anime_source_choices": AnimeSourceChoices.choices,
+                "manga_source_choices": MangaSourceChoices.choices,
+                "game_source_choices": GameSourceChoices.choices,
+                "book_source_choices": BookSourceChoices.choices,
+                "comic_source_choices": ComicSourceChoices.choices,
+                "boardgame_source_choices": BoardGameSourceChoices.choices,
+                "tvdb_air_order_choices": TVDBAirOrderChoices.choices,
                 "watch_provider_choices_tmdb": watch_provider_regions_tmdb,
                 "watch_provider_choices_tvdb": watch_provider_regions_tvdb,
                 "LANGUAGES": settings.LANGUAGES,
@@ -296,6 +315,42 @@ def preferences(request):
     theme = request.POST.get("theme")
     if theme in [theme_choice[0] for theme_choice in ThemeChoices.choices]:
         request.user.theme = theme
+        
+    default_movie_source = request.POST.get("movie_source")
+    if default_movie_source in MovieSourceChoices.values:
+        request.user.default_movie_source = default_movie_source
+
+    default_tv_source = request.POST.get("tv_source")
+    if default_tv_source in TVSourceChoices.values:
+        request.user.default_tv_source = default_tv_source
+
+    default_anime_source = request.POST.get("anime_source")
+    if default_anime_source in AnimeSourceChoices.values:
+        request.user.default_anime_source = default_anime_source
+
+    default_manga_source = request.POST.get("manga_source")
+    if default_manga_source in MangaSourceChoices.values:
+        request.user.default_manga_source = default_manga_source
+
+    default_game_source = request.POST.get("game_source")
+    if default_game_source in GameSourceChoices.values:
+        request.user.default_game_source = default_game_source
+
+    default_book_source = request.POST.get("book_source")
+    if default_book_source in BookSourceChoices.values:
+        request.user.default_book_source = default_book_source
+
+    default_comic_source = request.POST.get("comic_source")
+    if default_comic_source in ComicSourceChoices.values:
+        request.user.default_comic_source = default_comic_source
+
+    default_boardgame_source = request.POST.get("boardgame_source")
+    if default_boardgame_source in BoardGameSourceChoices.values:
+        request.user.default_boardgame_source = default_boardgame_source
+        
+    air_order = request.POST.get("air_order")
+    if air_order in [order_choice[0] for order_choice in TVDBAirOrderChoices.choices]:
+        request.user.prefered_tvdb_air_order = air_order
         
     language = request.POST.get("language")
 

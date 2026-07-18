@@ -63,6 +63,154 @@
         </div>
       </div>
 
+      {# Default Sources #}
+      <div class="mb-5">
+        <div class="p-4 bg-[#39404b] rounded-md">
+          <div class="flex items-start mb-4">
+            {% include "app/icons/database.svg" with classes="w-5 h-5 mr-2 mt-1 text-gray-200" %}
+            <div>
+              <div class="text-sm font-medium text-gray-200">
+                {% trans "Default Sources" %}
+              </div>
+              <p class="text-xs text-gray-400 mt-1">
+                {% trans "Choose which metadata source should be used by default for each media type when multiple sources are available." %}
+              </p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">{% trans "Movies" %}</label>
+              <select name="movie_source"
+                      class="w-full p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                {% for choice in movie_source_choices %}
+                  <option value="{{ choice.0 }}"
+                          {% if user.default_movie_source == choice.0 %}selected{% endif %}>
+                    {{ choice.1 }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">{% trans "TV Shows" %}</label>
+              <select name="tv_source"
+                      class="w-full p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                {% for choice in tv_source_choices %}
+                  <option value="{{ choice.0 }}"
+                          {% if user.default_tv_source == choice.0 %}selected{% endif %}>
+                    {{ choice.1 }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">{% trans "Anime" %}</label>
+              <select name="anime_source"
+                      class="w-full p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                {% for choice in anime_source_choices %}
+                  <option value="{{ choice.0 }}"
+                          {% if user.default_anime_source == choice.0 %}selected{% endif %}>
+                    {{ choice.1 }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">{% trans "Manga" %}</label>
+              <select name="manga_source"
+                      class="w-full p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                {% for choice in manga_source_choices %}
+                  <option value="{{ choice.0 }}"
+                          {% if user.default_manga_source == choice.0 %}selected{% endif %}>
+                    {{ choice.1 }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">{% trans "Games" %}</label>
+              <select name="game_source"
+                      class="w-full p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                {% for choice in game_source_choices %}
+                  <option value="{{ choice.0 }}"
+                          {% if user.default_game_source == choice.0 %}selected{% endif %}>
+                    {{ choice.1 }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">{% trans "Books" %}</label>
+              <select name="book_source"
+                      class="w-full p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                {% for choice in book_source_choices %}
+                  <option value="{{ choice.0 }}"
+                          {% if user.default_book_source == choice.0 %}selected{% endif %}>
+                    {{ choice.1 }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">{% trans "Comics" %}</label>
+              <select name="comic_source"
+                      class="w-full p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                {% for choice in comic_source_choices %}
+                  <option value="{{ choice.0 }}"
+                          {% if user.default_comic_source == choice.0 %}selected{% endif %}>
+                    {{ choice.1 }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">{% trans "Board Games" %}</label>
+              <select name="boardgame_source"
+                      class="w-full p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                {% for choice in boardgame_source_choices %}
+                  <option value="{{ choice.0 }}"
+                          {% if user.default_boardgame_source == choice.0 %}selected{% endif %}>
+                    {{ choice.1 }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+
+      {# TVDB AirOrder Selection #}
+      <div class="mb-5">
+        <div class="flex items-center justify-between p-3 bg-[#39404b] rounded-md">
+          <div class="flex-1">
+            <div class="flex items-center text-gray-200 mb-1">
+              {% include "app/icons/theme.svg" with classes="w-5 h-5 mr-2 mt-1" %}
+              <span class="text-sm font-medium">{% trans "TVDB Air Order" %}</span>
+            </div>
+            <p class="text-xs text-gray-400 ml-7">
+              {% trans "Choose an Air Order preference for TVDB this will be the prefered order on sign-in." %}
+            </p>
+          </div>
+          <select name="air_order"
+                  class="ml-4 p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+            {% for choice in tvdb_air_order_choices %}
+              <option value="{{ choice.0 }}"
+                      {% if user.prefered_tvdb_air_order == choice.0 %}selected{% endif %}>{{ choice.1 }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
       {# Media Card Overlay #}
       <div class="mb-5">
         <div class="flex items-center justify-between p-3 bg-[#39404b] rounded-md">

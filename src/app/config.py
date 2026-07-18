@@ -2,6 +2,7 @@ from django.urls import reverse
 from django.utils.http import urlencode
 from django.utils.translation import gettext_lazy as _
 from app.models import MediaTypes, Sources, Status
+from app import  helpers
 
 # --- Color Constants ---
 COLORS = {
@@ -72,7 +73,6 @@ COLORS = {
 MEDIA_TYPE_CONFIG = {
     MediaTypes.TV.value: {
         "sources": [Sources.TMDB, Sources.TVDB],
-        "default_source": Sources.TMDB,
         "sample_query": "Breaking Bad",
         "unicode_icon": "📺",
         "verb": (_("watch"), _("watched"), _("watching")),
@@ -84,7 +84,6 @@ MEDIA_TYPE_CONFIG = {
     },
     MediaTypes.SEASON.value: {
         "sources": [Sources.TMDB, Sources.TVDB],
-        "default_source": Sources.TMDB,
         "unicode_icon": "📺",
         "verb": (_("watch"), _("watched"), _("watching")),
         "text_color": COLORS["purple"]["text"],
@@ -98,7 +97,6 @@ MEDIA_TYPE_CONFIG = {
     },
     MediaTypes.EPISODE.value: {
         "sources": [Sources.TMDB, Sources.TVDB],
-        "default_source": Sources.TMDB,
         "unicode_icon": "📺",
         "verb": (_("watch"), _("watched"), _("watching")),
         "text_color": COLORS["indigo"]["text"],
@@ -107,7 +105,6 @@ MEDIA_TYPE_CONFIG = {
     },
     MediaTypes.MOVIE.value: {
         "sources": [Sources.TMDB, Sources.TVDB],
-        "default_source": Sources.TMDB,
         "sample_query": "The Shawshank Redemption",
         "unicode_icon": "🎬",
         "verb": (_("watch"), _("watched"), _("watching")),
@@ -126,7 +123,6 @@ MEDIA_TYPE_CONFIG = {
     },
     MediaTypes.ANIME.value: {
         "sources": [Sources.MAL],
-        "default_source": Sources.MAL,
         "sample_query": "Perfect Blue",
         "unicode_icon": "🎭",
         "verb": (_("watch"), _("watched"), _("watching")),
@@ -140,7 +136,6 @@ MEDIA_TYPE_CONFIG = {
     },
     MediaTypes.MANGA.value: {
         "sources": [Sources.MAL, Sources.MANGAUPDATES],
-        "default_source": Sources.MAL,
         "sample_query": "Berserk",
         "unicode_icon": "📚",
         "verb": (_("read"), _("read"), _("reading")),
@@ -158,7 +153,6 @@ MEDIA_TYPE_CONFIG = {
     },
     MediaTypes.GAME.value: {
         "sources": [Sources.IGDB],
-        "default_source": Sources.IGDB,
         "sample_query": "Half-Life",
         "unicode_icon": "🎮",
         "verb": (_("play"), _("played"), _("playing")),
@@ -180,7 +174,6 @@ MEDIA_TYPE_CONFIG = {
     },
     MediaTypes.BOOK.value: {
         "sources": [Sources.HARDCOVER, Sources.OPENLIBRARY],
-        "default_source": Sources.HARDCOVER,
         "sample_query": "The Great Gatsby",
         "unicode_icon": "📖",
         "verb": (_("read"), _("read"), _("reading")),
@@ -194,7 +187,6 @@ MEDIA_TYPE_CONFIG = {
     },
     MediaTypes.COMIC.value: {
         "sources": [Sources.COMICVINE],
-        "default_source": Sources.COMICVINE,
         "sample_query": "Batman",
         "unicode_icon": "📕",
         "verb": (_("read"), _("read"), _("reading")),
@@ -209,7 +201,6 @@ MEDIA_TYPE_CONFIG = {
     },
     MediaTypes.BOARDGAME.value: {
         "sources": [Sources.BGG],
-        "default_source": Sources.BGG,
         "sample_query": "Catan",
         "unicode_icon": "🎲",
         "verb": (_("play"), _("played"), _("playing")),
@@ -301,25 +292,21 @@ def get_sources(media_type):
     return get_property(media_type, "sources")
 
 
-def get_default_source_name(media_type):
-    """Get the human-readable default source name."""
-    return get_property(media_type, "default_source")
-
-
 def get_sample_query(media_type):
     """Get the sample search query."""
     return get_property(media_type, "sample_query")
 
 
-def get_sample_search_url(media_type):
+def get_sample_search_url(media_type, user):
     """Get the full sample search URL."""
     if media_type == MediaTypes.SEASON.value:
         media_type = MediaTypes.TV.value
 
     query = get_sample_query(media_type)
+    source= helpers.get_default_source(user, media_type)
 
     base_url = reverse("search")
-    query_params = {"media_type": media_type, "q": query}
+    query_params = {"source": source, "media_type": media_type, "q": query}
     return f"{base_url}?{urlencode(query_params)}"
 
 

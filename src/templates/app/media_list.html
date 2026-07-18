@@ -149,7 +149,7 @@
             <p class="text-gray-400 mb-6">
               {% trans "Start tracking your " %}{{ media_type_plural }}{% trans " to keep a record of what you've " %}{{ media_type|media_past_verb }}.
             </p>
-            <a href="{{ media_type|sample_search }}"
+            <a href="{{ media_type|sample_search:request.user }}"
                class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors">
               {% trans "Browse" %} {{ media_type|media_type_readable_plural }}
             </a>

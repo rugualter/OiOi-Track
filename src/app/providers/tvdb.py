@@ -1226,6 +1226,9 @@ def fetch_and_cache_seasons(media_id, season_numbers, tv_data, order_type=None):
 
     season_numbers_int = {int(n) for n in season_numbers}
     seasons_to_fetch = []
+    preferred_seasons = []
+    official_seasons = []
+
 
     for season in response.get("seasons", []):
 
@@ -1233,13 +1236,20 @@ def fetch_and_cache_seasons(media_id, season_numbers, tv_data, order_type=None):
 
         if not s_type:
             continue
-
-        if s_type.get("type") != "official":
-            continue
-
+        
         season_number = season.get("number")
-        if season_number is not None and int(season_number) in season_numbers_int:
-            seasons_to_fetch.append((season, season_number))
+        if season_number is None or int(season_number) not in season_numbers_int:
+            continue
+        
+        season_type = s_type.get("type")
+
+        if season_type == order_type:
+            preferred_seasons.append((season, season_number))
+        elif season_type == "official":
+            official_seasons.append((season, season_number))
+        
+    # Use preferred seasons if any exist, otherwise fall back to official.
+    seasons_to_fetch = preferred_seasons or official_seasons
 
     def fetch_season(season, season_number):
         
@@ -1467,23 +1477,27 @@ def process_tv(response, media_id, order_type=None):
     official_seasons = []
     episodes = []
     seasons = []
+    preferred_seasons = []
+    falback_seasons = []
     
     for season in response.get("seasons", []):
         s_type = season.get("type")
-
         if not s_type:
             continue
 
-        if s_type.get("type") != "official":
-            continue
-
         season_id = season.get("id")
-
         if not season_id:
             continue
 
-        official_seasons.append(season_id)
+        season_type = s_type.get("type")
 
+        if season_type == order_type:
+            preferred_seasons.append(season_id)
+        elif season_type == "official":
+            falback_seasons.append(season_id)
+            
+    # Use preferred seasons if any exist, otherwise fall back to official.
+    official_seasons = preferred_seasons or falback_seasons
     
     def fetch_season(season_id):
         

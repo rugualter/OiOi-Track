@@ -287,7 +287,7 @@ def media_search(request):
     # only receives source when searching with secondary source
     source = request.GET.get(
         "source",
-        config.get_default_source_name(media_type).value,
+        helpers.get_default_source(request.user, media_type)
     )
 
     data = services.search(media_type, query, page, source)

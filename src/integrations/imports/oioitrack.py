@@ -193,7 +193,8 @@ class oioitrackImporter:
         if row.get("title", "") != "":
             source = row.get("source", "")
             if source == "":
-                source = config.get_default_source_name(media_type).value
+                source = helpers.get_default_source(self.user, media_type).value
+                
 
             metadata = services.search(
                 media_type,

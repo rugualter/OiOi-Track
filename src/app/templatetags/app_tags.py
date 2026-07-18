@@ -170,21 +170,15 @@ def media_status_readable(media_status):
 
 
 @register.filter
-def default_source(media_type):
-    """Return the default source for the media type."""
-    return config.get_default_source_name(media_type).label
-
-
-@register.filter
 def media_past_verb(media_type):
     """Return the past tense verb for the given media type."""
     return config.get_verb(media_type, past_tense=True)
 
 
 @register.filter
-def sample_search(media_type):
+def sample_search(media_type, user):
     """Return a sample search URL for the given media type using GET parameters."""
-    return config.get_sample_search_url(media_type)
+    return config.get_sample_search_url(media_type, user)
 
 
 @register.filter
