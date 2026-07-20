@@ -137,6 +137,43 @@ def home(request):
     return render(request, "app/home.html", context)
 
 
+@require_GET
+def watch_provider_regions(request):
+    source = request.GET.get("source")
+    provider = (
+        request.GET.get("provider")
+        or request.GET.get("provider_tmdb")
+        or request.GET.get("provider_tvdb")
+    )
+
+    regions = [("", "Disabled")]
+    if source == "tmdb" and provider == "tmdb":
+        regions = services.get_media_metadata(
+            media_type="watch_provider_regions",
+            source=Sources.TMDB.value,
+            provider=provider,
+        )
+
+    elif source == "tvdb" and provider == "tmdb":
+        regions = services.get_media_metadata(
+            media_type="watch_provider_regions",
+            source=Sources.TVDB.value,
+            provider=provider,
+        )
+
+    default = helpers.get_default_region_provider(request.user, source)
+        
+    return render(
+        request,
+        "users/components/watch_provider_regions.html",
+        {
+            "regions": regions,
+            "source": source,
+            "provider": provider,
+            "default": default,
+        },
+    )
+
 @require_POST
 def progress_edit(request, media_type, instance_id):
     """Increase or decrease the progress of a media item from home page."""
@@ -267,6 +304,35 @@ def media_list(request, username, media_type):
         media_page.object_list,
         media_type,
     )
+    
+    order_types = [list(choice) for choice in AirOrder.choices]
+    
+    selected_order_type = (
+        request.user.last_order_type
+        or request.user.prefered_air_order
+    )
+    
+    source_preference_map = {
+        MediaTypes.TV.value: request.user.last_source_used_tv,
+        MediaTypes.MOVIE.value: request.user.last_source_used_movie,
+        MediaTypes.ANIME.value: request.user.last_source_used_anime,
+        MediaTypes.MANGA.value: request.user.last_source_used_manga,
+        MediaTypes.GAME.value: request.user.last_source_used_game,
+        MediaTypes.BOOK.value: request.user.last_source_used_book,
+        MediaTypes.COMIC.value: request.user.last_source_used_comic,
+        MediaTypes.BOARDGAME.value: request.user.last_source_used_boardgame,
+    }
+    
+    preference_key = source_preference_map.get(media_type)
+    
+    source = preference_key or helpers.get_default_source(request.user, media_type)
+
+    sample_url = helpers.sample_search(
+        source=source,
+        media_type=media_type,
+        user=request.user,
+        order_type=selected_order_type,
+    )
 
     context = {
         "media_type": media_type,
@@ -279,6 +345,10 @@ def media_list(request, username, media_type):
         "sort_choices": MediaSortChoices.choices,
         "status_choices": MediaStatusChoices.choices,
         "target_user": target_user,
+        "order_types": order_types,
+        "selected_order_type": selected_order_type,
+        "source_choices": MediaSourceChoices.all(),
+        "sample_url": sample_url,
     }
 
     # Handle HTMX requests for partial updates
@@ -367,8 +437,9 @@ def media_search(request):
 
 @require_GET
 def media_details(request, source, media_type, media_id, title, order_type=None):  # noqa: ARG001 title for URL
-    """Return the details page for a media item."""
-    media_metadata = services.get_media_metadata(media_type = media_type, media_id = media_id, order_type=order_type, source = source)
+    """Return the details page for a media item.""" 
+    provider = helpers.get_default_provider(request.user, source)
+    media_metadata = services.get_media_metadata(media_type = media_type, media_id = media_id, order_type=order_type, provider=provider, source = source)
     user_medias = BasicMedia.objects.filter_media_prefetch(
         request.user,
         media_id,
@@ -492,12 +563,14 @@ def season_details(request, source, media_id, order_type, title, season_number):
             current_instance.item, season_metadata.get("image")
         )
 
+    provider = helpers.get_default_provider(request.user, source)
     season_metadata["episodes"] = services.get_media_metadata(
             media_type =  "process_episodes",
             season_metadata = season_metadata,
             source = source,
             episodes = episodes_in_db,
             order_type = order_type,
+            provider = provider,
         )
 
     # Enrich related items with user tracking data
@@ -592,12 +665,13 @@ def sync_metadata(request, source, media_type, media_id, order_type=None, season
     else:
         deleted = cache.delete(cache_key)
         logger.debug("%s - Old cache deleted: %s", cache_key, deleted)
-
+        provider = helpers.get_default_provider(request.user, source)
         metadata = services.get_media_metadata(
             media_type = media_type,
             media_id = media_id,
             source = source,
             order_type = order_type,
+            provider = provider,
             season_numbers = [season_number],
         )
         item, _ = Item.objects.update_or_create(
@@ -616,11 +690,13 @@ def sync_metadata(request, source, media_type, media_id, order_type=None, season
             title += f" - Season {season_number}"
 
         if media_type == MediaTypes.SEASON.value:
+            provider = helpers.get_default_provider(request.user, source)
             metadata["episodes"] = services.get_media_metadata(
                 media_type = "process_episodes",
                 season_metadata = metadata,
                 source = source,
                 order_type = order_type,
+                provider = provider,
                 episodes = []
             )
 
@@ -731,10 +807,12 @@ def track_modal(
         if media_type == MediaTypes.GAME.value:
             initial_data["progress"] = helpers.minutes_to_hhmm(media.progress)
     else:
+        provider = helpers.get_default_provider(request.user, source)
         title = services.get_media_metadata(
             media_type = media_type,
             media_id = media_id,
             source = source,
+            provider=provider,
             order_type = order_type,
             season_numbers = [season_number],
         )["title"]
@@ -778,10 +856,12 @@ def media_save(request):
     if instance_id:
         instance = helpers.get_owned_media_or_404(request, media_type, instance_id)
     else:
+        provider = helpers.get_default_provider(request.user, source)
         metadata = services.get_media_metadata(
             media_type = media_type,
             media_id = media_id,
             source = source,
+            provider = provider,
             season_numbers = [season_number],
         )
         item, _ = Item.objects.get_or_create(
@@ -868,10 +948,12 @@ def episode_save(request):
             user=request.user,
         )
     except Season.DoesNotExist:
+        provider = helpers.get_default_provider(request.user, source)
         tv_with_seasons_metadata = services.get_media_metadata(
             media_type = "tv_with_seasons",
             media_id = media_id,
             source = source,
+            provider = provider,
             season_numbers = [season_number],
         )
         season_metadata = tv_with_seasons_metadata[f"season/{season_number}"]
@@ -905,8 +987,21 @@ def episode_save(request):
 def create_entry(request):
     """Return the form for manually adding media items."""
     if request.method == "GET":
+        order_types = [list(choice) for choice in AirOrder.choices]
+        selected_order_type = (
+            request.user.last_order_type
+            or request.user.prefered_air_order
+        )
         media_types = MediaTypes.values
-        return render(request, "app/create_entry.html", {"media_types": media_types})
+        return render(
+            request, "app/create_entry.html", 
+            {
+                "media_types": media_types,
+                "order_types": order_types,
+                "selected_order_type": selected_order_type,
+                "source_choices": MediaSourceChoices.all(),
+            }
+        )
 
     # Process the form submission
     form = ManualItemForm(request.POST, user=request.user)
@@ -1150,6 +1245,12 @@ def statistics(request):
         round(score_distribution["total_scored"] / total * 100) if total else None
     )
 
+    order_types = [list(choice) for choice in AirOrder.choices]
+    
+    selected_order_type = (
+        request.user.last_order_type
+        or request.user.prefered_air_order
+    )
 
     context = {
         "start_date": start_date,
@@ -1164,6 +1265,9 @@ def statistics(request):
         "in_progress_count": in_progress_count,
         "rated_percent": rated_percent,
         "date_format_values": DateFormatChoices.values,
+        "order_types": order_types,
+        "selected_order_type": selected_order_type,
+        "source_choices": MediaSourceChoices.all(),
     }
 
     return render(request, "app/statistics.html", context)
@@ -1205,6 +1309,13 @@ def journal(request):
 
     prev_day = request.GET.get("last_day", "")
 
+    order_types = [list(choice) for choice in AirOrder.choices]
+    
+    selected_order_type = (
+        request.user.last_order_type
+        or request.user.prefered_air_order
+    )
+    
     context = {
         "entries": entries,
         "journal_days": journal_days,
@@ -1219,6 +1330,9 @@ def journal(request):
         "filter_query": urlencode(date_params),
         "start_date": start_date,
         "end_date": end_date,
+        "order_types": order_types,
+        "selected_order_type": selected_order_type,
+        "source_choices": MediaSourceChoices.all(),
     }
 
     # The activity dashboard only appears on the full page, so skip its queries

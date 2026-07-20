@@ -100,11 +100,8 @@ urlpatterns = [
     ),
     path("create", views.create_entry, name="create_entry"),
     path("search/parent_tv", views.search_parent_tv, name="search_parent_tv"),
-    path(
-        "search/parent_season",
-        views.search_parent_season,
-        name="search_parent_season",
-    ),
+    path("search/parent_season", views.search_parent_season, name="search_parent_season"),
+    path("watch-provider-regions/", views.watch_provider_regions, name="watch-provider-regions"),
     path("statistics", views.statistics, name="statistics"),
     path("journal", views.journal, name="journal"),
     path("serviceworker.js", views.service_worker, name="service_worker"),

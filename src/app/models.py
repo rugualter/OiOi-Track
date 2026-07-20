@@ -73,7 +73,6 @@ class AirOrder(models.TextChoices):
     
 class WatchProviderServicesChoices(models.TextChoices):
     """Choices for home page sort options."""
-    
     TMDB = "tmdb", _("The Movie Database")
 
 class MovieSourceChoices(models.TextChoices):
@@ -102,13 +101,26 @@ class BookSourceChoices(models.TextChoices):
     OPENLIBRARY = Sources.OPENLIBRARY.value, Sources.OPENLIBRARY.label
     
 
-
 class ComicSourceChoices(models.TextChoices):
     COMICVINE = Sources.COMICVINE.value, Sources.COMICVINE.label
 
 
 class BoardGameSourceChoices(models.TextChoices):
     BGG = Sources.BGG.value, Sources.BGG.label
+
+
+SOURCE_LOGOS = {
+    Sources.TMDB.value: "img/tmdb.svg",
+    Sources.TVDB.value: "img/tvdb.svg",
+    Sources.MAL.value: "img/mal.svg",
+    Sources.MANGAUPDATES.value: "img/mangaupdates.svg",
+    Sources.IGDB.value: "img/igdb.svg",
+    Sources.HARDCOVER.value: "img/hardcover.svg",
+    Sources.OPENLIBRARY.value: "img/openlibrary.svg",
+    Sources.COMICVINE.value: "img/comicvine.svg",
+    Sources.BGG.value: "img/bgg.svg",
+    Sources.MANUAL.value: "img/manual.svg",
+}
 
 
 class MediaTypes(models.TextChoices):
@@ -149,7 +161,7 @@ class MediaSourceChoices:
     @classmethod
     def all(cls):
         return {
-            media_type: [list(choice) for choice in source_choices.choices]
+            media_type: [[value, label, SOURCE_LOGOS.get(value)] for value, label in source_choices.choices]
             for media_type, source_choices in cls._registry.items()
         }
 

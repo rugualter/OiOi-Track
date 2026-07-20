@@ -12,7 +12,7 @@ from django.utils.translation import gettext_lazy as _
 from unidecode import unidecode
 
 from app import config, helpers
-from app.models import MediaTypes, Sources, Status
+from app.models import MediaTypes, Sources, Status, SOURCE_LOGOS
 from users.models import WATCH_PROVIDER_REGION_UNSET
 
 register = template.Library()
@@ -304,6 +304,55 @@ def get_last_or_default_display(user, media_type):
 
 
 @register.filter
+def get_last_or_default_logo(user, media_type):
+    """Get the display name for a source value."""
+    """Get attribute from object dynamically."""
+    mapping = {
+        MediaTypes.MOVIE.value: user.last_source_used_movie,
+        MediaTypes.TV.value: user.last_source_used_tv,
+        MediaTypes.SEASON.value: user.last_source_used_tv,
+        MediaTypes.EPISODE.value: user.last_source_used_tv,
+        MediaTypes.ANIME.value: user.last_source_used_anime,
+        MediaTypes.MANGA.value: user.last_source_used_manga,
+        MediaTypes.GAME.value: user.last_source_used_game,
+        MediaTypes.BOOK.value: user.last_source_used_book,
+        MediaTypes.COMIC.value: user.last_source_used_comic,
+        MediaTypes.BOARDGAME.value: user.last_source_used_boardgame,
+    }
+    last_source_code = mapping.get(media_type)
+    last_source = None
+    if last_source_code:
+        match last_source_code:
+            case Sources.TMDB.value:
+                last_source = SOURCE_LOGOS.get(Sources.TMDB.value)
+            case Sources.TVDB.value:
+                last_source = SOURCE_LOGOS.get(Sources.TVDB.value)
+            case Sources.MAL.value:
+                last_source = SOURCE_LOGOS.get(Sources.MAL.value)
+            case Sources.MANGAUPDATES.value:
+                last_source = SOURCE_LOGOS.get(Sources.MANGAUPDATES.value)
+            case Sources.IGDB.value:
+                last_source = SOURCE_LOGOS.get(Sources.IGDB.value)
+            case Sources.OPENLIBRARY.value:
+                last_source = SOURCE_LOGOS.get(Sources.OPENLIBRARY.value)
+            case Sources.HARDCOVER.value:
+                last_source = SOURCE_LOGOS.get(Sources.HARDCOVER.value)
+            case Sources.COMICVINE.value:
+                last_source = SOURCE_LOGOS.get(Sources.COMICVINE.value)
+            case Sources.BGG.value:
+                last_source = SOURCE_LOGOS.get(Sources.BGG.value)
+            case Sources.MANUAL.value:
+                last_source = SOURCE_LOGOS.get(Sources.MANUAL.value)
+            case _:
+                last_source = None
+
+     # If no last source, get the default
+    if not last_source:
+        last_source = SOURCE_LOGOS.get(helpers.get_default_source(user, media_type).value)
+        
+    return last_source
+
+@register.filter
 def journal_accent(accent):
     """Return the badge background class and icon template for a journal accent."""
     return config.get_journal_accent(accent)
@@ -404,9 +453,9 @@ def media_url(media, order_type=None):
         },
     )
 
-
 @register.simple_tag
 def media_view_url(view_name, media):
+
     """Return the modal URL for both metadata and model object cases."""
     is_dict = isinstance(media, dict)
 

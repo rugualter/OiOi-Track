@@ -345,7 +345,7 @@ def search(media_type, query, page, order_type=None):
                 "original_title": original_title,
                 "order_type": None,
                 "original_language": native_language_name(primary_language),
-                "image": media.get("image_url"),
+                "image": get_image_url(media.get("image_url", settings.IMG_NONE)),
                 "release_year": get_release_year(media)
             }
         )
@@ -662,7 +662,7 @@ def get_first_none_official_list(lists, preferred_language, primary_language):
         return  {
                 "source": Sources.TVDB.value,
                 "media_type": media_type,
-                "image": response.get("image"),
+                "image": get_image_url(response.get("image", settings.IMG_NONE)),
                 "media_id": media_id,
                 "title": preferred_title,
                 "original_title": original_title,
@@ -845,7 +845,7 @@ def get_first_official_list(lists, preferred_language, primary_language):
         return {
                 "source": Sources.TVDB.value,
                 "media_type": media_type,
-                "image": response.get("image"),
+                "image": get_image_url(response.get("image", settings.IMG_NONE)),
                 "media_id": media_id,
                 "title": preferred_title,
                 "original_title": original_title,
@@ -1029,7 +1029,7 @@ def get_first_list(lists, preferred_language, primary_language):
         return {
                 "source": Sources.TVDB.value,
                 "media_type": media_type,
-                "image": response.get("image"),
+                "image": get_image_url(response.get("image", settings.IMG_NONE)),
                 "media_id": media_id,
                 "title": preferred_title,
                 "original_title": original_title,
@@ -1169,13 +1169,14 @@ def movie(media_id, provider):
             related["recommendations"] = collection_none_info[2]
         
         cast = response.get("characters", [])
+        cast = [] if cast is None else cast
         filtered_cast = [
             {
                 "id": member.get("id"),
                 "name": member.get("personName"),
                 "url": member.get("url"),
                 "character": member.get("name"),
-                "image": member.get("image"),
+                "image": get_image_url(member.get("image", settings.IMG_NONE)),
             }
             for member in cast[:30]
         ]
@@ -1228,7 +1229,7 @@ def movie(media_id, provider):
             "original_language": native_language_name(primary_language),
             "max_progress": 1,
             "order_type": None,
-            "image": response.get("image"),
+            "image": get_image_url(response.get("image", settings.IMG_NONE)),
             "synopsis": overview,
             "genres": get_genres(response.get("genres")),
             "score": get_score(response.get("score")),
@@ -1498,7 +1499,7 @@ def get_related(related_medias):
         data = {
             "source": Sources.TVDB.value,
             "media_type": media.get("media_type"),
-            "image": media.get("image"),
+            "image": get_image_url(media.get("image", settings.IMG_NONE)),
             "year": media.get("year", year),
             "media_id": media.get("parent_id"),
             "title": media.get("parent_title"),
@@ -1527,12 +1528,13 @@ def process_tv(response, media_id, order_type=None, provider = None):
     collection_info_name = collection_info[0] if collection_info else None
     
     cast = response.get("characters", [])
+    cast = [] if cast is None else cast
     filtered_cast = [
         {
             "id": member.get("id"),
             "name": member.get("personName"),
             "character": member.get("name"),
-            "image": member.get("image"),
+            "image": get_image_url(member.get("image", settings.IMG_NONE)),
         }
         for member in cast[:30]
     ]
@@ -1691,9 +1693,9 @@ def process_tv(response, media_id, order_type=None, provider = None):
             
     related = {}
     if seasons:
-        related["seasons"] = get_related(seasons)
+        related[_("seasons")] = get_related(seasons)
     if collection_info:
-        related["recommendations"] = collection_info[2]
+        related[_("recommendations")] = collection_info[2]
     
     tmdb_id = next(
         (
@@ -1730,7 +1732,7 @@ def process_tv(response, media_id, order_type=None, provider = None):
         "release_year": get_release_year(response),
         "max_progress": len(valid_episodes),
         "order_type": order_type,
-        "image": response.get("image"),
+        "image": get_image_url(response.get("image", settings.IMG_NONE)),
         "synopsis": overview,
         "genres": get_genres(response.get("genres")),
         "score": get_score(response.get("score")),
@@ -1762,11 +1764,12 @@ def process_tv(response, media_id, order_type=None, provider = None):
 
 def process_episode(episode, preferred_language, primary_language, order_type=None):
     """Fetch and process a single episode."""
-
+    
     try:
         episode_response = tvdb.get_episode_extended(episode["id"], meta="translations")
     except Exception:
         return None
+    print(episode["id"])
 
     episode_base_translations = episode_response.get("translations", {})
     episode_name_translations = episode_base_translations.get("nameTranslations", [])
@@ -1776,7 +1779,7 @@ def process_episode(episode, preferred_language, primary_language, order_type=No
     episode_original_title = get_translation( episode_name_translations, primary_language, primary_language, "series")
 
     episode_preferred_overview = get_translation(episode_overviews, preferred_language, primary_language, "series-overview")
-
+    
     if not episode_preferred_title:
         episode_preferred_title = episode_response.get("name")
     if not episode_original_title:
@@ -1786,7 +1789,10 @@ def process_episode(episode, preferred_language, primary_language, order_type=No
         if original_overview:
             episode_preferred_overview = original_overview
 
+
     cast = episode_response.get("characters", [])
+    cast = [] if cast is None else cast
+
     filtered_cast = [
         {
             "department": _("Crew"),
@@ -1799,12 +1805,12 @@ def process_episode(episode, preferred_language, primary_language, order_type=No
             "name": member.get("personName"),
             "original_name": member.get("personName"),
             "popularity": None,
-            "profile_path": member.get("image"),
+            "profile_path": get_image_url(member.get("image", settings.IMG_NONE)),
         }
         for member in cast
     ]
-
-    return {
+   
+    data =  {
         "runtime": episode_response.get("runtime"),
         "episode_data": {
             "air_date": episode_response.get("aired"),
@@ -1819,17 +1825,20 @@ def process_episode(episode, preferred_language, primary_language, order_type=No
             "runtime": episode_response.get("runtime"),
             "season_number": episode_response.get("seasonNumber"),
             "show_id": episode_response.get("seriesId"),
-            "still_path": episode_response.get("image"),
+            "still_path": get_image_url(episode_response.get("image", settings.IMG_NONE)),
             "vote_average": 0,
             "vote_count": 0,
             "crew": filtered_cast,
-        },
+        }
     }
+
+    return data
     
 def process_season(response, provider, primary_language, media_id, order_type=None):
     """Process the metadata for the selected season from The Movie Database."""
     season_response = response
     episodes = season_response.get("episodes", [])
+    
     num_episodes = len(episodes)
 
     if len(episodes) == 0:
@@ -1871,9 +1880,10 @@ def process_season(response, provider, primary_language, media_id, order_type=No
             season_episodes[index] = result["episode_data"]
     
     # Remove failed episodes
+    print(season_episodes)
     season_episodes = [ep for ep in season_episodes if ep is not None]
     season_episodes.sort(key=lambda ep: int(ep.get("episode_number", 0)))
-    
+
     avg_runtime = (
         get_readable_duration(sum(runtimes) / len(runtimes)) if runtimes else None
     )
@@ -1930,7 +1940,7 @@ def process_season(response, provider, primary_language, media_id, order_type=No
         "season_original_title": season_original_title,
         "season_release_year": first_air_date[:4] if first_air_date else None,
         "max_progress": season_episodes[-1]["episode_number"] if season_episodes else 0,
-        "image": season_response.get("image"),
+        "image": get_image_url(season_response.get("image", settings.IMG_NONE)),
         "season_number": season_response.get("number"),
         "order_type": order_type,
         "synopsis": season_preferred_overview,
@@ -1985,7 +1995,7 @@ def filter_providers(all_providers, region, provider):
         # Convert dict back to list and add image URLs
         providers = list(providers.values())
         for provider in providers:
-            provider["image"] = tmdb.get_image_url(provider.get("logo_path"))
+            provider["image"] = get_image_url(tmdb.get_image_url(provider.get("logo_path")))
 
         providers.sort(key=lambda e: e.get("display_priority", 999))
         return providers
@@ -2018,7 +2028,7 @@ def process_episodes(season_metadata, episodes_in_db, order_type=None):
                 "air_date": air_Date,
                 "order_type": order_type,
                 "episode_release_year": int(air_Date[:4]),
-                "image": episode.get("still_path"),
+                "image": get_image_url(episode.get("still_path", settings.IMG_NONE)),
                 "title": episode.get("name"),
                 "original_title": episode.get("original_name"),
                 "overview": episode.get("overview"),
@@ -2071,7 +2081,7 @@ def episode(media_id, season_number, episode_number, order_type=None, provider =
                 "episode_original_title": episode.get("original_name"),
                 "air_date": air_Date,
                 "episode_release_year": int(air_Date[:4]),
-                "image": episode.get("still_path"),
+                "image": get_image_url(episode.get("still_path", settings.IMG_NONE)),
             }
 
     # Episode not found - throw ProviderAPIError
@@ -2112,9 +2122,9 @@ def watch_provider_regions(provider):
 
             data = [("", "Disabled")]
             regions = response.get("results", [])
-            for region in sorted(regions, key=lambda r: r.get("name", "")):
+            for region in sorted(regions, key=lambda r: r.get("english_name", "")):
                 key = region.get("iso_3166_1")
-                name = region.get("name")
+                name = region.get("english_name")
                 if key:
                     if not name:
                         name = key
@@ -2122,9 +2132,6 @@ def watch_provider_regions(provider):
 
             cache.set(cache_key, data)
             
-        else:
-            data = [("", "Disabled")]
-
     return data
 
 def get_changed_ids(media_type):
@@ -2181,3 +2188,12 @@ def tv_changes():
 def movie_changes():
     """Return changed movie ids from TVDB for the last days across all pages."""
     return get_changed_ids(MediaTypes.MOVIE.value)
+
+def get_image_url(path):
+    """Return the image URL for the media."""
+    # when no image, value from response is null
+    # e.g movie: 445290
+    if path is None or path == '':
+        return settings.IMG_NONE
+    
+    return path

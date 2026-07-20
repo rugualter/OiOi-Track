@@ -291,3 +291,21 @@ def get_default_provider(user, source):
     }
 
     return provider_map.get(source)
+
+
+def get_default_region_provider(user, source):
+    """Return the user's preferred provider for a source."""
+
+    provider_map = {
+        Sources.TMDB: user.watch_provider_region_tmdb,
+        Sources.TVDB: user.watch_provider_region_tvdb,
+        ##Sources.MAL: user.anime_provider_mal,
+        ##Sources.MANGAUPDATES: user.manga_provider_mangaupdates,
+        ##Sources.IGDB: user.game_provider_igdb,
+        ##Sources.OPENLIBRARY: user.book_provider_openlibrary,
+        ##Sources.HARDCOVER: user.book_provider_hardcover,
+        ##Sources.COMICVINE: user.comic_provider_comicvine,
+        ##Sources.BGG: user.boardgame_provider_bgg,
+    }
+
+    return provider_map.get(source)

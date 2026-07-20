@@ -823,6 +823,9 @@
   .max-w-6xl {
     max-width: var(--container-6xl);
   }
+  .max-w-20 {
+    max-width: calc(var(--spacing) * 20);
+  }
   .max-w-\[98\%\] {
     max-width: 98%;
   }
@@ -1734,6 +1737,9 @@
   .fill-yellow-400 {
     fill: var(--color-yellow-400);
   }
+  .object-contain {
+    object-fit: contain;
+  }
   .object-cover {
     object-fit: cover;
   }
@@ -1924,15 +1930,6 @@
   .text-xs {
     font-size: var(--text-xs);
     line-height: var(--tw-leading, var(--text-xs--line-height));
-  }
-  .text-\[0\.2rem\] {
-    font-size: 0.2rem;
-  }
-  .text-\[0\.8rem\] {
-    font-size: 0.8rem;
-  }
-  .text-\[7px\] {
-    font-size: 7px;
   }
   .text-\[11px\] {
     font-size: 11px;

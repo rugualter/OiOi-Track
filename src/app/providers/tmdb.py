@@ -273,11 +273,11 @@ def translated_genre(genre):
     return translations.get(genre, genre)
 
 def get_watch_providers(media_type, media_id, provider, season_number=None):
-    
+
     if media_type == MediaTypes.MOVIE.value:
         cache_key = f"{Sources.TMDB.value}_providers_{provider}_{MediaTypes.MOVIE.value}_{media_id}"
         data = cache.get(cache_key)
-        
+
         if data is None:
             url = f"{base_url}/movie/{media_id}/watch/providers"
             params = {
@@ -301,7 +301,7 @@ def get_watch_providers(media_type, media_id, provider, season_number=None):
         return data
             
     elif media_type == MediaTypes.TV.value:
-        
+
         cache_key = f"{Sources.TMDB.value}_providers_{provider}_{MediaTypes.TV.value}_{media_id}"
         data = cache.get(cache_key)
         
@@ -327,8 +327,8 @@ def get_watch_providers(media_type, media_id, provider, season_number=None):
         
         return data
     
-    elif media_type == MediaTypes.SEASON.value:
-        
+    elif media_type == MediaTypes.SEASON.value or media_type == MediaTypes.EPISODE.value:
+
         cache_key = f"{Sources.TMDB.value}_providers_{provider}_{MediaTypes.SEASON.value}_{media_id}"
         data = cache.get(cache_key)
         
@@ -451,8 +451,8 @@ def movie(media_id, provider):
             "cast": filtered_cast,
             "total_cast_count": len(cast),
             "related": {
-                collection_response_trans.get("name", "collection"): collection_items,
-                "recommendations": get_related(
+                collection_response_trans.get("name", _("collection")): collection_items,
+                _("recommendations"): get_related(
                     final_recommendations,
                     MediaTypes.MOVIE.value,
                 ),
@@ -693,11 +693,11 @@ def process_tv(response, order_type=None, provider = None):
     new_seasons.sort(key=lambda season: int(season.get("season_number",0)))
     recommendations = response.get("recommendations", {}).get("results", [])
     recommendations = add_recommendation_translations(recommendations[:8])
-    
+
     providers = {}
     if provider == "tmdb":
-        providers = get_watch_providers(MediaTypes.MOVIE.value, response.get("id"), provider)
-    
+        providers = get_watch_providers(MediaTypes.TV.value, response.get("id"), provider)
+
     return {
         "media_id": response.get("id"),
         "source": Sources.TMDB.value,
@@ -727,12 +727,12 @@ def process_tv(response, order_type=None, provider = None):
             "languages": get_languages(response.get("spoken_languages")),
         },
         "related": {
-            "seasons": get_related(
+            _("seasons"): get_related(
                 new_seasons,
                 MediaTypes.SEASON.value,
                 response,
             ),
-            "recommendations": get_related(
+            _("recommendations"): get_related(
                 recommendations,
                 MediaTypes.TV.value,
             ),
@@ -1600,10 +1600,11 @@ def episode(media_id, season_number, episode_number, order_type=None, provider =
 
 def watch_provider_regions(provider):
     """Return the available watch provider regions from The Movie Database."""
+
     if provider == "tmdb":
         cache_key = f"{Sources.TMDB.value}_provider_watch_provider_regions"
         data = cache.get(cache_key)
-
+        
         if data is None:
             url = f"{base_url}/watch/providers/regions"
             params = {**tmdb_get_base_params_prefered()}
@@ -1620,9 +1621,10 @@ def watch_provider_regions(provider):
 
             data = [("", "Disabled")]
             regions = response.get("results", [])
-            for region in sorted(regions, key=lambda r: r.get("name", "")):
+
+            for region in sorted(regions, key=lambda r: r.get("english_name", "")):
                 key = region.get("iso_3166_1")
-                name = region.get("name")
+                name = region.get("english_name")
                 if key:
                     if not name:
                         name = key
@@ -1630,9 +1632,6 @@ def watch_provider_regions(provider):
 
             cache.set(cache_key, data)
             
-        else:
-            data = [("", "Disabled")]
-
     return data
 
 def get_changed_ids(media_type):

@@ -14,15 +14,12 @@ from django_celery_beat.models import PeriodicTask
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 
-from app.models import Item, MediaTypes, Sources
-from app.providers import services
-from users.forms import NotificationSettingsForm, PasswordChangeForm, UserUpdateForm
-from users.models import (
-    WATCH_PROVIDER_REGION_UNSET,
-    DateFormatChoices,
-    QuickWatchDateChoices,
-    TimeFormatChoices,
-    WeekStartDayChoices,
+from app.models import (
+    Item, 
+    MediaTypes, 
+    Sources, 
+    AirOrder, 
+    MediaSourceChoices,
     MovieSourceChoices,
     ThemeChoices,
     TVSourceChoices,
@@ -32,9 +29,17 @@ from users.models import (
     BookSourceChoices,
     ComicSourceChoices,
     BoardGameSourceChoices,
-    AirOrder,
     WatchProviderServicesChoices,
-    
+)
+from app import helpers
+from app.providers import services
+from users.forms import NotificationSettingsForm, PasswordChangeForm, UserUpdateForm
+from users.models import (
+    WATCH_PROVIDER_REGION_UNSET,
+    DateFormatChoices,
+    QuickWatchDateChoices,
+    TimeFormatChoices,
+    WeekStartDayChoices,
 )
 
 logger = logging.getLogger(__name__)
@@ -89,10 +94,21 @@ def account(request):
                 request.user.username,
                 list(password_form.errors.keys()),
             )
+            
+    order_types = [list(choice) for choice in AirOrder.choices]
+    
+    selected_order_type = (
+        request.user.last_order_type
+        or request.user.prefered_air_order
+    )
 
     context = {
         "user_form": user_form,
         "password_form": password_form,
+        "order_types": order_types,
+        "selected_order_type": selected_order_type,
+        "source_choices": MediaSourceChoices.all(),
+        
     }
 
     return render(request, "users/account.html", context)
@@ -115,11 +131,21 @@ def notifications(request):
 
     form = NotificationSettingsForm(instance=request.user)
 
+    order_types = [list(choice) for choice in AirOrder.choices]
+    
+    selected_order_type = (
+        request.user.last_order_type
+        or request.user.prefered_air_order
+    )
+    
     return render(
         request,
         "users/notifications.html",
         {
             "form": form,
+            "order_types": order_types,
+            "selected_order_type": selected_order_type,
+            "source_choices": MediaSourceChoices.all(),
         },
     )
 
@@ -149,10 +175,23 @@ def search_items(request):
         .distinct()[:10]
     )
 
+    order_types = [list(choice) for choice in AirOrder.choices]
+    
+    selected_order_type = (
+        request.user.last_order_type
+        or request.user.prefered_air_order
+    )
+    
     return render(
         request,
         "users/components/search_results.html",
-        {"items": items, "query": query},
+        {
+            "items": items, 
+            "query": query,
+            "order_types": order_types,
+            "selected_order_type": selected_order_type,
+            "source_choices": MediaSourceChoices.all(),
+        },
     )
 
 
@@ -166,10 +205,22 @@ def exclude_item(request):
     # Return the updated excluded items list
     excluded_items = request.user.notification_excluded_items.all()
 
+    order_types = [list(choice) for choice in AirOrder.choices]
+    
+    selected_order_type = (
+        request.user.last_order_type
+        or request.user.prefered_air_order
+    )
+    
     return render(
         request,
         "users/components/excluded_items.html",
-        {"excluded_items": excluded_items},
+        {
+            "excluded_items": excluded_items,
+            "order_types": order_types,
+            "selected_order_type": selected_order_type,
+            "source_choices": MediaSourceChoices.all(),
+        },
     )
 
 
@@ -182,11 +233,21 @@ def include_item(request):
 
     # Return the updated excluded items list
     excluded_items = request.user.notification_excluded_items.all()
-
+    order_types = [list(choice) for choice in AirOrder.choices]
+    
+    selected_order_type = (
+        request.user.last_order_type
+        or request.user.prefered_air_order
+    )
     return render(
         request,
         "users/components/excluded_items.html",
-        {"excluded_items": excluded_items},
+        {
+            "excluded_items": excluded_items,
+            "order_types": order_types,
+            "selected_order_type": selected_order_type,
+            "source_choices": MediaSourceChoices.all(),
+        },
     )
 
 
@@ -237,8 +298,15 @@ def preferences(request):
             
     if request.method == "GET":
         
-        watch_provider_regions_tmdb = services.get_media_metadata(media_type = "watch_provider_regions", source = Sources.TMDB.value, provider = request.user.watch_provider_tmdb.value)
-        watch_provider_regions_tvdb = services.get_media_metadata(media_type = "watch_provider_regions",source = Sources.TVDB.value, provider = request.user.watch_provider_tmdb.value)
+        watch_provider_regions_tmdb = services.get_media_metadata(media_type = "watch_provider_regions", source = Sources.TMDB.value, provider = request.user.watch_provider_tmdb)
+        watch_provider_regions_tvdb = services.get_media_metadata(media_type = "watch_provider_regions",source = Sources.TVDB.value, provider = request.user.watch_provider_tmdb)
+
+        order_types = [list(choice) for choice in AirOrder.choices]
+    
+        selected_order_type = (
+            request.user.last_order_type
+            or request.user.prefered_air_order
+        )
         
         return render(
             request,
@@ -264,6 +332,9 @@ def preferences(request):
                 "watch_provider_tmdb": WatchProviderServicesChoices.choices,
                 "watch_provider_tvdb": WatchProviderServicesChoices.choices,
                 "LANGUAGES": settings.LANGUAGES,
+                "order_types": order_types,
+                "selected_order_type": selected_order_type,
+                "source_choices": MediaSourceChoices.all(),
             },
         )
 
@@ -386,32 +457,105 @@ def preferences(request):
 @require_GET
 def integrations(request):
     """Render the integrations settings page."""
-    return render(request, "users/integrations.html")
+    order_types = [list(choice) for choice in AirOrder.choices]
+    
+    selected_order_type = (
+        request.user.last_order_type
+        or request.user.prefered_air_order
+    )
+    
+    return render(
+                request, 
+                "users/integrations.html",
+                {
+                    "order_types": order_types,
+                    "selected_order_type": selected_order_type,
+                    "source_choices": MediaSourceChoices.all(),
+                }
+            )
 
 
 @require_GET
 def import_data(request):
     """Render the import data settings page."""
     import_tasks = request.user.get_import_tasks()
-    return render(request, "users/import_data.html", {"import_tasks": import_tasks})
+    order_types = [list(choice) for choice in AirOrder.choices]
+    
+    selected_order_type = (
+        request.user.last_order_type
+        or request.user.prefered_air_order
+    )
+    return render(
+        request, 
+        "users/import_data.html", 
+        {
+            "import_tasks": import_tasks,
+            "order_types": order_types,
+            "selected_order_type": selected_order_type,
+            "source_choices": MediaSourceChoices.all(),
+        }
+    )
 
 
 @require_GET
 def export_data(request):
     """Render the export data settings page."""
-    return render(request, "users/export_data.html")
+    order_types = [list(choice) for choice in AirOrder.choices]
+    
+    selected_order_type = (
+        request.user.last_order_type
+        or request.user.prefered_air_order
+    )
+    return render(
+        request, 
+        "users/export_data.html",
+        {
+            "order_types": order_types,
+            "selected_order_type": selected_order_type,
+            "source_choices": MediaSourceChoices.all(),
+        }
+    )
 
 
 @require_GET
 def advanced(request):
     """Render the advanced settings page."""
-    return render(request, "users/advanced.html")
+    order_types = [list(choice) for choice in AirOrder.choices]
+    
+    selected_order_type = (
+        request.user.last_order_type
+        or request.user.prefered_air_order
+    )
+    return render(
+        request, 
+        "users/advanced.html",
+        {
+            "order_types": order_types,
+            "selected_order_type": selected_order_type,
+            "source_choices": MediaSourceChoices.all(),
+        }
+    )
 
 
 @require_GET
 def about(request):
     """Render the about page."""
-    return render(request, "users/about.html", {"version": settings.VERSION})
+    order_types = [list(choice) for choice in AirOrder.choices]
+    
+    selected_order_type = (
+        request.user.last_order_type
+        or request.user.prefered_air_order
+    )
+    return render(
+        request, 
+        "users/about.html", 
+        {
+            "version": settings.VERSION,
+            "order_types": order_types,
+            "selected_order_type": selected_order_type,
+            "source_choices": MediaSourceChoices.all(),
+        }
+    )
 
 
 @require_POST

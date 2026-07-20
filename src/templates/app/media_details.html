@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load app_tags %}
+{% load static %}
 {% load humanize %}
 {% load i18n %}
 
@@ -124,7 +125,17 @@
                  @keydown.escape.window="open = false">
               <button @click="open = !open"
                       class="flex items-center space-x-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-md transition-colors duration-200 cursor-pointer">
-                <span class="text-sm font-medium">{{ media.season_title }}</span>
+                <span class="text-sm font-medium">
+                  {% if media.season_title is None or media.season_title == media.title %}
+                    {% if media.season_number == 0 %}
+                      {% trans 'Specials' %}
+                    {% else %}
+                      {% trans 'Season' %} {{ media.season_number }}
+                    {% endif %}
+                  {% else %}
+                    {{ media.season_title }}
+                  {% endif %}
+                </span>
                 <div class="w-4 h-4" :class="{ 'rotate-180': open }">{% include "app/icons/chevron-down.svg" %}</div>
               </button>
               <div x-show="open"
@@ -143,7 +154,17 @@
                         {{ tv_season.season_number }} 
                       </div>
                       <div class="flex-1 text-left">
-                        <div class="text-sm font-medium">{{ tv_season.season_title }}</div>
+                        <div class="text-sm font-medium">
+                          {% if tv_season.season_title is None or  tv_season.season_title == tv_season.title %}
+                            {% if tv_season.season_number == 0 %}
+                              {% trans "Specials" %}
+                            {% else %}
+                              {% trans "Season" %} {{ tv_season.season_number }}
+                            {% endif %}
+                          {% else %}
+                            {{ tv_season.season_title }}
+                          {% endif %}
+                        </div>
                         <div class="text-xs text-gray-400">
                           {{ tv_season.max_progress }} {% trans "Episode" %}{{ tv_season.max_progress|pluralize }}
                           {% if tv_season.first_air_date %}• {{ tv_season.first_air_date }}{% endif %}

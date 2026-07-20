@@ -443,14 +443,21 @@
                   <label class="block text-[11px] text-gray-500 mb-1">
                     {% trans "Provider" %}
                   </label>
-                  <select name="provider_tmdb"
-                          class="w-full p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
-                    {% for choice in watch_provider_service_choices %}
-                      <option value="{{ choice.0 }}"
+                  <select 
+                      name="provider_tmdb"
+                      hx-get="{% url 'watch-provider-regions' %}"
+                      hx-target="#tmdb-region-select"
+                      hx-trigger="change"
+                      hx-vals='{"source":"tmdb"}'
+                      hx-include="this"
+                      class="w-full p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+
+                      {% for choice in watch_provider_tmdb %}
+                          <option value="{{ choice.0 }}"
                               {% if user.watch_provider_tmdb == choice.0 %}selected{% endif %}>
-                        {{ choice.1 }}
-                      </option>
-                    {% endfor %}
+                              {{ choice.1 }}
+                          </option>
+                      {% endfor %}
                   </select>
                 </div>
 
@@ -458,15 +465,9 @@
                   <label class="block text-[11px] text-gray-500 mb-1">
                     {% trans "Region" %}
                   </label>
-                  <select name="watch_provider_region_tmdb"
-                          class="w-full p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
-                    {% for choice in watch_provider_choices_tmdb %}
-                      <option value="{{ choice.0 }}"
-                              {% if user.watch_provider_region_tmdb == choice.0 %}selected{% endif %}>
-                        {{ choice.1 }}
-                      </option>
-                    {% endfor %}
-                  </select>
+                  <div id="tmdb-region-select">
+                      {% include "users/components/watch_provider_regions.html" with regions=watch_provider_choices_tmdb source="tmdb" default=user.watch_provider_region_tmdb %}
+                  </div>
                 </div>
               </div>
             </div>
@@ -482,14 +483,21 @@
                   <label class="block text-[11px] text-gray-500 mb-1">
                     {% trans "Provider" %}
                   </label>
-                  <select name="provider_tvdb"
-                          class="w-full p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
-                    {% for choice in watch_provider_service_choices %}
-                      <option value="{{ choice.0 }}"
+                  <select 
+                      name="provider_tvdb"
+                      hx-get="{% url 'watch-provider-regions' %}"
+                      hx-target="#tvdb-region-select"
+                      hx-trigger="change"
+                      hx-vals='{"source":"tvdb"}'
+                      hx-include="this"
+                      class="w-full p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+
+                      {% for choice in watch_provider_tvdb %}
+                          <option value="{{ choice.0 }}"
                               {% if user.watch_provider_tvdb == choice.0 %}selected{% endif %}>
-                        {{ choice.1 }}
-                      </option>
-                    {% endfor %}
+                              {{ choice.1 }}
+                          </option>
+                      {% endfor %}
                   </select>
                 </div>
 
@@ -497,15 +505,9 @@
                   <label class="block text-[11px] text-gray-500 mb-1">
                     {% trans "Region" %}
                   </label>
-                  <select name="watch_provider_region_tvdb"
-                          class="w-full p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
-                    {% for choice in watch_provider_choices_tvdb %}
-                      <option value="{{ choice.0 }}"
-                              {% if user.watch_provider_region_tvdb == choice.0 %}selected{% endif %}>
-                        {{ choice.1 }}
-                      </option>
-                    {% endfor %}
-                  </select>
+                  <div id="tvdb-region-select">
+                      {% include "users/components/watch_provider_regions.html" with regions=watch_provider_choices_tvdb source="tvdb" default=user.watch_provider_region_tvdb %}
+                  </div>
                 </div>
               </div>
             </div>
