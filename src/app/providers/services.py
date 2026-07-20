@@ -215,11 +215,17 @@ def api_request(
 
 def get_media_metadata(
     media_type,
-    media_id,
-    source,
+    media_id = None,
+    source = None,
     season_numbers=None,
     episode_number=None,
     order_type=None,
+    provider=None,
+    season_metadata= None,
+    all_providers=None,
+    episodes=None,
+    progress=None,
+    region=None
 ):
     """Return the metadata for the selected media."""
     if source == Sources.MANUAL.value:
@@ -230,9 +236,9 @@ def get_media_metadata(
         if media_type == "tv_with_seasons":
             media_type = MediaTypes.TV.value
         if media_type == "find_next_episode": 
-            return manual.find_next_episode(season_numbers, media_id)
+            return manual.find_next_episode(progress, episodes)
         if media_type == "process_episodes":
-            return manual.process_episodes(media_id, season_numbers)
+            return manual.process_episodes(season_metadata, episodes)
         return manual.metadata(media_id, media_type)
 
     metadata_retrievers = {
@@ -243,34 +249,34 @@ def get_media_metadata(
             else mal.manga(media_id)
         ),
         MediaTypes.TV.value: lambda: (
-            tmdb.tv(media_id, order_type)
+            tmdb.tv(media_id, order_type, provider)
             if source == Sources.TMDB.value
-            else tvdb.tv(media_id, order_type)
+            else tvdb.tv(media_id, order_type, provider)
         ),
         "tv_with_seasons": lambda: (
-            tmdb.tv_with_seasons(media_id, season_numbers, order_type)
+            tmdb.tv_with_seasons(media_id, season_numbers, order_type, provider)
             if source == Sources.TMDB.value
-            else tvdb.tv_with_seasons(media_id, season_numbers, order_type)
+            else tvdb.tv_with_seasons(media_id, season_numbers, order_type, provider)
         ),
         "find_next_episode": lambda: (
-            tmdb.find_next_episode(season_numbers, media_id)
+            tmdb.find_next_episode(progress, episodes)
             if source == Sources.TMDB.value
-            else tvdb.find_next_episode(season_numbers, media_id)
+            else tvdb.find_next_episode(progress, episodes)
         ),
         "filter_providers": lambda: (
-            tmdb.filter_providers(media_id, season_numbers)
+            tmdb.filter_providers(all_providers, region, provider)
             if source == Sources.TMDB.value
-            else tvdb.filter_providers(media_id, season_numbers)
+            else tvdb.filter_providers(all_providers, region, provider)
         ),
         "process_episodes": lambda: (
-            tmdb.process_episodes(media_id, season_numbers)
+            tmdb.process_episodes(season_metadata, episodes, order_type)
             if source == Sources.TMDB.value
-            else tvdb.process_episodes(media_id, season_numbers)
+            else tvdb.process_episodes(season_metadata, episodes, order_type)
         ),
         "watch_provider_regions": lambda: (
-            tmdb.watch_provider_regions()
+            tmdb.watch_provider_regions(provider)
             if source == Sources.TMDB.value
-            else tvdb.watch_provider_regions()
+            else tvdb.watch_provider_regions(provider)
         ),
         "get_changed_tv_ids": lambda: (
             tmdb.tv_changes()
@@ -283,19 +289,19 @@ def get_media_metadata(
             else tvdb.movie_changes()
         ),
         MediaTypes.SEASON.value: lambda: (
-            tmdb.tv_with_seasons(media_id, season_numbers)[ f"season/{season_numbers[0]}", order_type]
+            tmdb.tv_with_seasons(media_id, season_numbers, order_type, provider)
             if source == Sources.TMDB.value
-            else tvdb.tv_with_seasons(media_id, season_numbers)[ f"season/{season_numbers[0]}", order_type]
+            else tvdb.tv_with_seasons(media_id, season_numbers, order_type, provider)
         ),
         MediaTypes.EPISODE.value: lambda: (
-            tmdb.episode(media_id, season_numbers[0], episode_number, order_type)
+            tmdb.episode(media_id, season_numbers[0], episode_number, order_type, provider)
             if source == Sources.TMDB.value
-            else tvdb.episode(media_id, season_numbers[0], episode_number, order_type)
+            else tvdb.episode(media_id, season_numbers[0], episode_number, order_type, provider)
         ),
         MediaTypes.MOVIE.value: lambda: (
-            tmdb.movie(media_id)
+            tmdb.movie(media_id, provider)
             if source == Sources.TMDB.value
-            else tvdb.movie(media_id)
+            else tvdb.movie(media_id, provider)
         ),
         MediaTypes.GAME.value: lambda: igdb.game(media_id),
         MediaTypes.BOOK.value: lambda: (
@@ -309,7 +315,7 @@ def get_media_metadata(
     return metadata_retrievers[media_type]()
 
 
-def search(media_type, query, page, source=None):
+def search(media_type, query, page, source=None, order_type=None):
     """Search for media based on the query and return the results."""
     search_handlers = {
         MediaTypes.MANGA.value: lambda: (
@@ -320,9 +326,9 @@ def search(media_type, query, page, source=None):
         
         MediaTypes.ANIME.value: lambda: mal.search(media_type, query, page),
         MediaTypes.TV.value: lambda: (
-            tmdb.search(media_type, query, page)
+            tmdb.search(media_type, query, page, order_type)
             if source == Sources.TMDB.value
-            else tvdb.search(media_type, query, page)
+            else tvdb.search(media_type, query, page, order_type)
         ),
         MediaTypes.MOVIE.value: lambda: (
             tmdb.search(media_type, query, page)
@@ -330,14 +336,14 @@ def search(media_type, query, page, source=None):
             else tvdb.search(media_type, query, page)
         ),
         MediaTypes.SEASON.value: lambda: (
-            tmdb.search(MediaTypes.TV.value, query, page)
+            tmdb.search(MediaTypes.TV.value, query, page, order_type)
             if source == Sources.TMDB.value
-            else tvdb.search(MediaTypes.TV.value, query, page)
+            else tvdb.search(MediaTypes.TV.value, query, page, order_type)
         ),
         MediaTypes.EPISODE.value: lambda: (
-            tmdb.search(MediaTypes.TV.value, query, page)
+            tmdb.search(MediaTypes.TV.value, query, page, order_type)
             if source == Sources.TMDB.value
-            else tvdb.search(MediaTypes.TV.value, query, page)
+            else tvdb.search(MediaTypes.TV.value, query, page, order_type)
         ),
         MediaTypes.GAME.value: lambda: igdb.search(query, page),
         MediaTypes.BOOK.value: lambda: (

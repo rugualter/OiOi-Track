@@ -318,9 +318,9 @@ class SteamImporter:
 
         # Get the game details using the IGDB ID
         game_details = services.get_media_metadata(
-            MediaTypes.GAME.value,
-            str(igdb_game_id),
-            Sources.IGDB.value,
+            media_type = MediaTypes.GAME.value,
+            media_id = str(igdb_game_id),
+            source = Sources.IGDB.value,
         )
 
         logger.debug(

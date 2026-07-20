@@ -14,7 +14,7 @@
 
       <div class="p-4 space-y-3">
         {% for release in releases %}
-          <a href="{{ release.item|media_url }}" class="block">
+          <a href="{{ release.item|media_url:item.order_type }}" class="block">
             <div class="flex items-center gap-3 p-2 rounded-md hover:bg-[#454d5a] transition-colors">
               <img alt="{{ release }}"
                    class="w-10 h-10 object-cover rounded-md shrink-0"

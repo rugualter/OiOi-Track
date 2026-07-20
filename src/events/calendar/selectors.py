@@ -158,9 +158,8 @@ def get_changed_tv_ids(source):
     """Return changed Provider TV ids, tolerating provider errors."""
     try:
         return services.get_media_metadata(
-            "get_changed_tv_ids", 
-            1, 
-            source
+            media_type = "get_changed_tv_ids", 
+            source = source
         )
     except services.ProviderAPIError:
         logger.warning("Failed to fetch Provider TV changes")
@@ -171,9 +170,8 @@ def get_changed_movie_ids(source):
     """Return changed Provider movie ids, tolerating provider errors."""
     try:
         return services.get_media_metadata(
-            "get_changed_tv_ids",
-            1, 
-            source
+            media_type = "get_changed_tv_ids", 
+            source = source
         )
     except services.ProviderAPIError:
         logger.warning("Failed to fetch Provider movie changes")

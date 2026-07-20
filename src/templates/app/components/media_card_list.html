@@ -4,7 +4,7 @@
      x-data="{ trackOpen: false, listsOpen: false, historyOpen: false }">
   <div class="flex items-center p-4 gap-4">
     <div class="shrink-0 relative">
-      <a href="{{ item|media_url }}">
+      <a href="{{ item|media_url:item.order_type }}">
         <img alt="{{ title }}"
              class="lazyload w-16 h-24 object-cover rounded shadow-md bg-[#3e454d]"
              data-src="{{ item.image }}"
@@ -16,7 +16,7 @@
       <div class="flex items-start justify-between gap-4">
         <div class="flex-1 min-w-0">
           <h3 class="text-lg font-semibold text-white mb-2 line-clamp-2">
-            <a href="{{ item|media_url }}"
+            <a href="{{ item|media_url:item.order_type }}"
                class="hover:text-indigo-400 transition-colors">{{ title }}</a>
           </h3>
 

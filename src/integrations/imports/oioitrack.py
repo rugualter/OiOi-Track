@@ -180,11 +180,11 @@ class oioitrackImporter:
 
         if row.get("media_id", "") != "":
             metadata = services.get_media_metadata(
-                media_type,
-                row["media_id"],
-                row["source"],
-                [season_number],
-                episode_number,
+                media_type = media_type,
+                media_id = row["media_id"],
+                source = row["source"],
+                season_numbers = [season_number],
+                episode_number = episode_number,
             )
             row["title"] = metadata["title"]
             row["image"] = metadata["image"]

@@ -347,9 +347,9 @@ class TraktImporter:
                 kwargs["season_numbers"] = [season_number]
 
             return services.get_media_metadata(
-                media_type,
-                tmdb_id,
-                Sources.TMDB.value,
+                media_type = media_type,
+                media_id = tmdb_id,
+                source = Sources.TMDB.value,
                 **kwargs,
             )
         except services.ProviderAPIError as error:

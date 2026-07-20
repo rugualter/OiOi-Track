@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from django_celery_beat.models import PeriodicTask
 from django_celery_results.models import TaskResult
 
-from app.models import Item, MediaTypes, Status, Sources
+from app.models import Item, MediaTypes, Status, WatchProviderServicesChoices, ThemeChoices, AirOrder, MovieSourceChoices, TVSourceChoices, AnimeSourceChoices, MangaSourceChoices, GameSourceChoices, BookSourceChoices, ComicSourceChoices, BoardGameSourceChoices
 from users import helpers
 
 EXCLUDED_SEARCH_TYPES = [MediaTypes.SEASON.value, MediaTypes.EPISODE.value]
@@ -31,60 +31,6 @@ class HomeSortChoices(models.TextChoices):
     COMPLETION = "completion", _("Completion")
     EPISODES_LEFT = "episodes_left", _("Episodes Left")
     TITLE = "title", _("Title")
-
-
-class ThemeChoices(models.TextChoices):
-    """Choices for home page sort options."""
-
-    DARK = "dark", _("Dark")
-    LIGHT = "light", _("Light")
-
-
-class TVDBAirOrderChoices(models.TextChoices):
-    """Choices for home page sort options."""
-
-    OFFICIAL = "official", _("Offical")
-    AIRED = "aired", _("Aired")
-    DVD = "dvd", _("DVD")
-    ABSOLUTE = "absolute", _("Absolute")
-    ALT = "alternate", _("Alternate")
-    ALTTWO = "alttwo", _("Alternate Variant")
-    REGIONAL = "regional", _("Regional")
-    DIGUTAL = "digital", _("Digital")
-
-class MovieSourceChoices(models.TextChoices):
-    TMDB = Sources.TMDB.value, Sources.TMDB.label
-    TVDB = Sources.TVDB.value, Sources.TVDB.label
-
-class TVSourceChoices(models.TextChoices):
-    TMDB = Sources.TMDB.value, Sources.TMDB.label
-    TVDB = Sources.TVDB.value, Sources.TVDB.label
-
-
-class AnimeSourceChoices(models.TextChoices):
-    MAL = Sources.MAL.value, Sources.MAL.label
-
-
-class MangaSourceChoices(models.TextChoices):
-    MANGAUPDATES = Sources.MANGAUPDATES.value, Sources.MANGAUPDATES.label
-
-
-class GameSourceChoices(models.TextChoices):
-    IGDB = Sources.IGDB.value, Sources.IGDB.label
-
-
-class BookSourceChoices(models.TextChoices):
-    HARDCOVER = Sources.HARDCOVER.value, Sources.HARDCOVER.label
-    OPENLIBRARY = Sources.OPENLIBRARY.value, Sources.OPENLIBRARY.label
-    
-
-
-class ComicSourceChoices(models.TextChoices):
-    COMICVINE = Sources.COMICVINE.value, Sources.COMICVINE.label
-
-
-class BoardGameSourceChoices(models.TextChoices):
-    BGG = Sources.BGG.value, Sources.BGG.label
 
 
 class MediaSortChoices(models.TextChoices):
@@ -181,9 +127,63 @@ class User(AbstractUser):
     )
 
     last_search_type = models.CharField(
-        max_length=10,
+        max_length=20,
         default=MediaTypes.TV.value,
         choices=MediaTypes.choices,
+    )
+    
+    last_source_used_tv = models.CharField(
+        max_length=20,
+        default=MovieSourceChoices.TMDB,
+        choices=TVSourceChoices.choices,
+    )
+    
+    last_source_used_movie = models.CharField(
+        max_length=20,
+        default=MovieSourceChoices.TMDB,
+        choices=MovieSourceChoices.choices,
+    )
+    
+    last_source_used_anime = models.CharField(
+        max_length=20,
+        default=AnimeSourceChoices.MAL,
+        choices=AnimeSourceChoices.choices,
+    )
+    
+    last_source_used_manga = models.CharField(
+        max_length=20,
+        default=MangaSourceChoices.MANGAUPDATES,
+        choices=MangaSourceChoices.choices,
+    )
+    
+    last_source_used_game = models.CharField(
+        max_length=20,
+        default=GameSourceChoices.IGDB,
+        choices=GameSourceChoices.choices,
+    )
+    
+    last_source_used_book = models.CharField(
+        max_length=20,
+        default=BookSourceChoices.HARDCOVER,
+        choices=BookSourceChoices.choices,
+    )
+    
+    last_source_used_comic = models.CharField(
+        max_length=20,
+        default=ComicSourceChoices.COMICVINE,
+        choices=ComicSourceChoices.choices,
+    )
+    
+    last_source_used_boardgame = models.CharField(
+        max_length=20,
+        default=BoardGameSourceChoices.BGG,
+        choices=BoardGameSourceChoices.choices,
+    )
+    
+    last_order_type = models.CharField(
+        max_length=20,
+        default=AirOrder.OFFICIAL.value,
+        choices=AirOrder.choices,
     )
     
     theme = models.CharField(
@@ -251,10 +251,10 @@ class User(AbstractUser):
         default=BoardGameSourceChoices.BGG,
     )
     
-    prefered_tvdb_air_order = models.CharField(
+    prefered_air_order = models.CharField(
         max_length=20,
-        choices=TVDBAirOrderChoices,
-        default=TVDBAirOrderChoices.OFFICIAL,
+        choices=AirOrder,
+        default=AirOrder.OFFICIAL,
     )
 
     # Media type preferences: TV Shows
@@ -480,13 +480,26 @@ class User(AbstractUser):
     watch_provider_region_tmdb = models.CharField(
         max_length=5,
         default=WATCH_PROVIDER_REGION_UNSET,
-        help_text=_("Region to show watch providers for"),
+        help_text=_("Region to show watch providers for TMDB"),
     )
     
     watch_provider_region_tvdb = models.CharField(
         max_length=5,
         default=WATCH_PROVIDER_REGION_UNSET,
-        help_text=_("Region to show watch providers for"),
+        help_text=_("Region to show watch providers for TVDB"),
+    )
+    
+    
+    watch_provider_tmdb = models.CharField(
+        max_length=20,
+        choices=WatchProviderServicesChoices,
+        default=WatchProviderServicesChoices.TMDB,
+    )
+    
+    watch_provider_tvdb = models.CharField(
+        max_length=20,
+        choices=WatchProviderServicesChoices,
+        default=WatchProviderServicesChoices.TMDB,
     )
 
     # Calendar preferences

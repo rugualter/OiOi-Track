@@ -32,7 +32,8 @@ from users.models import (
     BookSourceChoices,
     ComicSourceChoices,
     BoardGameSourceChoices,
-    TVDBAirOrderChoices,
+    AirOrder,
+    WatchProviderServicesChoices,
     
 )
 
@@ -233,10 +234,12 @@ def preferences(request):
     """Render the preferences settings page."""
     media_types = MediaTypes.values
     media_types.remove(MediaTypes.EPISODE.value)
-    watch_provider_regions_tmdb = services.get_media_metadata("watch_provider_regions", 1 , Sources.TMDB.value)
-    watch_provider_regions_tvdb = services.get_media_metadata("watch_provider_regions", 1 , Sources.TVDB.value)
             
     if request.method == "GET":
+        
+        watch_provider_regions_tmdb = services.get_media_metadata(media_type = "watch_provider_regions", source = Sources.TMDB.value, provider = request.user.watch_provider_tmdb.value)
+        watch_provider_regions_tvdb = services.get_media_metadata(media_type = "watch_provider_regions",source = Sources.TVDB.value, provider = request.user.watch_provider_tmdb.value)
+        
         return render(
             request,
             "users/preferences.html",
@@ -255,13 +258,27 @@ def preferences(request):
                 "book_source_choices": BookSourceChoices.choices,
                 "comic_source_choices": ComicSourceChoices.choices,
                 "boardgame_source_choices": BoardGameSourceChoices.choices,
-                "tvdb_air_order_choices": TVDBAirOrderChoices.choices,
+                "tvdb_air_order_choices": AirOrder.choices,
                 "watch_provider_choices_tmdb": watch_provider_regions_tmdb,
                 "watch_provider_choices_tvdb": watch_provider_regions_tvdb,
+                "watch_provider_tmdb": WatchProviderServicesChoices.choices,
+                "watch_provider_tvdb": WatchProviderServicesChoices.choices,
                 "LANGUAGES": settings.LANGUAGES,
             },
         )
 
+    
+    watch_provider_tmdb = request.POST.get("provider_tmdb")
+    if watch_provider_tmdb in WatchProviderServicesChoices.values:
+        request.user.watch_provider_tmdb = watch_provider_tmdb
+        
+    watch_provider_tvdb = request.POST.get("provider_tvdb")
+    if watch_provider_tvdb in WatchProviderServicesChoices.values:
+        request.user.watch_provider_tvdb = watch_provider_tvdb
+    
+    watch_provider_regions_tmdb = services.get_media_metadata(media_type = "watch_provider_regions", source = Sources.TMDB.value, provider = watch_provider_tmdb)
+    watch_provider_regions_tvdb = services.get_media_metadata(media_type = "watch_provider_regions", source = Sources.TVDB.value, provider = watch_provider_tvdb)
+        
     # Prevent demo users from updating preferences
     if request.user.is_demo:
         messages.error(request, _("This section is view-only for demo accounts."))
@@ -349,8 +366,8 @@ def preferences(request):
         request.user.default_boardgame_source = default_boardgame_source
         
     air_order = request.POST.get("air_order")
-    if air_order in [order_choice[0] for order_choice in TVDBAirOrderChoices.choices]:
-        request.user.prefered_tvdb_air_order = air_order
+    if air_order in [order_choice[0] for order_choice in AirOrder.choices]:
+        request.user.prefered_air_order = air_order
         
     language = request.POST.get("language")
 

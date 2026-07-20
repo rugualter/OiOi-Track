@@ -51,6 +51,66 @@ class Sources(models.TextChoices):
     MANUAL = "manual", _("Manual")
 
 
+class ThemeChoices(models.TextChoices):
+    """Choices for home page sort options."""
+
+    DARK = "dark", _("Dark")
+    LIGHT = "light", _("Light")
+
+
+class AirOrder(models.TextChoices):
+    """Choices for home page sort options."""
+
+    OFFICIAL = "official", _("Offical")
+    AIRED = "aired", _("Aired")
+    DVD = "dvd", _("DVD")
+    ABSOLUTE = "absolute", _("Absolute")
+    ALT = "alternate", _("Alternate")
+    ALTTWO = "alttwo", _("Alternate Variant")
+    REGIONAL = "regional", _("Regional")
+    DIGUTAL = "digital", _("Digital")
+    
+    
+class WatchProviderServicesChoices(models.TextChoices):
+    """Choices for home page sort options."""
+    
+    TMDB = "tmdb", _("The Movie Database")
+
+class MovieSourceChoices(models.TextChoices):
+    TMDB = Sources.TMDB.value, Sources.TMDB.label
+    TVDB = Sources.TVDB.value, Sources.TVDB.label
+
+class TVSourceChoices(models.TextChoices):
+    TMDB = Sources.TMDB.value, Sources.TMDB.label
+    TVDB = Sources.TVDB.value, Sources.TVDB.label
+
+
+class AnimeSourceChoices(models.TextChoices):
+    MAL = Sources.MAL.value, Sources.MAL.label
+
+
+class MangaSourceChoices(models.TextChoices):
+    MANGAUPDATES = Sources.MANGAUPDATES.value, Sources.MANGAUPDATES.label
+
+
+class GameSourceChoices(models.TextChoices):
+    IGDB = Sources.IGDB.value, Sources.IGDB.label
+
+
+class BookSourceChoices(models.TextChoices):
+    HARDCOVER = Sources.HARDCOVER.value, Sources.HARDCOVER.label
+    OPENLIBRARY = Sources.OPENLIBRARY.value, Sources.OPENLIBRARY.label
+    
+
+
+class ComicSourceChoices(models.TextChoices):
+    COMICVINE = Sources.COMICVINE.value, Sources.COMICVINE.label
+
+
+class BoardGameSourceChoices(models.TextChoices):
+    BGG = Sources.BGG.value, Sources.BGG.label
+
+
 class MediaTypes(models.TextChoices):
     """Choices for the media type of the item."""
 
@@ -65,6 +125,34 @@ class MediaTypes(models.TextChoices):
     COMIC = "comic", _("Comic")
     BOARDGAME = "boardgame", _("Boardgame")
 
+class MediaSourceChoices:
+    _registry = {
+        MediaTypes.MOVIE.value: MovieSourceChoices,
+        MediaTypes.TV.value: TVSourceChoices,
+        MediaTypes.ANIME.value: AnimeSourceChoices,
+        MediaTypes.MANGA.value: MangaSourceChoices,
+        MediaTypes.GAME.value: GameSourceChoices,
+        MediaTypes.BOOK.value: BookSourceChoices,
+        MediaTypes.COMIC.value: ComicSourceChoices,
+        MediaTypes.BOARDGAME.value: BoardGameSourceChoices,
+    }
+
+    @classmethod
+    def get(cls, media_type):
+        return cls._registry.get(media_type)
+
+    @classmethod
+    def choices(cls, media_type):
+        source_choices = cls.get(media_type)
+        return source_choices.choices if source_choices else []
+
+    @classmethod
+    def all(cls):
+        return {
+            media_type: [list(choice) for choice in source_choices.choices]
+            for media_type, source_choices in cls._registry.items()
+        }
+
 
 class Item(CalendarTriggerMixin, models.Model):
     """Model to store basic information about media items."""
@@ -75,6 +163,19 @@ class Item(CalendarTriggerMixin, models.Model):
         max_length=20,
         choices=Sources,
     )
+    
+    provider = models.CharField(
+        max_length=20,
+        choices=WatchProviderServicesChoices,
+        default=WatchProviderServicesChoices.TMDB.value,
+    )
+    
+    order_type = models.CharField(
+        max_length=20,
+        choices=AirOrder,
+        default=AirOrder.OFFICIAL.value,
+    )
+
     media_type = models.CharField(
         max_length=10,
         choices=MediaTypes,
@@ -180,6 +281,7 @@ class Item(CalendarTriggerMixin, models.Model):
 
     def fetch_releases(self, delay):
         """Fetch releases for the item."""
+        
         if self._disable_calendar_triggers:
             return
 
@@ -189,18 +291,24 @@ class Item(CalendarTriggerMixin, models.Model):
                 tv_item = Item.objects.get(
                     media_id=self.media_id,
                     source=self.source,
+                    provider=self.provider,
+                    order_type=self.order_type,
                     media_type=MediaTypes.TV.value,
                 )
             except Item.DoesNotExist:
                 # Get metadata for the TV show
                 tv_metadata = providers.services.get_media_metadata(
-                    MediaTypes.TV.value,
-                    self.media_id,
-                    self.source,
+                    media_type = MediaTypes.TV.value,
+                    media_id = self.media_id,
+                    source = self.source,
+                    order_type = self.order_type,
+                    provider = self.provider,
                 )
                 tv_item = Item.objects.create(
                     media_id=self.media_id,
                     source=self.source,
+                    provider=self.provider,
+                    order_type=self.order_type,
                     media_type=MediaTypes.TV.value,
                     title=tv_metadata["title"],
                     image=tv_metadata["image"],
@@ -1012,9 +1120,9 @@ class Media(models.Model):
             self.progress = 0
         elif self.status == Status.IN_PROGRESS.value:
             max_progress = providers.services.get_media_metadata(
-                self.item.media_type,
-                self.item.media_id,
-                self.item.source,
+                media_type = self.item.media_type,
+                media_id = self.item.media_id,
+                source = self.item.source,
             )["max_progress"]
 
             if max_progress:
@@ -1030,9 +1138,9 @@ class Media(models.Model):
         """Update fields depending on the status of the media."""
         if self.status == Status.COMPLETED.value:
             max_progress = providers.services.get_media_metadata(
-                self.item.media_type,
-                self.item.media_id,
-                self.item.source,
+                media_type = self.item.media_type,
+                media_id = self.item.media_id,
+                source = self.item.source,
             )["max_progress"]
 
             if max_progress:
@@ -1188,9 +1296,9 @@ class TV(Media):
     def _completed(self):
         """Create remaining seasons and episodes for a TV show."""
         tv_metadata = providers.services.get_media_metadata(
-            self.item.media_type,
-            self.item.media_id,
-            self.item.source,
+            media_type = self.item.media_type,
+            media_id = self.item.media_id,
+            source = self.item.source,
         )
         max_progress = tv_metadata["max_progress"]
 
@@ -1209,10 +1317,12 @@ class TV(Media):
             if season["season_number"] != 0
         ]
         tv_with_seasons_metadata = providers.services.get_media_metadata(
-            "tv_with_seasons",
-            self.item.media_id,
-            self.item.source,
-            season_numbers,
+            media_type = "tv_with_seasons",
+            media_id = self.item.media_id,
+            source = self.item.source,
+            order_type = self.item.order_type,
+            provider = self.item.provider,
+            season_numbers = season_numbers,
         )
         for season_number in season_numbers:
             season_metadata = tv_with_seasons_metadata[f"season/{season_number}"]
@@ -1334,9 +1444,9 @@ class TV(Media):
             ).order_by("item__season_number")
         }
         tv_metadata = providers.services.get_media_metadata(
-            self.item.media_type,
-            self.item.media_id,
-            self.item.source,
+            media_type = self.item.media_type,
+            media_id = self.item.media_id,
+            source = self.item.source,
         )
         related_seasons = tv_metadata.get("related", {}).get("seasons", [])
 
@@ -1504,10 +1614,10 @@ class Season(Media):
         if self.tracker.has_changed("status"):
             if self.status == Status.COMPLETED.value:
                 season_metadata = providers.services.get_media_metadata(
-                    MediaTypes.SEASON.value,
-                    self.item.media_id,
-                    self.item.source,
-                    [self.item.season_number],
+                    media_type = MediaTypes.SEASON.value,
+                    media_id = self.item.media_id,
+                    source = self.item.source,
+                    season_numbers = [self.item.season_number],
                 )
                 current_date = timezone.localdate()
                 target_status = self.get_completion_status(
@@ -1686,10 +1796,10 @@ class Season(Media):
     def increase_progress(self):
         """Watch the next episode of the season."""
         season_metadata = providers.services.get_media_metadata(
-            MediaTypes.SEASON.value,
-            self.item.media_id,
-            self.item.source,
-            [self.item.season_number],
+            media_type = MediaTypes.SEASON.value,
+            media_id= self.item.media_id,
+            source = self.item.source,
+            season_numbers= [self.item.season_number],
         )
         episodes = season_metadata["episodes"]
 
@@ -1698,10 +1808,10 @@ class Season(Media):
             next_episode_number = episodes[0]["episode_number"]
         else:
             next_episode_number = providers.services.get_media_metadata(
-                "find_next_episode",
-                episodes,
-                self.item.source,
-                self.progress,
+                media_type = "find_next_episode",
+                episodes = episodes,
+                source = self.item.source,
+                progress = self.progress,
             )
 
         now = timezone.now().replace(second=0, microsecond=0)
@@ -1771,9 +1881,9 @@ class Season(Media):
             )
         except TV.DoesNotExist:
             tv_metadata = providers.services.get_media_metadata(
-                MediaTypes.TV.value,
-                self.item.media_id,
-                self.item.source,
+                media_type = MediaTypes.TV.value,
+                media_id = self.item.media_id,
+                source = self.item.source,
             )
 
             # creating tv with multiple seasons from a completed season
@@ -1851,10 +1961,10 @@ class Season(Media):
         """Get the episode item instance, create it if it doesn't exist."""
         if not season_metadata:
             season_metadata = providers.services.get_media_metadata(
-                MediaTypes.SEASON.value,
-                self.item.media_id,
-                self.item.source,
-                [self.item.season_number],
+                media_type = MediaTypes.SEASON.value,
+                media_id = self.item.media_id,
+                source = self.item.source,
+                season_numbers = [self.item.season_number],
             )
 
         image = settings.IMG_NONE
@@ -1925,10 +2035,12 @@ class Episode(models.Model):
 
         season_number = self.item.season_number
         tv_with_seasons_metadata = providers.services.get_media_metadata(
-            "tv_with_seasons",
-            self.item.media_id,
-            self.item.source,
-            [season_number],
+            media_type = "tv_with_seasons",
+            media_id = self.item.media_id,
+            source = self.item.source,
+            order_type = self.item.order_type,
+            provider = self.item.provider,
+            season_numbers = [season_number],
         )
         season_metadata = tv_with_seasons_metadata[f"season/{season_number}"]
         max_progress = len(season_metadata["episodes"])

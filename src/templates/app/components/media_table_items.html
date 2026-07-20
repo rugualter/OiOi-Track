@@ -30,7 +30,7 @@
     </td>
     <td class="p-2 pe-8 font-medium">
       <div class=" flex justify-between items-center">
-        <a href="{{ media.item|media_url }}"
+        <a href="{{ media.item|media_url:item.order_type }}"
            class="hover:text-indigo-400 transition-colors line-clamp-1">{{ media.item }}</a>
 
         {% if media.repeats > 1 %}

@@ -695,10 +695,10 @@ class TVTimeImporter:
         try:
             season_numbers = [season_number] if season_number is not None else None
             return services.get_media_metadata(
-                media_type,
-                tmdb_id,
-                Sources.TMDB.value,
-                season_numbers,
+                media_type = media_type,
+                media_id = tmdb_id,
+                source = Sources.TMDB.value,
+                season_numbers = season_numbers,
             )
         except services.ProviderAPIError as error:
             if error.status_code == requests.codes.not_found:

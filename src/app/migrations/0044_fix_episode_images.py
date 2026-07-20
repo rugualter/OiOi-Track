@@ -33,10 +33,10 @@ def update_episode_images(apps, schema_editor):
                 item.episode_number
             )
             season_metadata = services.get_media_metadata(
-                MediaTypes.SEASON.value,
-                item.media_id,
-                item.source,
-                [item.season_number]
+                media_type = MediaTypes.SEASON.value,
+                media_id = item.media_id,
+                source = item.source,
+                season_numbers = [item.season_number]
             )
 
             for ep_meta in season_metadata.get('episodes', []):

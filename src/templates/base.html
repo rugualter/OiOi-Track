@@ -262,8 +262,143 @@
                 {% block search_bar %}
                   <div class="relative w-full max-w-2xl">
                     <form method="get"
-                          action="{% url 'search' %}"
-                          x-data=" { isOpen: false, selectedType: { display: '{{ search_type|media_type_readable_plural }}', value: '{{ search_type }}' }, mediaTypes: {% get_search_media_types user as search_types %}{{ search_types }}, getPlaceholder() { return `Search ${this.selectedType.display.toLowerCase()}...` } }">
+                      action="{% url 'search' %}"
+                      x-data=" { 
+                                  isOpen: false, 
+                                  isSourceOpen: false,
+                                  isOrderOpen: false,
+                                  sampleUrl: '',
+                                  selectedType: { 
+                                    display: '{{ search_type|media_type_readable_plural }}', 
+                                    value: '{{ search_type }}' 
+                                  },
+                                  selectedSource: {
+                                      value: '{{ user|get_last_or_default_source:search_type }}',
+                                      display: '{{ user|get_last_or_default_display:search_type }}'
+                                  },
+                                  get selectedOrderDisplay() {
+                                      const order = this.orderTypes.find(
+                                          o => o[0] === Alpine.store('order').value
+                                      );
+                                      return order ? order[1] : 'Order';
+                                  },
+                                  mediaTypes: {% get_search_media_types user as search_types %}{{ search_types }},
+                                  sourceChoices: {{ source_choices|safe }}, 
+                                  defaultSources: {
+                                      {% for media_type in media_types_list %}
+                                          '{{ media_type }}': {
+                                              value: '{{ user|get_last_or_default_source:media_type }}',
+                                              display: '{{ user|get_last_or_default_display:media_type }}'
+                                          }{% if not forloop.last %},{% endif %}
+                                      {% endfor %}
+                                  },
+                                  orderTypes: {{ order_types|safe }},
+                                  get sources() {
+                                      return this.sourceChoices[this.selectedType.value] || [];
+                                  },
+                                  async updateSampleUrl() {
+                                      const params = new URLSearchParams({
+                                          source: this.selectedSource.value,
+                                          media_type: this.selectedType.value,
+                                          order_type: Alpine.store('order').value,
+                                      });
+                                      const response = await fetch(
+                                          `/sample-url/?${params.toString()}`
+                                      );
+                                      const data = await response.json();
+                                      Alpine.store('search').sampleUrl = data.url;
+                                  },
+                                  init() {
+                                      const sources = this.sources;
+                                      if (sources.length > 0) {
+                                          const exists = sources.some(source => source[0] === this.selectedSource.value);
+                                          if (!exists || !this.selectedSource.value) {
+                                              const defaultSource = this.defaultSources[this.selectedType.value];
+                                              if (defaultSource && sources.some(s => s[0] === defaultSource.value)) {
+                                                  this.selectedSource = defaultSource;
+                                              } else {
+                                                  this.selectedSource = {
+                                                      value: sources[0][0],
+                                                      display: sources[0][1]
+                                                  }
+                                              }
+                                          }
+                                      };
+                                      console.log(
+                                          '{{ selected_order_type|escapejs }}'
+                                      );
+                                      console.log(this.selectedSource.value);
+                                      Alpine.store('order', {
+                                          value: this.selectedSource.value === 'tvdb'
+                                              ? '{{ selected_order_type|escapejs }}'
+                                              : 'official'
+                                      });
+                                      if (this.selectedSource.value === 'tvdb' && this.selectedType.value === 'tv') {
+                                        // optionally set to a default if selected_order_type isn't set
+                                        if (!Alpine.store('order').value || Alpine.store('order').value === 'official') {
+                                          Alpine.store('order').value = this.orderTypes.length ? this.orderTypes[0][0] : 'official';
+                                        }
+                                      };
+                                      Alpine.store('search', {
+                                          sampleUrl: ''
+                                      });
+                                      this.updateSampleUrl();
+                                  },
+                                  selectType(type) {
+                                      this.selectedType = type
+                                      const sources = this.sources;
+                                      const defaultSource = this.defaultSources[type.value];
+                                      
+                                      if (sources.length > 0) {
+                                          if (defaultSource && sources.some(s => s[0] === defaultSource.value)) {
+                                              this.selectedSource = defaultSource;
+                                          } else {
+                                              this.selectedSource = {
+                                                  value: sources[0][0],
+                                                  display: sources[0][1]
+                                              }
+                                          }
+                                      } else {
+                                          this.selectedSource = {
+                                              value: '',
+                                              display: 'Source'
+                                          }
+                                      }
+                                      this.isOpen = false;
+                                      this.updateOrderForSource(this.selectedSource.value);
+                                      this.updateSampleUrl();
+                                  },
+                                  selectSource(source) {
+                                      this.selectedSource = {
+                                          value: source[0],
+                                          display: source[1]
+                                      }
+                                      this.isSourceOpen = false;
+                                      this.updateOrderForSource(source[0]);
+                                      this.updateSampleUrl();
+                                  },
+                                  updateOrderForSource(sourceValue) {
+                                    if (sourceValue === 'tvdb' && this.selectedType.value === 'tv') {
+                                      // If switching to TVDB, set a default order (e.g., first available or fallback)
+                                      if (this.orderTypes.length) {
+                                        Alpine.store('order').value = this.orderTypes[0][0];
+                                      } else {
+                                        Alpine.store('order').value = 'official';
+                                      };
+                                      this.updateSampleUrl();
+                                    } else {
+                                      // For any other source, force 'official'
+                                      Alpine.store('order').value = 'official';
+                                      this.updateSampleUrl();
+                                    }
+                                  },
+
+                                  getPlaceholder() { 
+                                    return `Search ${this.selectedType.display.toLowerCase()}...` 
+                                  } 
+                                  
+                                }"
+                    >
                       <div class="flex">
                         <div class="relative grow">
                           {# Search input #}
@@ -281,35 +416,102 @@
                         </div>
 
                         <input type="hidden" name="media_type" :value="selectedType.value">
-                        {% if source %}
-                            <input type="hidden" name="source" value="{{ source }}">
-                        {% endif %}
+                        <input type="hidden" name="source" :value="selectedSource.value">
+                        <input type="hidden" name="order_type" :value="$store.order.value">
+
 
                         {# Media type dropdown #}
-                        <button type="button"
-                                @click="isOpen = !isOpen"
-                                @click.away="isOpen = false"
-                                class="flex items-center justify-between max-w-[110px] sm:max-w-none sm:w-32 px-2 sm:px-4 py-2 text-sm text-gray-300 bg-[#272c31] rounded-r-md focus:outline-none focus:ring-2 focus:ring-[#4a9eff] focus:ring-inset hover:bg-[#2a2e33] transition-colors duration-200 cursor-pointer">
-                          <span class="truncate sm:whitespace-normal" x-text="selectedType.display"></span>
-                          {% include "app/icons/chevron-down.svg" with classes="w-4 h-4 ml-2" %}
+                        <div class="relative">
+                          <button type="button"
+                                  @click="isOpen = !isOpen"
+                                  @click.away="isOpen = false"
+                                  class="flex items-center justify-between w-38 px-3 py-2 text-sm text-gray-300 bg-[#272c31] border-l border-[#3a3f45] hover:bg-[#2a2e33] transition-colors cursor-pointer">
+                              <span class="truncate" x-text="selectedType.display"></span>
 
-                        </button>
-                        <ul x-cloak
-                            x-show="isOpen"
-                            @keydown.escape.window="isOpen = false"
-                            x-transition:enter="transition ease-out duration-100"
-                            x-transition:enter-start="transform opacity-0 scale-95"
-                            x-transition:enter-end="transform opacity-100 scale-100"
-                            x-transition:leave="transition ease-in duration-75"
-                            x-transition:leave-start="transform opacity-100 scale-100"
-                            x-transition:leave-end="transform opacity-0 scale-95"
-                            class="absolute z-20 py-1 mt-12 overflow-auto text-sm text-gray-300 bg-[#2a2e33] rounded-md shadow-lg right-0 w-32">
-                          <template x-for="type in mediaTypes" :key="type.value">
-                            <li @click="selectedType = type; isOpen = false"
-                                class="px-4 py-2 cursor-pointer hover:bg-[#343a40] transition duration-150 ease-in-out"
-                                x-text="type.display"></li>
-                          </template>
-                        </ul>
+                              {% include "app/icons/chevron-down.svg" with classes="w-4 h-4 ml-2" %}
+                          </button>
+                          <ul x-cloak
+                              x-show="isOpen"
+                              @keydown.escape.window="isOpen = false"
+                              x-transition:enter="transition ease-out duration-100"
+                              x-transition:enter-start="transform opacity-0 scale-95"
+                              x-transition:enter-end="transform opacity-100 scale-100"
+                              x-transition:leave="transition ease-in duration-75"
+                              x-transition:leave-start="transform opacity-100 scale-100"
+                              x-transition:leave-end="transform opacity-0 scale-95"
+                              class="absolute z-20 py-1 mt-10 overflow-auto text-sm text-gray-300 bg-[#2a2e33] rounded-md shadow-lg left-0 w-38">
+                            <template x-for="type in mediaTypes" :key="type.value">
+                              <li @click="selectType(type)"
+                                  class="px-4 py-2 cursor-pointer hover:bg-[#343a40] transition duration-150 ease-in-out"
+                                  x-text="type.display"></li>
+                            </template>
+                          </ul>
+                        </div>
+                        <div class="relative">
+                          <button type="button" 
+                                  @click="isSourceOpen = !isSourceOpen" 
+                                  @click.away="isSourceOpen = false" 
+                                  class="flex items-center justify-between w-38 px-3 py-2 text-sm text-gray-300 bg-[#272c31] border-l border-[#3a3f45] hover:bg-[#2a2e33] transition-colors cursor-pointer">
+                              <span class="truncate" x-text="selectedSource.display || 'Source'"></span>
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 ml-2">
+                                  <path d="m6 9 6 6 6-6"></path>
+                              </svg>
+                          </button>
+
+                          <ul x-show="isSourceOpen" 
+                              @keydown.escape.window="isSourceOpen = false" 
+                              x-transition:enter="transition ease-out duration-100" 
+                              x-transition:enter-start="transform opacity-0 scale-95" 
+                              x-transition:enter-end="transform opacity-100 scale-100" 
+                              x-transition:leave="transition ease-in duration-75" 
+                              x-transition:leave-start="transform opacity-100 scale-100" 
+                              x-transition:leave-end="transform opacity-0 scale-95" 
+                              class="absolute z-20 py-1 mt-10 overflow-auto text-sm text-gray-300 bg-[#2a2e33] rounded-md shadow-lg left-0 w-38">
+                              
+                              <template x-for="source in sources" :key="source[0]">
+                                  <li @click="selectedSource = {value: source[0], display: source[1]}; isSourceOpen = false; updateSampleUrl(); updateOrderForSource(source[0]);" 
+                                      class="px-4 py-2 cursor-pointer hover:bg-[#343a40]"
+                                      x-text="source[1]">
+                                  </li>
+                              </template>
+                          </ul>
+                        </div>
+
+                        {# Order dropdown – visible only when TVDB is selected #}
+                        <div
+                            class="relative min-w-[9rem]"
+                            x-show="selectedSource.value === 'tvdb' && selectedType.value === 'tv'"
+                            x-cloak
+                        >
+                            <button
+                                type="button"
+                                @click="isOrderOpen = !isOrderOpen"
+                                @click.away="isOrderOpen = false"
+                                class="flex items-center justify-between w-full px-3 py-2 text-sm text-gray-300 bg-[#272c31] border-l border-[#3a3f45] hover:bg-[#2a2e33] transition-colors cursor-pointer"
+                            >
+                                <span class="truncate" x-text="selectedOrderDisplay"></span>
+
+                                {% include "app/icons/chevron-down.svg" with classes="w-4 h-4 ml-2" %}
+                            </button>
+
+                            <ul
+                                x-cloak
+                                x-show="isOrderOpen"
+                                @keydown.escape.window="isOrderOpen = false"
+                                x-transition
+                                class="absolute left-0 z-20 mt-2 w-full py-1 text-sm text-gray-300 bg-[#2a2e33] rounded-md shadow-lg"
+                            >
+                                <template x-for="order in orderTypes" :key="order[0]">
+                                    <li
+                                        @click="$store.order.value = order[0]; isOrderOpen = false; updateSampleUrl();"
+                                        class="px-4 py-2 cursor-pointer hover:bg-[#343a40]"
+                                        x-text="order[1]"
+                                    ></li>
+                                </template>
+                            </ul>
+                        </div>
+
+
                       </div>
                     </form>
                   </div>

@@ -52,9 +52,9 @@ def process_tv(tv_item, events_bulk):
 def get_seasons_to_process(tv_item):
     """Identify which seasons of a TV show need to be processed."""
     tv_metadata = services.get_media_metadata(
-        MediaTypes.TV.value,
-        tv_item.media_id,
-        tv_item.source,
+        media_type = MediaTypes.TV.value,
+        media_id = tv_item.media_id,
+        source = tv_item.source,
     )
 
     if not tv_metadata.get("related", {}).get("seasons"):
@@ -112,10 +112,10 @@ def get_seasons_to_process(tv_item):
 def process_tv_seasons(tv_item, seasons_to_process, events_bulk):
     """Process specific seasons of a TV show."""
     process_seasons_data = services.get_media_metadata(
-        "tv_with_seasons",
-        tv_item.media_id,
-        tv_item.source,
-        seasons_to_process,
+        media_type = "tv_with_seasons",
+        media_id = tv_item.media_id,
+        source = tv_item.source,
+        season_numbers = seasons_to_process,
     )
     
     processed_season_items = []

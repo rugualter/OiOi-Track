@@ -92,7 +92,7 @@
         {% endif %}
       </p>
       <div class="mt-6">
-        <a href="{% if section.key == Status.PLANNING.value %}{{ MediaTypes.MOVIE.value|sample_search:request.user }}{% else %}{{ MediaTypes.TV.value|sample_search:request.user }}{% endif %}"
+        <a :href="$store.search.sampleUrl"
            class="inline-flex items-center gap-2 rounded-md {% if section.key == Status.PLANNING.value %}bg-sky-600 hover:bg-sky-700{% else %}bg-indigo-600 hover:bg-indigo-700{% endif %} px-4 py-2 text-sm font-medium text-white transition-colors">
           {% include "app/icons/magnifying-glass.svg" with classes="h-4 w-4" %}
           {% trans "Browse media" %}

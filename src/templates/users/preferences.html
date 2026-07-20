@@ -194,7 +194,7 @@
         <div class="flex items-center justify-between p-3 bg-[#39404b] rounded-md">
           <div class="flex-1">
             <div class="flex items-center text-gray-200 mb-1">
-              {% include "app/icons/theme.svg" with classes="w-5 h-5 mr-2 mt-1" %}
+              {% include "app/icons/order_sort.svg" with classes="w-5 h-5 mr-2 mt-1" %}
               <span class="text-sm font-medium">{% trans "TVDB Air Order" %}</span>
             </div>
             <p class="text-xs text-gray-400 ml-7">
@@ -205,7 +205,7 @@
                   class="ml-4 p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
             {% for choice in tvdb_air_order_choices %}
               <option value="{{ choice.0 }}"
-                      {% if user.prefered_tvdb_air_order == choice.0 %}selected{% endif %}>{{ choice.1 }}</option>
+                      {% if user.prefered_air_order == choice.0 %}selected{% endif %}>{{ choice.1 }}</option>
             {% endfor %}
           </select>
         </div>
@@ -415,47 +415,102 @@
         </div>
       </div>
 
-      {# Watch Provider Region TMDB #}
+      {# Watch Providers #}
       <div class="mb-5">
-        <div class="flex items-center justify-between p-3 bg-[#39404b] rounded-md">
-          <div class="flex-1">
-            <div class="flex items-center text-gray-200 mb-1">
-              {% include "app/icons/globe.svg" with classes="w-5 h-5 mr-2" %}
-              <span class="text-sm font-medium">{% trans "Watch provider region" %}</span>
+        <div class="p-4 bg-[#39404b] rounded-md">
+          <div class="flex items-start mb-4">
+            {% include "app/icons/globe.svg" with classes="w-5 h-5 mr-2 mt-1 text-gray-200" %}
+            <div>
+              <div class="text-sm font-medium text-gray-200">
+                {% trans "Watch Providers" %}
+              </div>
+              <p class="text-xs text-gray-400 mt-1">
+                {% trans "Choose which provider service and region should be used for each metadata source. Setting the region to Disabled hides watch providers." %}
+              </p>
             </div>
-            <p class="text-xs text-gray-400 ml-7">
-              {% trans "For TMDB Choose the region to show watch providers for. Setting this to disabled will hide the box from the media page." %}
-            </p>
           </div>
-          <select name="watch_provider_region_tmdb"
-                  class="ml-4 p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
-            {% for choice in watch_provider_choices_tmdb %}
-              <option value="{{ choice.0 }}"
-                      {% if user.watch_provider_region_tmdb == choice.0 %}selected{% endif %}>{{ choice.1 }}</option>
-            {% endfor %}
-          </select>
-        </div>
-      </div>
 
-      {# Watch Provider Region TVDB #}
-      <div class="mb-5">
-        <div class="flex items-center justify-between p-3 bg-[#39404b] rounded-md">
-          <div class="flex-1">
-            <div class="flex items-center text-gray-200 mb-1">
-              {% include "app/icons/globe.svg" with classes="w-5 h-5 mr-2" %}
-              <span class="text-sm font-medium">{% trans "Watch provider region" %}</span>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            {# TMDB #}
+            <div>
+              <label class="block text-xs text-gray-400 mb-2">
+                {% trans "TMDB" %}
+              </label>
+
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[11px] text-gray-500 mb-1">
+                    {% trans "Provider" %}
+                  </label>
+                  <select name="provider_tmdb"
+                          class="w-full p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                    {% for choice in watch_provider_service_choices %}
+                      <option value="{{ choice.0 }}"
+                              {% if user.watch_provider_tmdb == choice.0 %}selected{% endif %}>
+                        {{ choice.1 }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-[11px] text-gray-500 mb-1">
+                    {% trans "Region" %}
+                  </label>
+                  <select name="watch_provider_region_tmdb"
+                          class="w-full p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                    {% for choice in watch_provider_choices_tmdb %}
+                      <option value="{{ choice.0 }}"
+                              {% if user.watch_provider_region_tmdb == choice.0 %}selected{% endif %}>
+                        {{ choice.1 }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
             </div>
-            <p class="text-xs text-gray-400 ml-7">
-              {% trans "For TVDB Choose the region to show watch providers for. Setting this to disabled will hide the box from the media page." %}
-            </p>
+
+            {# TVDB #}
+            <div>
+              <label class="block text-xs text-gray-400 mb-2">
+                {% trans "TVDB" %}
+              </label>
+
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[11px] text-gray-500 mb-1">
+                    {% trans "Provider" %}
+                  </label>
+                  <select name="provider_tvdb"
+                          class="w-full p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                    {% for choice in watch_provider_service_choices %}
+                      <option value="{{ choice.0 }}"
+                              {% if user.watch_provider_tvdb == choice.0 %}selected{% endif %}>
+                        {{ choice.1 }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-[11px] text-gray-500 mb-1">
+                    {% trans "Region" %}
+                  </label>
+                  <select name="watch_provider_region_tvdb"
+                          class="w-full p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                    {% for choice in watch_provider_choices_tvdb %}
+                      <option value="{{ choice.0 }}"
+                              {% if user.watch_provider_region_tvdb == choice.0 %}selected{% endif %}>
+                        {{ choice.1 }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+            </div>
+
           </div>
-          <select name="watch_provider_region_tvdb"
-                  class="ml-4 p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
-            {% for choice in watch_provider_choices_tvdb %}
-              <option value="{{ choice.0 }}"
-                      {% if user.watch_provider_region_tvdb == choice.0 %}selected{% endif %}>{{ choice.1 }}</option>
-            {% endfor %}
-          </select>
         </div>
       </div>
 

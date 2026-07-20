@@ -1,7 +1,8 @@
 import logging
 from pathlib import Path
 from urllib.parse import urlencode
-
+import json
+from django.utils.encoding import force_str
 from django.apps import apps
 from django.conf import settings
 from django.contrib import messages
@@ -33,6 +34,9 @@ from app.models import (
     Sources,
     Status,
     UserMessage,
+    AirOrder,
+    MediaSourceChoices,
+    
 )
 from app.providers import services
 from app.templatetags import app_tags
@@ -47,6 +51,22 @@ from users.models import (
 
 logger = logging.getLogger(__name__)
 
+@require_GET
+def get_sample_url(request):
+    source = request.GET.get("source")
+    media_type = request.GET.get("media_type")
+    order_type = request.GET.get("order_type")
+
+    url = helpers.sample_search(
+        source=source,
+        media_type=media_type,
+        user=request.user,
+        order_type=order_type,
+    )
+
+    return JsonResponse({
+        "url": url
+    })
 
 @require_GET
 def home(request):
@@ -82,6 +102,13 @@ def home(request):
                 "home_status": section_to_load,
             },
         )
+        
+    order_types = [list(choice) for choice in AirOrder.choices]
+    
+    selected_order_type = (
+        request.user.last_order_type
+        or request.user.prefered_air_order
+    )
 
     home_sections = [
         home_helpers.build_home_section(
@@ -103,6 +130,9 @@ def home(request):
         "sort_choices": HomeSortChoices.choices,
         "hide_unreleased": hide_unreleased,
         "items_limit": items_limit,
+        "order_types": order_types,
+        "selected_order_type": selected_order_type,
+        "source_choices": MediaSourceChoices.all(),
     }
     return render(request, "app/home.html", context)
 
@@ -280,18 +310,42 @@ def media_search(request):
         "last_search_type",
         request.GET["media_type"],
     )
+
     query = request.GET["q"]
     page = int(request.GET.get("page", 1))
     layout = request.GET.get("layout", "grid")
+  
 
-    # only receives source when searching with secondary source
-    source = request.GET.get(
-        "source",
-        helpers.get_default_source(request.user, media_type)
+    
+    source_preference_map = {
+        MediaTypes.TV.value: "last_source_used_tv",
+        MediaTypes.MOVIE.value: "last_source_used_movie",
+        MediaTypes.ANIME.value: "last_source_used_anime",
+        MediaTypes.MANGA.value: "last_source_used_manga",
+        MediaTypes.GAME.value: "last_source_used_game",
+        MediaTypes.BOOK.value: "last_source_used_book",
+        MediaTypes.COMIC.value: "last_source_used_comic",
+        MediaTypes.BOARDGAME.value: "last_source_used_boardgame",
+    }
+    
+    preference_key = source_preference_map.get(media_type)
+    
+    order_type = request.user.update_preference(
+        "last_order_type",
+        request.GET.get("order_type", request.user.prefered_air_order),
+    )
+    
+    source = request.user.update_preference(
+        preference_key,
+        request.GET.get("source", helpers.get_default_source(request.user, media_type)),
     )
 
-    data = services.search(media_type, query, page, source)
+    data = services.search(media_type, query, page, source, order_type)
 
+    order_types = [list(choice) for choice in AirOrder.choices]
+    
+    selected_order_type = order_type
+    
     # Enrich search results with user tracking data
     if data.get("results"):
         data["results"] = helpers.enrich_items_with_user_data(
@@ -302,16 +356,19 @@ def media_search(request):
         "data": data,
         "source": source,
         "media_type": media_type,
+        "order_types": order_types,
+        "selected_order_type": selected_order_type,
         "layout": layout,
+        "source_choices": MediaSourceChoices.all(),
     }
 
     return render(request, "app/search.html", context)
 
 
 @require_GET
-def media_details(request, source, media_type, media_id, title):  # noqa: ARG001 title for URL
+def media_details(request, source, media_type, media_id, title, order_type=None):  # noqa: ARG001 title for URL
     """Return the details page for a media item."""
-    media_metadata = services.get_media_metadata(media_type, media_id, source)
+    media_metadata = services.get_media_metadata(media_type = media_type, media_id = media_id, order_type=order_type, source = source)
     user_medias = BasicMedia.objects.filter_media_prefetch(
         request.user,
         media_id,
@@ -335,17 +392,42 @@ def media_details(request, source, media_type, media_id, title):  # noqa: ARG001
                     )
                 )
 
-    this_watch_provider_region = request.user.watch_provider_region_tmdb if source == Sources.TMDB.value else request.user.watch_provider_region_tvdb
+    match source:
+        case Sources.TMDB.value:
+            this_watch_provider_region = request.user.watch_provider_region_tmdb
+            this_watch_provider = request.user.watch_provider_tmdb
+
+        case Sources.TVDB.value:
+            this_watch_provider_region = request.user.watch_provider_region_tvdb
+            this_watch_provider = request.user.watch_provider_tvdb
+
+        # case Sources.TRAKT.value:
+        #     this_watch_provider_region = request.user.watch_provider_region_trakt
+        #     this_watch_provider = request.user.watch_provider_trakt
+
+        case _:
+            this_watch_provider_region = None
+            this_watch_provider = None
+    
     if media_type in ["tv", "movie"]:
         watch_providers = services.get_media_metadata(
-            "filter_providers",
-            media_metadata.get("providers"),
-            source,
-            this_watch_provider_region,
+            media_type = "filter_providers",
+            all_providers = media_metadata.get("providers"),
+            source = source,
+            region = this_watch_provider_region,
+            provider = this_watch_provider,
         )
     else:
         watch_providers = None
 
+    order_type = request.user.update_preference(
+        "last_order_type",
+        (order_type or request.user.prefered_air_order),
+    )
+    order_types = [list(choice) for choice in AirOrder.choices]
+        
+    selected_order_type = order_type
+ 
     context = {
         "media": media_metadata,
         "media_type": media_type,
@@ -354,19 +436,44 @@ def media_details(request, source, media_type, media_id, title):  # noqa: ARG001
         "watch_providers": watch_providers,
         "watch_provider_region_tmdb": request.user.watch_provider_region_tmdb,
         "watch_provider_region_tvdb": request.user.watch_provider_region_tvdb,
+        "watch_provider_tmdb": request.user.watch_provider_tmdb,
+        "watch_provider_tvdb": request.user.watch_provider_tvdb,
+        "order_types": order_types,
+        "selected_order_type": selected_order_type,
+        "source_choices": MediaSourceChoices.all(),
     }
     return render(request, "app/media_details.html", context)
 
 
 @require_GET
-def season_details(request, source, media_id, title, season_number):  # noqa: ARG001 For URL
+def season_details(request, source, media_id, order_type, title, season_number):  # noqa: ARG001 For URL
     """Return the details page for a season."""
+    
+    match source:
+        case Sources.TMDB.value:
+            this_watch_provider_region = request.user.watch_provider_region_tmdb
+            this_watch_provider = request.user.watch_provider_tmdb
+
+        case Sources.TVDB.value:
+            this_watch_provider_region = request.user.watch_provider_region_tvdb
+            this_watch_provider = request.user.watch_provider_tvdb
+
+        # case Sources.TRAKT.value:
+        #     this_watch_provider_region = request.user.watch_provider_region_trakt
+        #     this_watch_provider = request.user.watch_provider_trakt
+        case _:
+            this_watch_provider_region = None
+            this_watch_provider = None
+            
     tv_with_seasons_metadata = services.get_media_metadata(
-        "tv_with_seasons",
-        media_id,
-        source,
-        [season_number],
+        media_type = "tv_with_seasons",
+        media_id = media_id,
+        source = source,
+        order_type = order_type,
+        season_numbers = [season_number],
+        provider = this_watch_provider
     )
+    
     season_metadata = tv_with_seasons_metadata[f"season/{season_number}"]
 
     user_medias = BasicMedia.objects.filter_media_prefetch(
@@ -386,10 +493,11 @@ def season_details(request, source, media_id, title, season_number):  # noqa: AR
         )
 
     season_metadata["episodes"] = services.get_media_metadata(
-            "process_episodes",
-            season_metadata,
-            source,
-            episodes_in_db,
+            media_type =  "process_episodes",
+            season_metadata = season_metadata,
+            source = source,
+            episodes = episodes_in_db,
+            order_type = order_type,
         )
 
     # Enrich related items with user tracking data
@@ -404,8 +512,14 @@ def season_details(request, source, media_id, title, season_number):  # noqa: AR
                     )
                 )
 
-    this_watch_provider_region = request.user.watch_provider_region_tmdb if source == Sources.TMDB.value else request.user.watch_provider_region_tvdb
-
+    order_type = request.user.update_preference(
+        "last_order_type",
+        (order_type or request.user.prefered_air_order),
+    )
+    order_types = [list(choice) for choice in AirOrder.choices]
+        
+    selected_order_type = order_type
+   
     context = {
         "media": season_metadata,
         "tv": tv_with_seasons_metadata,
@@ -413,13 +527,19 @@ def season_details(request, source, media_id, title, season_number):  # noqa: AR
         "user_medias": user_medias,
         "current_instance": current_instance,
         "watch_providers": services.get_media_metadata(
-            "filter_providers",
-            season_metadata.get("providers"),
-            source,
-            this_watch_provider_region,
+            media_type = "filter_providers",
+            all_providers = season_metadata.get("providers"),
+            source = source,
+            region = this_watch_provider_region,
+            provider = this_watch_provider,
         ),
         "watch_provider_region_tmdb": request.user.watch_provider_region_tmdb,
         "watch_provider_region_tvdb": request.user.watch_provider_region_tvdb,
+        "watch_provider_tmdb": request.user.watch_provider_tmdb,
+        "watch_provider_tvdb": request.user.watch_provider_tvdb,
+        "order_types": order_types,
+        "selected_order_type": selected_order_type,
+        "source_choices": MediaSourceChoices.all(),
     }
     return render(request, "app/media_details.html", context)
 
@@ -447,7 +567,7 @@ def update_media_score(request, media_type, instance_id):
 
 
 @require_POST
-def sync_metadata(request, source, media_type, media_id, season_number=None):
+def sync_metadata(request, source, media_type, media_id, order_type=None, season_number=None):
     """Refresh the metadata for a media item."""
     if source == Sources.MANUAL.value:
         msg = _("Manual items cannot be synced.")
@@ -458,7 +578,7 @@ def sync_metadata(request, source, media_type, media_id, season_number=None):
             headers={"HX-Redirect": request.POST.get("next", "/")},
         )
 
-    cache_key = f"{source}_{media_type}_{media_id}"
+    cache_key = f"{source}_{media_type}_{media_id}_{order_type}"
     if media_type == MediaTypes.SEASON.value:
         cache_key += f"_{season_number}"
 
@@ -474,15 +594,17 @@ def sync_metadata(request, source, media_type, media_id, season_number=None):
         logger.debug("%s - Old cache deleted: %s", cache_key, deleted)
 
         metadata = services.get_media_metadata(
-            media_type,
-            media_id,
-            source,
-            [season_number],
+            media_type = media_type,
+            media_id = media_id,
+            source = source,
+            order_type = order_type,
+            season_numbers = [season_number],
         )
         item, _ = Item.objects.update_or_create(
             media_id=media_id,
             source=source,
             media_type=media_type,
+            order_type = order_type,
             season_number=season_number,
             defaults={
                 "title": metadata["title"],
@@ -495,10 +617,11 @@ def sync_metadata(request, source, media_type, media_id, season_number=None):
 
         if media_type == MediaTypes.SEASON.value:
             metadata["episodes"] = services.get_media_metadata(
-                "process_episodes",
-                metadata,
-                source,
-                [],
+                media_type = "process_episodes",
+                season_metadata = metadata,
+                source = source,
+                order_type = order_type,
+                episodes = []
             )
 
             # Create a dictionary of existing episodes keyed by episode number
@@ -568,6 +691,7 @@ def track_modal(
     source,
     media_type,
     media_id,
+    order_type=None,
     season_number=None,
 ):
     """Return the tracking form for a media item."""
@@ -597,6 +721,7 @@ def track_modal(
         "media_id": media_id,
         "source": source,
         "media_type": media_type,
+        "order_type": order_type,
         "season_number": season_number,
         "instance_id": instance_id,
     }
@@ -607,16 +732,25 @@ def track_modal(
             initial_data["progress"] = helpers.minutes_to_hhmm(media.progress)
     else:
         title = services.get_media_metadata(
-            media_type,
-            media_id,
-            source,
-            [season_number],
+            media_type = media_type,
+            media_id = media_id,
+            source = source,
+            order_type = order_type,
+            season_numbers = [season_number],
         )["title"]
         if media_type == MediaTypes.SEASON.value:
             title += f" S{season_number}"
 
     form = get_form_class(media_type)(instance=media, initial=initial_data)
 
+    order_type = request.user.update_preference(
+        "last_order_type",
+        (order_type or request.user.prefered_air_order),
+    )
+    order_types = [list(choice) for choice in AirOrder.choices]
+        
+    selected_order_type = order_type
+    
     return render(
         request,
         "app/components/fill_track.html",
@@ -625,6 +759,9 @@ def track_modal(
             "form": form,
             "media": media,
             "return_url": request.GET["return_url"],
+            "order_types": order_types,
+            "selected_order_type": selected_order_type,
+            "source_choices": MediaSourceChoices.all(),
         },
     )
 
@@ -642,10 +779,10 @@ def media_save(request):
         instance = helpers.get_owned_media_or_404(request, media_type, instance_id)
     else:
         metadata = services.get_media_metadata(
-            media_type,
-            media_id,
-            source,
-            [season_number],
+            media_type = media_type,
+            media_id = media_id,
+            source = source,
+            season_numbers = [season_number],
         )
         item, _ = Item.objects.get_or_create(
             media_id=media_id,
@@ -732,10 +869,10 @@ def episode_save(request):
         )
     except Season.DoesNotExist:
         tv_with_seasons_metadata = services.get_media_metadata(
-            "tv_with_seasons",
-            media_id,
-            source,
-            [season_number],
+            media_type = "tv_with_seasons",
+            media_id = media_id,
+            source = source,
+            season_numbers = [season_number],
         )
         season_metadata = tv_with_seasons_metadata[f"season/{season_number}"]
 
@@ -900,6 +1037,7 @@ def history_modal(
     source,
     media_type,
     media_id,
+    order_type=None,
     season_number=None,
     episode_number=None,
 ):
@@ -926,6 +1064,15 @@ def history_modal(
                     request.user,
                 ),
             )
+            
+    order_type = request.user.update_preference(
+        "last_order_type",
+        (order_type or request.user.prefered_air_order),
+    )
+    order_types = [list(choice) for choice in AirOrder.choices]
+        
+    selected_order_type = order_type
+    
     return render(
         request,
         "app/components/fill_history.html",
@@ -933,6 +1080,9 @@ def history_modal(
             "media_type": media_type,
             "timeline": timeline_entries,
             "total_medias": total_medias,
+            "order_types": order_types,
+            "selected_order_type": selected_order_type,
+            "source_choices": MediaSourceChoices.all(),
             "return_url": request.GET["return_url"],
         },
     )

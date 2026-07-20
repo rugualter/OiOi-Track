@@ -19,7 +19,7 @@
           </div>
           <div class="mt-1 space-y-1 max-h-20 overflow-y-auto">
             {% for release in release_dict|get_item:day %}
-              <a href="{{ release.item|media_url }}" class="block">
+              <a href="{{ release.item|media_url:item.order_type }}" class="block">
                 <div class="flex items-center gap-1 px-1 py-0.5 text-xs rounded hover:bg-[#343a40] transition-colors">
                   {% with color=release.item.media_type|media_color %}
                     {% icon release.item.media_type is_active=False extra_classes=color|add:" w-4 h-4 shrink-0" %}

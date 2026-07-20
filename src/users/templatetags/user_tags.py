@@ -2,7 +2,6 @@ from django import template
 from django.templatetags.static import static
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
-
 register = template.Library()
 
 
@@ -10,7 +9,6 @@ register = template.Library()
 def get_attr(obj, attr):
     """Get attribute from object dynamically."""
     return getattr(obj, attr, None)
-
 
 SOURCES_CONFIG = {
     "kitsu": {

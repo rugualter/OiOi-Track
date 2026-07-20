@@ -112,9 +112,9 @@ def _collect_airing_schedule_pages(query, url, media_ids, page):
 
 def _get_mal_total_episodes(mal_id):
     mal_metadata = services.get_media_metadata(
-        media_type=MediaTypes.ANIME.value,
-        media_id=mal_id,
-        source=Sources.MAL.value,
+        media_type = MediaTypes.ANIME.value,
+        media_id = mal_id,
+        source = Sources.MAL.value,
     )
     return mal_metadata["max_progress"]
 

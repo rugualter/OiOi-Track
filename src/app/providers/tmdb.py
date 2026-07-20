@@ -17,6 +17,9 @@ max_workers_lists = 10
 logger = logging.getLogger(__name__)
 base_url = "https://api.themoviedb.org/3"
 
+def get_base_url_tmdb():
+    return base_url
+
 def get_tmdb_language():
     """Return the language tag to use for TMDB requests."""
     language = (
@@ -91,7 +94,7 @@ def get_external_links(external_ids, tmdb_id=None):
 
     return links
 
-def search(media_type, query, page):
+def search(media_type, query, page, order_type=None):
     """Search for media on TMDB."""
     cache_key = f"search_{Sources.TMDB.value}_{media_type}_{query}_{page}"
     data = cache.get(cache_key)
@@ -157,12 +160,17 @@ def search(media_type, query, page):
                 "media_type": media_type,
                 "title": get_title({}, media),
                 "original_title": get_title_original(media),
+                "order_type": None,
                 "original_language": media.get("original_language"),
                 "image": get_image_url(media.get("poster_path")),
                 "release_year": get_release_year(media),
             }
             for media in response["results"]
         ]
+        
+        if media_type == MediaTypes.TV.value:
+            for result in results:
+                result["order_type"] = 'official'
         
         per_page = 20  # TMDB always returns 20 results per page
         data = helpers.format_search_response(
@@ -264,14 +272,96 @@ def translated_genre(genre):
 
     return translations.get(genre, genre)
 
-def movie(media_id):
+def get_watch_providers(media_type, media_id, provider, season_number=None):
+    
+    if media_type == MediaTypes.MOVIE.value:
+        cache_key = f"{Sources.TMDB.value}_providers_{provider}_{MediaTypes.MOVIE.value}_{media_id}"
+        data = cache.get(cache_key)
+        
+        if data is None:
+            url = f"{base_url}/movie/{media_id}/watch/providers"
+            params = {
+                **tmdb_get_base_params_prefered()
+            }
+            
+            try:
+                response = services.api_request(
+                    Sources.TMDB.value,
+                    "GET",
+                    url,
+                    params=params,
+                )
+            except requests.exceptions.HTTPError as error:
+                handle_error(error)
+                
+            providers = response.get("results", {})
+            cache.set(cache_key, providers)
+            return providers
+        
+        return data
+            
+    elif media_type == MediaTypes.TV.value:
+        
+        cache_key = f"{Sources.TMDB.value}_providers_{provider}_{MediaTypes.TV.value}_{media_id}"
+        data = cache.get(cache_key)
+        
+        if data is None:
+            url = f"{base_url}/tv/{media_id}/watch/providers"
+            params = {
+                **tmdb_get_base_params_prefered()
+            }
+            
+            try:
+                response = services.api_request(
+                    Sources.TMDB.value,
+                    "GET",
+                    url,
+                    params=params,
+                )
+            except requests.exceptions.HTTPError as error:
+                handle_error(error)
+                
+            providers = response.get("results", {})
+            cache.set(cache_key, providers)
+            return providers
+        
+        return data
+    
+    elif media_type == MediaTypes.SEASON.value:
+        
+        cache_key = f"{Sources.TMDB.value}_providers_{provider}_{MediaTypes.SEASON.value}_{media_id}"
+        data = cache.get(cache_key)
+        
+        if data is None:
+            url = f"{base_url}/tv/{media_id}/season/{season_number}/watch/providers" 
+            params = {
+                **tmdb_get_base_params_prefered()
+            }
+            
+            try:
+                response = services.api_request(
+                    Sources.TMDB.value,
+                    "GET",
+                    url,
+                    params=params,
+                )
+            except requests.exceptions.HTTPError as error:
+                handle_error(error)
+                
+            providers = response.get("results", {})
+            cache.set(cache_key, providers)
+            return providers
+        
+        return data    
+        
+def movie(media_id, provider):
     """Return the metadata for the selected movie from The Movie Database."""
-    cache_key = f"{Sources.TMDB.value}_{MediaTypes.MOVIE.value}_{media_id}"
+    cache_key = f"{Sources.TMDB.value}_{provider}_{MediaTypes.MOVIE.value}_{media_id}"
     data = cache.get(cache_key)
 
     if data is None:
         url = f"{base_url}/movie/{media_id}"
-        appends = ["recommendations", "external_ids", "credits", "watch/providers", "translations"]
+        appends = ["recommendations", "external_ids", "credits", "translations"]
         params = {
             **tmdb_get_base_params_prefered(),
             "append_to_response": ",".join(appends),
@@ -328,6 +418,10 @@ def movie(media_id):
             }
             for member in cast[:30]
         ]
+        
+        providers = {}
+        if provider == "tmdb":
+            providers = get_watch_providers(MediaTypes.MOVIE.value, media_id, provider)
 
         data = {
             "media_id": media_id,
@@ -338,6 +432,7 @@ def movie(media_id):
             "original_title": get_title_original(response),
             "original_language": response.get("original_language"),
             "max_progress": 1,
+            "order_type": None,
             "image": get_image_url(response.get("poster_path")),
             "synopsis": get_synopsis(response.get("translations"), response),
             "genres": get_genres(response.get("genres")),
@@ -365,21 +460,21 @@ def movie(media_id):
             "external_links": get_external_links(
                 response.get("external_ids", {}), media_id
             ),
-            "providers": response.get("watch/providers", {}).get("results", {}),
+            "providers": providers,
         }
 
         cache.set(cache_key, data)
 
     return data
 
-def get_cached_seasons(media_id, season_numbers):
+def get_cached_seasons(media_id, season_numbers, order_type = None, provider = None):
     """Check cache for seasons and return cached data and list of uncached seasons."""
     cached_data = {}
     uncached_seasons = []
 
     for season_number in season_numbers:
         season_cache_key = (
-            f"{Sources.TMDB.value}_{MediaTypes.SEASON.value}_{media_id}_{season_number}"
+            f"{Sources.TMDB.value}_{provider}_{MediaTypes.SEASON.value}_{media_id}_{order_type}_{season_number}"
         )
         season_data = cache.get(season_cache_key)
         if season_data:
@@ -390,6 +485,7 @@ def get_cached_seasons(media_id, season_numbers):
     return cached_data, uncached_seasons
 
 def enrich_season_with_tv_data(season_data, tv_data, media_id, season_number):
+
     """Add TV show metadata to season metadata."""
     season_data["media_id"] = media_id
     season_data["source_url"] = (
@@ -404,12 +500,13 @@ def enrich_season_with_tv_data(season_data, tv_data, media_id, season_number):
     season_data["release_year"] = tv_data["release_year"]
     if season_data["synopsis"] == _("No synopsis available."):
         season_data["synopsis"] = tv_data["synopsis"]
+        
     return season_data
 
-def fetch_and_cache_seasons(media_id, season_numbers, tv_data, order_type=None):
+def fetch_and_cache_seasons(media_id, season_numbers, tv_data, order_type=None, provider = None):
     """Fetch uncached seasons from API and cache them."""
     url = f"{base_url}/tv/{media_id}"
-    base_append = "recommendations,external_ids,watch/providers,translations"
+    base_append = "recommendations,external_ids,translations"
     max_seasons_per_request = 8
     fetched_tv_data = tv_data
     result_data = {}
@@ -424,7 +521,7 @@ def fetch_and_cache_seasons(media_id, season_numbers, tv_data, order_type=None):
         errors = []
         append_text = ",".join(
             [
-                f"season/{season},season/{season}/watch/providers,season/{season}/translations"
+                f"season/{season},season/{season}/translations"
                 for season in season_subset
             ]
         )
@@ -441,18 +538,18 @@ def fetch_and_cache_seasons(media_id, season_numbers, tv_data, order_type=None):
                 url,
                 params=params,
             )
+            
         except requests.exceptions.HTTPError as error:
             errors.append(error)
             return None, None, errors
-
-         
         # Cache TV metadata if we haven't fetched it yet
         
         batch_tv_data = None
         
         if flag:
-            tv_cache_key = f"{Sources.TMDB.value}_{MediaTypes.TV.value}_{media_id}"
-            batch_tv_data  = process_tv(response, order_type)
+            tv_cache_key = f"{Sources.TMDB.value}_{provider}_{MediaTypes.TV.value}_{media_id}_{order_type}"
+            batch_tv_data  = process_tv(response, order_type, provider)
+            fetched_tv_data = batch_tv_data
             cache.set(tv_cache_key, batch_tv_data)
 
         batch_result = {}
@@ -467,8 +564,9 @@ def fetch_and_cache_seasons(media_id, season_numbers, tv_data, order_type=None):
                 errors.append(not_found_error)
 
             season_data = process_season(
-                response[season_key], response.get(f"{season_key}/watch/providers", {}), response.get(f"{season_key}/translations", {}), media_id
+                response[season_key], provider, response.get(f"{season_key}/translations", {}), media_id, order_type
             )
+
             season_data = enrich_season_with_tv_data(
                 season_data,
                 fetched_tv_data,
@@ -479,7 +577,7 @@ def fetch_and_cache_seasons(media_id, season_numbers, tv_data, order_type=None):
             #now we need to add the episodes translations so inside season
 
             cache.set(
-                f"{Sources.TMDB.value}_{MediaTypes.SEASON.value}_{media_id}_{season_number}",
+                f"{Sources.TMDB.value}_{provider}_{MediaTypes.SEASON.value}_{media_id}_{season_number}",
                 season_data,
             )
             
@@ -489,7 +587,7 @@ def fetch_and_cache_seasons(media_id, season_numbers, tv_data, order_type=None):
     
     errors = []
     
-    with ThreadPoolExecutor(max_workers=min(max_workers_seasons, len(season_subsets))) as executor:
+    with ThreadPoolExecutor(max_workers=min(max_workers_seasons, len(season_subsets)+1)) as executor:
         futures = [
             executor.submit(fetch_subset, subset, index == 0)
             for index, subset in enumerate(season_subsets)
@@ -522,15 +620,15 @@ def fetch_and_cache_seasons(media_id, season_numbers, tv_data, order_type=None):
 
     return result_data, fetched_tv_data
     
-def tv_with_seasons(media_id, season_numbers, order_type=None):
+def tv_with_seasons(media_id, season_numbers, order_type=None, provider = None):
     """Return the metadata for the tv show with seasons appended to the response."""
     if not season_numbers:
         return tv(media_id, order_type)
 
-    tv_cache_key = f"{Sources.TMDB.value}_{MediaTypes.TV.value}_{media_id}"
+    tv_cache_key = f"{Sources.TMDB.value}_{provider}_{MediaTypes.TV.value}_{media_id}"
     tv_data = cache.get(tv_cache_key)
 
-    cached_seasons, uncached_seasons = get_cached_seasons(media_id, season_numbers)
+    cached_seasons, uncached_seasons = get_cached_seasons(media_id, season_numbers, order_type, provider)
 
     if tv_data is None and not uncached_seasons:
         tv_data = tv(media_id, order_type)
@@ -540,7 +638,8 @@ def tv_with_seasons(media_id, season_numbers, order_type=None):
             media_id,
             uncached_seasons,
             tv_data,
-            order_type
+            order_type,
+            provider,
         )
 
         if tv_data is None:
@@ -557,16 +656,16 @@ def tv_with_seasons(media_id, season_numbers, order_type=None):
     
     return tv_data | cached_seasons
 
-def tv(media_id, order_type=None):
+def tv(media_id, order_type=None, provider = None):
     """Return the metadata for the selected tv show from The Movie Database."""
-    cache_key = f"{Sources.TMDB.value}_{MediaTypes.TV.value}_{media_id}"
+    cache_key = f"{Sources.TMDB.value}_{provider}_{MediaTypes.TV.value}_{media_id}_{order_type}"
     data = cache.get(cache_key)
 
     if data is None:
         url = f"{base_url}/tv/{media_id}"
         params = {
             **tmdb_get_base_params_prefered(),
-            "append_to_response": "recommendations,external_ids,watch/providers,translations",
+            "append_to_response": "recommendations,external_ids,translations",
         }
 
         try:
@@ -579,21 +678,25 @@ def tv(media_id, order_type=None):
         except requests.exceptions.HTTPError as error:
             handle_error(error)
 
-        data = process_tv(response, order_type)
+        data = process_tv(response, order_type, provider)
         cache.set(cache_key, data)
 
     return data
 
-def process_tv(response, order_type=None):
+def process_tv(response, order_type=None, provider = None):
     """Process the metadata for the selected tv show from The Movie Database."""
     num_episodes = response.get("number_of_episodes")
     next_episode = response.get("next_episode_to_air")
     last_episode = response.get("last_episode_to_air")
     
     new_seasons = add_season_translations(response.get("id"), response.get("seasons", []))
-    new_seasons.sort(key=lambda season: int(season.get("number",0)))
+    new_seasons.sort(key=lambda season: int(season.get("season_number",0)))
     recommendations = response.get("recommendations", {}).get("results", [])
     recommendations = add_recommendation_translations(recommendations[:8])
+    
+    providers = {}
+    if provider == "tmdb":
+        providers = get_watch_providers(MediaTypes.MOVIE.value, response.get("id"), provider)
     
     return {
         "media_id": response.get("id"),
@@ -605,6 +708,7 @@ def process_tv(response, order_type=None):
         "original_language": response.get("original_language"),
         "release_year": get_release_year(response),
         "max_progress": num_episodes,
+        "order_type": 'official',
         "image": get_image_url(response.get("poster_path")),
         "synopsis": get_synopsis(response.get("translations"), response),
         "genres": get_genres(response.get("genres")),
@@ -637,7 +741,7 @@ def process_tv(response, order_type=None):
         "external_links": get_external_links(response.get("external_ids", {})),
         "last_episode_season": last_episode["season_number"] if last_episode else None,
         "next_episode_season": next_episode["season_number"] if next_episode else None,
-        "providers": response.get("watch/providers", {}).get("results", {}),
+        "providers": providers,
     }
 
 def fetch_collection_part_translation(media_id, media_type):
@@ -686,7 +790,7 @@ def fetch_collection_part_translation(media_id, media_type):
 def add_collection_part_translations(collection_response):
     parts = collection_response.get("parts", [])
 
-    with ThreadPoolExecutor(max_workers=min(max_workers_lists, len(parts))) as executor:
+    with ThreadPoolExecutor(max_workers=min(max_workers_lists, len(parts)+1)) as executor:
         futures = [
             executor.submit(
                 fetch_collection_part_translation,
@@ -755,7 +859,7 @@ def fetch_recommendation_translation(media_id, media_type):
 
 def add_recommendation_translations(recommendations):
 
-    with ThreadPoolExecutor(max_workers=min(max_workers_lists, len(recommendations))) as executor:
+    with ThreadPoolExecutor(max_workers=min(max_workers_lists, len(recommendations)+1)) as executor:
         futures = [
             executor.submit(
                 fetch_recommendation_translation,
@@ -826,7 +930,7 @@ def fetch_season_translation(media_id, season_number):
 
 def add_season_translations(media_id, seasons):
 
-    with ThreadPoolExecutor(max_workers=min(max_workers_seasons, len(seasons))) as executor:
+    with ThreadPoolExecutor(max_workers=min(max_workers_seasons, len(seasons)+1)) as executor:
         futures = [
             executor.submit(
                 fetch_season_translation,
@@ -897,7 +1001,7 @@ def fetch_episode_translation(media_id, season_number, episode_number):
 
 def add_episode_translations(media_id, season_number, episodes):
 
-    with ThreadPoolExecutor(max_workers=min(max_workers_episodes, len(episodes))) as executor:
+    with ThreadPoolExecutor(max_workers=min(max_workers_episodes, len(episodes)+1)) as executor:
         futures = [
             executor.submit(
                 fetch_episode_translation,
@@ -922,7 +1026,7 @@ def add_episode_translations(media_id, season_number, episodes):
 
     return episodes
 
-def process_season(response, providers_response, translations, media_id):
+def process_season(response, provider, translations, media_id, order_type=None):
     """Process the metadata for the selected season from The Movie Database."""
     episodes = response.get("episodes")
     num_episodes = len(episodes)
@@ -943,7 +1047,11 @@ def process_season(response, providers_response, translations, media_id):
     total_runtime = get_readable_duration(total_runtime) if total_runtime else None
     
     new_epp = add_episode_translations(media_id, response.get("season_number"), response.get("episodes", []))
-    new_epp.sort(key=lambda episode: int(episode["number"]))
+    new_epp.sort(key=lambda episode: int(episode["episode_number"]))
+    
+    providers = {}
+    if provider == "tmdb":
+        providers = get_watch_providers(MediaTypes.SEASON.value, media_id, provider, response.get("season_number"))
     
     return {
         "source": Sources.TMDB.value,
@@ -954,6 +1062,7 @@ def process_season(response, providers_response, translations, media_id):
         "max_progress": episodes[-1]["episode_number"] if episodes else 0,
         "image": get_image_url(response.get("poster_path")),
         "season_number": response.get("season_number"),
+        "order_type": 'official',
         "synopsis": get_synopsis(translations, response),
         "score": get_score(response.get("vote_average")),
         "score_count": score_count,
@@ -965,7 +1074,7 @@ def process_season(response, providers_response, translations, media_id):
             "total_runtime": total_runtime,
         },
         "episodes": new_epp,
-        "providers": providers_response.get("results", {}),
+        "providers": providers,
     }
 
 def get_format(media_type):
@@ -1307,12 +1416,19 @@ def get_related(related_medias, media_type, parent_response=None):
             "media_type": media_type,
             "image": get_image_url(media.get("poster_path")),
         }
+        if media_type == MediaTypes.MOVIE.value:
+             data["order_type"] = None
+        
+        if media_type == MediaTypes.TV.value or media_type == MediaTypes.EPISODE.value:
+             data["order_type"] = 'official'    
+            
         if media_type == MediaTypes.SEASON.value:
             data["media_id"] = parent_response["id"]
             data["title"] = get_title(parent_response.get("translations"), parent_response)
             data["original_title"] = get_title_original(parent_response)
             data["release_year"] = get_release_year(parent_response)
             data["season_number"] = media.get("season_number")
+            data["order_type"] = 'official'
             data["season_title"] = get_season_episode_title(media.get("translations"), media)
             data["season_original_title"] = get_season_episode_title_original(media.get("translations"), media)
             data["first_air_date"] = get_start_date(media.get("air_date"))
@@ -1348,6 +1464,7 @@ def get_collection(collection_response):
             "media_type": MediaTypes.MOVIE.value,
             "image": get_image_url(media.get("poster_path")),
             "media_id": media.get("id"),
+            "order_type": None,
             "title": get_title(media.get("translations"), media),
             "original_title": get_title_original(media),
             "original_language": media.get("original_language"),
@@ -1356,31 +1473,37 @@ def get_collection(collection_response):
         for media in parts
     ]
 
-def filter_providers(all_providers, region):
+def filter_providers(all_providers, region, provider):
     """Filter watch providers by region."""
-    if region == "":
+
+    if provider == "tmdb":
+    
+        if region == "":
+            return None
+
+        if not all_providers:
+            return []
+
+        # Create a dict to get rid of duplicates across different provider types
+        region_providers = all_providers.get(region, {})
+        flatrate_providers = region_providers.get("flatrate", [])
+        free_providers = region_providers.get("free", [])
+        providers = {}
+        for provider in [*flatrate_providers, *free_providers]:
+            providers[provider.get("provider_id")] = provider
+
+        # Convert dict back to list and add image URLs
+        providers = list(providers.values())
+        for provider in providers:
+            provider["image"] = get_image_url(provider.get("logo_path"))
+
+        providers.sort(key=lambda e: e.get("display_priority", 999))
+        return providers
+    
+    else:
         return None
 
-    if not all_providers:
-        return []
-
-    # Create a dict to get rid of duplicates across different provider types
-    region_providers = all_providers.get(region, {})
-    flatrate_providers = region_providers.get("flatrate", [])
-    free_providers = region_providers.get("free", [])
-    providers = {}
-    for provider in [*flatrate_providers, *free_providers]:
-        providers[provider.get("provider_id")] = provider
-
-    # Convert dict back to list and add image URLs
-    providers = list(providers.values())
-    for provider in providers:
-        provider["image"] = get_image_url(provider.get("logo_path"))
-
-    providers.sort(key=lambda e: e.get("display_priority", 999))
-    return providers
-
-def process_episodes(season_metadata, episodes_in_db):
+def process_episodes(season_metadata, episodes_in_db, order_type=None):
     """Process the episodes for the selected season."""
     episodes_metadata = []
 
@@ -1401,6 +1524,7 @@ def process_episodes(season_metadata, episodes_in_db):
                 "source": Sources.TMDB.value,
                 "season_number": season_metadata.get("season_number"),
                 "episode_number": episode_number,
+                "order_type": 'official',
                 "air_date": episode.get("air_date"),  # when unknown, response returns null
                 "episode_release_year": get_release_year(episode),
                 "image": get_image_url(episode.get("still_path")),
@@ -1437,9 +1561,9 @@ def find_next_episode(episode_number, episodes_metadata):
     # Return the next episode number
     return None
 
-def episode(media_id, season_number, episode_number, order_type=None):
+def episode(media_id, season_number, episode_number, order_type=None, provider = None):
     """Return the metadata for the selected episode from The Movie Database."""
-    tv_metadata = tv_with_seasons(media_id, [season_number], order_type=None)
+    tv_metadata = tv_with_seasons(media_id, [season_number], order_type=None, provider = None)
     season_metadata = tv_metadata[f"season/{season_number}"]
 
     for episode in season_metadata.get("episodes"):
@@ -1450,6 +1574,7 @@ def episode(media_id, season_number, episode_number, order_type=None):
                 "season_title": season_metadata.get("season_title"),
                 "season_original_title": season_metadata.get("season_original_title"),
                 "season_release_year": season_metadata.get("season_release_year"),
+                "order_type": 'official',
                 "episode_title": get_season_episode_title(episode.get("translations", {}), episode),
                 "episode_original_title": get_season_episode_title_original(episode.get("translations", {}), episode),
                 "air_date": episode.get("air_date"),
@@ -1473,36 +1598,40 @@ def episode(media_id, season_number, episode_number, order_type=None):
         details=msg,
     )
 
-def watch_provider_regions():
+def watch_provider_regions(provider):
     """Return the available watch provider regions from The Movie Database."""
-    cache_key = f"{Sources.TMDB.value}_watch_provider_regions"
-    data = cache.get(cache_key)
+    if provider == "tmdb":
+        cache_key = f"{Sources.TMDB.value}_provider_watch_provider_regions"
+        data = cache.get(cache_key)
 
-    if data is None:
-        url = f"{base_url}/watch/providers/regions"
-        params = {**tmdb_get_base_params_prefered()}
+        if data is None:
+            url = f"{base_url}/watch/providers/regions"
+            params = {**tmdb_get_base_params_prefered()}
 
-        try:
-            response = services.api_request(
-                Sources.TMDB.value,
-                "GET",
-                url,
-                params=params,
-            )
-        except requests.exceptions.HTTPError as error:
-            handle_error(error)
+            try:
+                response = services.api_request(
+                    Sources.TMDB.value,
+                    "GET",
+                    url,
+                    params=params,
+                )
+            except requests.exceptions.HTTPError as error:
+                handle_error(error)
 
-        data = [("", "Disabled")]
-        regions = response.get("results", [])
-        for region in sorted(regions, key=lambda r: r.get("name", "")):
-            key = region.get("iso_3166_1")
-            name = region.get("name")
-            if key:
-                if not name:
-                    name = key
-                data.append((key, name))
+            data = [("", "Disabled")]
+            regions = response.get("results", [])
+            for region in sorted(regions, key=lambda r: r.get("name", "")):
+                key = region.get("iso_3166_1")
+                name = region.get("name")
+                if key:
+                    if not name:
+                        name = key
+                    data.append((key, name))
 
-        cache.set(cache_key, data)
+            cache.set(cache_key, data)
+            
+        else:
+            data = [("", "Disabled")]
 
     return data
 

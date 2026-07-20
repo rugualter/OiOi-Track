@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_GET, require_POST
 from django.utils.translation import gettext_lazy as _
 from app import helpers
-from app.models import Item, MediaManager, MediaTypes
+from app.models import Item, MediaManager, MediaTypes, MediaSourceChoices, AirOrder
 from app.providers import services
 from lists.forms import CustomListForm
 from lists.models import CustomList, CustomListItem
@@ -251,25 +251,33 @@ def lists_modal(
     source,
     media_type,
     media_id,
+    order_type=None,
     season_number=None,
     episode_number=None,
 ):
+
     """Return the modal showing all custom lists and allowing to add to them."""
+    
+    provider = helpers.get_default_provider(request.user, source)
+    
     try:
         item = Item.objects.get(
             media_id=media_id,
             source=source,
             media_type=media_type,
+            order_type=order_type,
             season_number=season_number,
             episode_number=episode_number,
         )
     except Item.DoesNotExist:
         metadata = services.get_media_metadata(
-            media_type,
-            media_id,
-            source,
-            [season_number],
-            episode_number,
+            media_type = media_type,
+            media_id = media_id,
+            source = source,
+            season_numbers = [season_number],
+            episode_number = episode_number,
+            order_type = order_type,
+            provider = provider,
         )
         item = Item.objects.create(
             media_id=media_id,
@@ -277,16 +285,31 @@ def lists_modal(
             media_type=media_type,
             season_number=season_number,
             episode_number=episode_number,
+            order_type=order_type,
+            provider=provider,
             title=metadata["title"],
             image=metadata["image"],
         )
 
     custom_lists = CustomList.objects.get_user_lists_with_item(request.user, item)
+    order_type = request.user.update_preference(
+        "last_order_type",
+        (order_type or request.user.prefered_air_order),
+    )
+    order_types = [list(choice) for choice in AirOrder.choices]
+        
+    selected_order_type = order_type
 
     return render(
         request,
         "lists/components/fill_lists.html",
-        {"item": item, "custom_lists": custom_lists},
+        {
+            "item": item, 
+            "custom_lists": custom_lists,
+            "order_types": order_types,
+            "selected_order_type": selected_order_type,
+            "source_choices": MediaSourceChoices.all(),
+         },
     )
 
 

@@ -11,12 +11,17 @@ urlpatterns = [
     path("<str:username>/<media_type:media_type>", views.media_list, name="medialist"),
     path("search", views.media_search, name="search"),
     path(
+        "details/<source:source>/<media_type:media_type>/<str:media_id>/<str:order_type>/<str:title>",
+        views.media_details,
+        name="media_details",
+    ),
+    path(
         "details/<source:source>/<media_type:media_type>/<str:media_id>/<str:title>",
         views.media_details,
         name="media_details",
     ),
     path(
-        "details/<source:source>/tv/<str:media_id>/<str:title>/season/<int:season_number>",
+        "details/<source:source>/tv/<str:media_id>/<str:order_type>/<str:title>/season/<int:season_number>",
         views.season_details,
         name="season_details",
     ),
@@ -26,14 +31,24 @@ urlpatterns = [
         name="update_media_score",
     ),
     path(
+        "details/sync/<source:source>/<media_type:media_type>/<str:media_id>/<str:order_type>",
+        views.sync_metadata,
+        name="sync_metadata",
+    ),
+    path(
         "details/sync/<source:source>/<media_type:media_type>/<str:media_id>",
         views.sync_metadata,
         name="sync_metadata",
     ),
     path(
-        "details/sync/<source:source>/<media_type:media_type>/<str:media_id>/<int:season_number>",
+        "details/sync/<source:source>/<media_type:media_type>/<str:media_id>/<str:order_type>/<int:season_number>",
         views.sync_metadata,
         name="sync_metadata",
+    ),
+    path(
+        "track_modal/<source:source>/<media_type:media_type>/<str:media_id>/<str:order_type>",
+        views.track_modal,
+        name="track_modal",
     ),
     path(
         "track_modal/<source:source>/<media_type:media_type>/<str:media_id>",
@@ -41,7 +56,7 @@ urlpatterns = [
         name="track_modal",
     ),
     path(
-        "track_modal/<source:source>/<media_type:media_type>/<str:media_id>/<int:season_number>",
+        "track_modal/<source:source>/<media_type:media_type>/<str:media_id>/<str:order_type>/<int:season_number>",
         views.track_modal,
         name="track_modal",
     ),
@@ -59,17 +74,22 @@ urlpatterns = [
     ),
     path("episode_save", views.episode_save, name="episode_save"),
     path(
+        "history_modal/<source:source>/<media_type:media_type>/<str:media_id>/<str:order_type>",
+        views.history_modal,
+        name="history_modal",
+    ),
+    path(
         "history_modal/<source:source>/<media_type:media_type>/<str:media_id>",
         views.history_modal,
         name="history_modal",
     ),
     path(
-        "history_modal/<source:source>/<media_type:media_type>/<str:media_id>/<int:season_number>",
+        "history_modal/<source:source>/<media_type:media_type>/<str:media_id>/<str:order_type>/<int:season_number>",
         views.history_modal,
         name="history_modal",
     ),
     path(
-        "history_modal/<source:source>/<media_type:media_type>/<str:media_id>/<int:season_number>/<int:episode_number>",
+        "history_modal/<source:source>/<media_type:media_type>/<str:media_id>/<str:order_type>/<int:season_number>/<int:episode_number>",
         views.history_modal,
         name="history_modal",
     ),
@@ -88,4 +108,5 @@ urlpatterns = [
     path("statistics", views.statistics, name="statistics"),
     path("journal", views.journal, name="journal"),
     path("serviceworker.js", views.service_worker, name="service_worker"),
+    path("sample-url/", views.get_sample_url, name="sample_url"),
 ]

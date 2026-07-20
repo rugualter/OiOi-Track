@@ -174,13 +174,6 @@ def media_past_verb(media_type):
     """Return the past tense verb for the given media type."""
     return config.get_verb(media_type, past_tense=True)
 
-
-@register.filter
-def sample_search(media_type, user):
-    """Return a sample search URL for the given media type using GET parameters."""
-    return config.get_sample_search_url(media_type, user)
-
-
 @register.filter
 def short_unit(media_type):
     """Return the short unit for the media type."""
@@ -234,6 +227,80 @@ def get_sidebar_media_types(user):
 def media_color(media_type):
     """Return the color associated with the media type."""
     return config.get_text_color(media_type)
+
+
+@register.filter
+def get_last_or_default_source(user, media_type):
+    """Get attribute from object dynamically."""
+    mapping = {
+        MediaTypes.MOVIE.value: user.last_source_used_movie,
+        MediaTypes.TV.value: user.last_source_used_tv,
+        MediaTypes.SEASON.value: user.last_source_used_tv,
+        MediaTypes.EPISODE.value: user.last_source_used_tv,
+        MediaTypes.ANIME.value: user.last_source_used_anime,
+        MediaTypes.MANGA.value: user.last_source_used_manga,
+        MediaTypes.GAME.value: user.last_source_used_game,
+        MediaTypes.BOOK.value: user.last_source_used_book,
+        MediaTypes.COMIC.value: user.last_source_used_comic,
+        MediaTypes.BOARDGAME.value: user.last_source_used_boardgame,
+    }
+
+    last_source = mapping.get(media_type)
+    
+     # If no last source, get the default
+    if not last_source:
+        last_source = helpers.get_default_source(user, media_type).value
+        
+    return last_source
+
+@register.filter
+def get_last_or_default_display(user, media_type):
+    """Get the display name for a source value."""
+    """Get attribute from object dynamically."""
+    mapping = {
+        MediaTypes.MOVIE.value: user.last_source_used_movie,
+        MediaTypes.TV.value: user.last_source_used_tv,
+        MediaTypes.SEASON.value: user.last_source_used_tv,
+        MediaTypes.EPISODE.value: user.last_source_used_tv,
+        MediaTypes.ANIME.value: user.last_source_used_anime,
+        MediaTypes.MANGA.value: user.last_source_used_manga,
+        MediaTypes.GAME.value: user.last_source_used_game,
+        MediaTypes.BOOK.value: user.last_source_used_book,
+        MediaTypes.COMIC.value: user.last_source_used_comic,
+        MediaTypes.BOARDGAME.value: user.last_source_used_boardgame,
+    }
+    last_source_code = mapping.get(media_type)
+    last_source = None
+    if last_source_code:
+        match last_source_code:
+            case Sources.TMDB.value:
+                last_source = Sources.TMDB.label
+            case Sources.TVDB.value:
+                last_source = Sources.TVDB.label
+            case Sources.MAL.value:
+                last_source = Sources.MAL.label
+            case Sources.MANGAUPDATES.value:
+                last_source = Sources.MANGAUPDATES.label
+            case Sources.IGDB.value:
+                last_source = Sources.IGDB.label
+            case Sources.OPENLIBRARY.value:
+                last_source = Sources.OPENLIBRARY.label
+            case Sources.HARDCOVER.value:
+                last_source = Sources.HARDCOVER.label
+            case Sources.COMICVINE.value:
+                last_source = Sources.COMICVINE.label
+            case Sources.BGG.value:
+                last_source = Sources.BGG.label
+            case Sources.MANUAL.value:
+                last_source = Sources.MANUAL.label
+            case _:
+                last_source = None
+
+     # If no last source, get the default
+    if not last_source:
+        last_source = helpers.get_default_source(user, media_type).label
+        
+    return last_source
 
 
 @register.filter
@@ -293,7 +360,7 @@ def natural_day(datetime, user):
 
 
 @register.filter
-def media_url(media):
+def media_url(media, order_type=None):
     """Return the media URL for both metadata and model object cases."""
     is_dict = isinstance(media, dict)
 
@@ -310,8 +377,20 @@ def media_url(media):
             kwargs={
                 "source": source,
                 "media_id": media_id,
+                "order_type": order_type,
                 "title": slug(title),
                 "season_number": season_number,
+            },
+        )
+    elif media_type in [MediaTypes.TV.value]:
+        return reverse(
+            "media_details",
+            kwargs={
+                "source": source,
+                "media_type": media_type,
+                "media_id": media_id,
+                "order_type": order_type,
+                "title": slug(title),
             },
         )
 
@@ -336,6 +415,7 @@ def media_view_url(view_name, media):
         "source": media["source"] if is_dict else media.source,
         "media_type": media["media_type"] if is_dict else media.media_type,
         "media_id": media["media_id"] if is_dict else media.media_id,
+        "order_type": media["order_type"] if is_dict else media.order_type,
     }
 
     # Handle season/episode numbers if they exist

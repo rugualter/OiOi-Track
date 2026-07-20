@@ -297,16 +297,18 @@ def get_sample_query(media_type):
     return get_property(media_type, "sample_query")
 
 
-def get_sample_search_url(media_type, user):
+def get_sample_search_url(source, media_type, user, order_type):
     """Get the full sample search URL."""
-    if media_type == MediaTypes.SEASON.value:
+    if media_type == MediaTypes.SEASON.value or media_type == MediaTypes.EPISODE.value:
         media_type = MediaTypes.TV.value
 
     query = get_sample_query(media_type)
-    source= helpers.get_default_source(user, media_type)
 
     base_url = reverse("search")
     query_params = {"source": source, "media_type": media_type, "q": query}
+    if order_type and media_type == MediaTypes.TV.value:
+        query_params = {"order_type": order_type, "source": source, "media_type": media_type, "q": query}
+    
     return f"{base_url}?{urlencode(query_params)}"
 
 
