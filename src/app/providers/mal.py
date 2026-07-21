@@ -5,7 +5,7 @@ from zoneinfo import ZoneInfo
 import requests
 from django.conf import settings
 from django.core.cache import cache
-from django.utils.translation import gettext_lazy as _
+
 from app import helpers
 from app.models import MediaTypes, Sources
 from app.providers import services
@@ -27,12 +27,12 @@ def handle_error(error):
         raise services.ProviderAPIError(Sources.MAL.value, error) from json_error
 
     if status_code == requests.codes.forbidden:
-        details = _("API key is missing")
+        details = "API key is missing"
         raise services.ProviderAPIError(Sources.MAL.value, error, details)
     if status_code == requests.codes.bad_request:
         error_message = error_json.get("message")
         if error_message == "Invalid client id":
-            details = _("Invalid API key")
+            details = "Invalid API key"
             raise services.ProviderAPIError(Sources.MAL.value, error, details)
         if error_message == "invalid q":
             return {"data": []}
@@ -242,14 +242,14 @@ def get_readable_status(response):
     """Return the status in human-readable format."""
     # Map status to human-readable values
     status_map = {
-        "finished_airing": _("Finished"),
-        "currently_airing": _("Airing"),
-        "not_yet_aired": _("Upcoming"),
-        "finished": _("Finished"),
-        "currently_publishing": _("Publishing"),
-        "not_yet_published": _("Upcoming"),
-        "on_hiatus": _("On Hiatus"),
-        "discontinued": _("Discontinued"),
+        "finished_airing": "Finished",
+        "currently_airing": "Airing",
+        "not_yet_aired": "Upcoming",
+        "finished": "Finished",
+        "currently_publishing": "Publishing",
+        "not_yet_published": "Upcoming",
+        "on_hiatus": "On Hiatus",
+        "discontinued": "Discontinued",
     }
     if response["status"] in status_map:
         return status_map[response["status"]]
@@ -261,7 +261,7 @@ def get_synopsis(response):
     # when no synopsis, value from response is empty string
     # e.g manga: 160219
     if response["synopsis"] == "":
-        return _("No synopsis available.")
+        return "No synopsis available."
     return response["synopsis"]
 
 

@@ -5,7 +5,7 @@ from datetime import datetime
 
 from django.apps import apps
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
+
 import app
 from app.models import MediaTypes, Sources, Status
 from app.providers import services
@@ -62,7 +62,7 @@ class GoodReadsImporter:
         try:
             decoded_file = self.file.read().decode("utf-8").splitlines()
         except UnicodeDecodeError as e:
-            msg = _("Invalid file format. Please upload a CSV file.")
+            msg = "Invalid file format. Please upload a CSV file."
             raise MediaImportError(msg) from e
 
         reader = DictReader(decoded_file)
@@ -77,14 +77,11 @@ class GoodReadsImporter:
                     row_description,
                     error,
                 )
-                error_msg = _("Error processing entry: %(row_description)s - %(error)s") % {
-                    "row_description": row_description,
-                    "error": error,
-                }
+                error_msg = f"Error processing entry: {row_description} - {error}"
                 self.warnings.append(error_msg)
                 continue
             except Exception as error:
-                error_msg = _("Error processing entry: %(row)s") % {"row": row}
+                error_msg = f"Error processing entry: {row}"
                 raise MediaImportUnexpectedError(error_msg) from error
 
         logger.debug("processed %s", self.bulk_media)
@@ -103,7 +100,7 @@ class GoodReadsImporter:
         return imported_counts, deduplicated_messages
 
     def _row_description(self, row):
-        """Return a useful label for warnings without assuming OiOi-Track fields."""
+        """Return a useful label for warnings without assuming Yamtrack fields."""
         title = row.get("Title")
         book_id = row.get("Book Id")
 
@@ -117,23 +114,22 @@ class GoodReadsImporter:
 
     def _process_row(self, row):
         """Process a single row from the CSV file."""
-        
+        # Skip early (before hitting the provider) when the shelf can't be
+        # mapped to a Yamtrack status.
         if self._determine_status(row) is None:
             shelf = row["Exclusive Shelf"]
             self.warnings.append(
                 f"{self._row_description(row)}: Unsupported shelf '{shelf}'.",
             )
             return
-        
+
         default_source = Sources.HARDCOVER
         book = self._search_book(row, default_source)
 
         if not book:
             self.warnings.append(
-                _("%(title)s: Couldn't find this book via Title or ISBN13 in %(source)s") % {
-                    "title": row["Title"],
-                    "source": default_source.label,
-                }
+                f"{row['Title']}: Couldn't find this book via Title or ISBN13 in "
+                f"{default_source.label}",
             )
             return
 
@@ -199,6 +195,7 @@ class GoodReadsImporter:
         )
 
     def _determine_status(self, row):
+        """Map a Goodreads exclusive shelf to a status, or None if unmapped."""
         status_mapping = {
             "read": Status.COMPLETED,
             "currently-reading": Status.IN_PROGRESS,
@@ -208,7 +205,7 @@ class GoodReadsImporter:
 
         status = status_mapping.get(row["Exclusive Shelf"])
         return status.value if status else None
-    
+
     def _parse_rating(self, raw):
         """Parse a GoodReads 1-5 rating into Yamtrack's 0-10 score scale.
 
@@ -226,7 +223,6 @@ class GoodReadsImporter:
 
         # scale 1-5 onto 0-10, preserving half-stars (3.5 -> 7, 4.5 -> 9)
         return round(value * GOODREADS_SCORE_SCALE, 1)
-    
 
     def _parse_goodreads_date(self, date_str):
         """Parse GoodReads date string (YYYY/MM/DD) into datetime object."""

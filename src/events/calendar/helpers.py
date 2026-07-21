@@ -25,6 +25,7 @@ def date_parser(date_str):
         tzinfo=ZoneInfo("UTC"),
     )
 
+
 def unknown_release_datetime():
     """Return the far-future sentinel datetime for unknown release dates.
 

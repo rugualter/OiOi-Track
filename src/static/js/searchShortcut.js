@@ -6,8 +6,8 @@ if (!window.__searchShortcutBound) {
     // Ignore if typing in an input, textarea, or contenteditable
     const activeEl = document.activeElement;
     const isTyping = activeEl.tagName === 'INPUT' ||
-      activeEl.tagName === 'TEXTAREA' ||
-      activeEl.isContentEditable;
+                     activeEl.tagName === 'TEXTAREA' ||
+                     activeEl.isContentEditable;
 
     if (isTyping) return;
 

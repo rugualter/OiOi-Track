@@ -7,7 +7,7 @@ from django.apps import apps
 from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
+
 import app
 from app import helpers as app_helpers
 from app.models import MediaTypes, Sources, Status
@@ -44,7 +44,7 @@ def get_token(request):
         )
     except services.ProviderAPIError as error:
         if error.status_code == requests.codes.unauthorized:
-            msg = _("Invalid Anilist secret key.")
+            msg = "Invalid Anilist secret key."
             raise MediaImportError(msg) from error
         raise
 
@@ -79,7 +79,7 @@ def get_username_from_oauth(access_token):
         )
     except services.ProviderAPIError as error:
         if error.status_code == requests.codes.unauthorized:
-            msg = _("Invalid AniList access token.")
+            msg = "Invalid AniList access token."
             raise MediaImportError(msg) from error
         raise
 
@@ -224,15 +224,10 @@ class AniListImporter:
         except requests.exceptions.HTTPError as error:
             error_message = error.response.json()["errors"][0].get("message")
             if error_message == "User not found":
-                msg = _("User %(username)s not found.") % {
-                    "username": self.username,
-                }
+                msg = f"User {self.username} not found."
                 raise MediaImportError(msg) from error
-
             if error_message == "Private User":
-                msg = _("User %(username)s is private.") % {
-                    "username": self.username,
-                }
+                msg = f"User {self.username} is private."
                 raise MediaImportError(msg) from error
             raise
 
@@ -260,16 +255,14 @@ class AniListImporter:
                     try:
                         self._process_entry(content, media_type)
                     except Exception as e:
-                        msg = _("Error processing history entry: %(content)s") % {
-                            "content": content,
-                        }
+                        msg = f"Error processing history entry: {content}"
                         raise MediaImportUnexpectedError(msg) from e
 
     def _process_entry(self, content, media_type):
         """Process a single entry from AniList."""
         if content["media"]["idMal"] is None:
             title = content["media"]["title"]["userPreferred"]
-            self.warnings.append(_("%(title)s: No matching MAL ID.") % {"title": title})
+            self.warnings.append(f"{title}: No matching MAL ID.")
             return
 
         # Check if we should process this entry based on mode

@@ -1,7 +1,7 @@
 from django import template
 from django.templatetags.static import static
 from django.utils.html import format_html
-from django.utils.safestring import mark_safe
+
 register = template.Library()
 
 
@@ -9,6 +9,7 @@ register = template.Library()
 def get_attr(obj, attr):
     """Get attribute from object dynamically."""
     return getattr(obj, attr, None)
+
 
 SOURCES_CONFIG = {
     "kitsu": {
@@ -31,8 +32,8 @@ SOURCES_CONFIG = {
         "name": "SIMKL",
         "logo": static("img/simkl-logo.png"),
     },
-    "oioitrack": {
-        "name": "OiOi-Track",
+    "yamtrack": {
+        "name": "YamTrack",
         "logo": static("favicon/apple-touch-icon.png"),
     },
     "hltb": {
@@ -51,10 +52,6 @@ SOURCES_CONFIG = {
         "name": "GoodReads",
         "logo": static("img/logo-goodreads.svg"),
     },
-    "tvtime": {
-        "name": "TV Time",
-        "logo": static("img/TVShow_Time_logo.png"),
-    },
 }
 
 
@@ -72,4 +69,4 @@ def source_display(source_name):
         </div>
     """
 
-    return mark_safe(html)
+    return format_html(html)

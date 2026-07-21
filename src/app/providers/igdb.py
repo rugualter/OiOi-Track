@@ -5,7 +5,7 @@ import requests
 from django.conf import settings
 from django.core.cache import cache
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
+
 from app import helpers
 from app.models import MediaTypes, Sources
 from app.providers import services
@@ -345,7 +345,7 @@ def game(media_id):
             "title": game_response["name"],
             "max_progress": None,
             "image": get_image_url(game_response),
-            "synopsis": game_response.get("summary", _("No synopsis available.")),
+            "synopsis": game_response.get("summary", "No synopsis available."),
             "genres": get_list(game_response, "genres"),
             "score": get_score(game_response),
             "score_count": game_response.get("total_rating_count"),
@@ -387,21 +387,21 @@ def get_image_url(response):
 def get_game_type(game_type_id):
     """Return the game_type of the game."""
     game_type_mapping = {
-        0: _("Main game"),
-        1: _("DLC"),
-        2: _("Expansion"),
-        3: _("Bundle"),
-        4: _("Standalone expansion"),
-        5: _("Mod"),
-        6: _("Episode"),
-        7: _("Season"),
-        8: _("Remake"),
-        9: _("Remaster"),
-        10: _("Expanded game"),
-        11: _("Port"),
-        12: _("Fork"),
-        13: _("Pack"),
-        14: _("Update"),
+        0: "Main game",
+        1: "DLC",
+        2: "Expansion",
+        3: "Bundle",
+        4: "Standalone expansion",
+        5: "Mod",
+        6: "Episode",
+        7: "Season",
+        8: "Remake",
+        9: "Remaster",
+        10: "Expanded game",
+        11: "Port",
+        12: "Fork",
+        13: "Pack",
+        14: "Update",
     }
     return game_type_mapping.get(game_type_id)
 

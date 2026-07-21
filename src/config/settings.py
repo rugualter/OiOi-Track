@@ -1,4 +1,4 @@
-"""Django settings for OiOi-Track project."""
+"""Django settings for Yamtrack project."""
 
 import json
 import sys
@@ -137,22 +137,19 @@ MIDDLEWARE = [
     "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
-    "django.middleware.locale.LocaleMiddleware",
-     "users.middleware.UserLanguageMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.contrib.auth.middleware.LoginRequiredMiddleware",
     "simple_history.middleware.HistoryRequestMiddleware",
     "allauth.account.middleware.AccountMiddleware",
     "app.middleware.ProviderAPIErrorMiddleware",
-    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
-OIOIWATCH_AUTO_LOGIN_USERNAME = config("OIOIWATCH_AUTO_LOGIN_USERNAME", default=None)
-if OIOIWATCH_AUTO_LOGIN_USERNAME:
+YAMTRACK_AUTO_LOGIN_USERNAME = config("YAMTRACK_AUTO_LOGIN_USERNAME", default=None)
+if YAMTRACK_AUTO_LOGIN_USERNAME:
     _index = MIDDLEWARE.index("django.contrib.auth.middleware.AuthenticationMiddleware")
     # This allows auto-login if the user is not already authenticated.
     MIDDLEWARE.insert(_index + 1, "app.middleware.AutoLoginMiddleware")
@@ -190,6 +187,8 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/stable/ref/settings/#databases
 
+# create db folder if it doesn't exist
+Path(BASE_DIR / "db").mkdir(parents=True, exist_ok=True)
 
 if config("DB_HOST", default=None):
     DATABASES = {
@@ -218,7 +217,18 @@ else:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
+            "NAME": BASE_DIR / "db" / "db.sqlite3",
+            "OPTIONS": {
+                "timeout": 10,
+                "transaction_mode": "IMMEDIATE",
+                "init_command": (
+                    "PRAGMA journal_mode=WAL;"
+                    "PRAGMA synchronous=NORMAL;"
+                    "PRAGMA mmap_size=134217728;"
+                    "PRAGMA journal_size_limit=27103364;"
+                    "PRAGMA cache_size=2000;"
+                ),
+            },
         },
     }
 
@@ -232,7 +242,7 @@ CACHES = {
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": REDIS_URL,
         "TIMEOUT": CACHE_TIMEOUT,
-        "VERSION": 16,
+        "VERSION": 17,
         "KEY_PREFIX": KEY_PREFIX,
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
@@ -297,20 +307,11 @@ LOGGING = {
 # Internationalization
 # https://docs.djangoproject.com/en/stable/topics/i18n/
 
-LANGUAGE_CODE = "en-US"
+LANGUAGE_CODE = "en-us"
 
 TIME_ZONE = config("TZ", default="UTC")
 
 USE_I18N = True
-USE_L10N = True
-LANGUAGES = [
-    ("en-US", "English"),
-    ("pt-PT", "Portuguese (Portugal)")
-]
-
-LOCALE_PATHS = [
-    BASE_DIR / "locale",
-]
 
 USE_TZ = True
 
@@ -319,6 +320,7 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
 if BASE_URL:
@@ -337,12 +339,12 @@ LOGIN_REDIRECT_URL = "home"
 
 AUTH_USER_MODEL = "users.User"
 
-# OiOi-Track settings
+# Yamtrack settings
 
 # For CSV imports
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB
 
-VERSION = config("VERSION", default="1.0.0")
+VERSION = config("VERSION", default="dev")
 
 ADMIN_ENABLED = config("ADMIN_ENABLED", default=False, cast=bool)
 
@@ -416,15 +418,6 @@ STEAM_API_KEY = config(
         "",
     ),  # Generate default key https://steamcommunity.com/dev/apikey
 )
-
-EPIC_API_KEY = config(
-    "STEAM_API_KEY",
-    default=secret(
-        "EPIC_API_KEY_FILE",
-        "",
-    ),  # Generate default key https://steamcommunity.com/dev/apikey
-)
-
 
 HARDCOVER_API = config(
     "HARDCOVER_API",

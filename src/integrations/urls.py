@@ -29,12 +29,11 @@ urlpatterns = [
         name="import_anilist_public",
     ),
     path("import/kitsu", views.import_kitsu, name="import_kitsu"),
-    path("import/oioitrack", views.import_oioitrack, name="import_oioitrack"),
+    path("import/yamtrack", views.import_yamtrack, name="import_yamtrack"),
     path("import/hltb", views.import_hltb, name="import_hltb"),
     path("import/steam", views.import_steam, name="import_steam"),
     path("import/imdb", views.import_imdb, name="import_imdb"),
     path("import/goodreads", views.import_goodreads, name="import_goodreads"),
-    path("import/tvtime", views.import_tvtime, name="import_tvtime"),
     path("export/csv", views.export_csv, name="export_csv"),
     path(
         "webhook/jellyfin/<str:token>",
@@ -50,10 +49,5 @@ urlpatterns = [
         "webhook/emby/<str:token>",
         views.emby_webhook,
         name="emby_webhook",
-    ),
-    path(
-        "webhook/kodi/<str:token>",
-        views.kodi_webhook,
-        name="kodi_webhook",
     ),
 ]

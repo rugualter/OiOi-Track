@@ -1,4 +1,3 @@
-from datetime import timedelta
 from pathlib import Path
 
 from django import template
@@ -7,12 +6,10 @@ from django.urls import reverse
 from django.utils import formats, timezone
 from django.utils.dateparse import parse_date
 from django.utils.html import format_html
-from django.utils.safestring import mark_safe
-from django.utils.translation import gettext_lazy as _
 from unidecode import unidecode
 
 from app import config, helpers
-from app.models import MediaTypes, Sources, Status, SOURCE_LOGOS
+from app.models import MediaTypes, Sources, Status
 from users.models import WATCH_PROVIDER_REGION_UNSET
 
 register = template.Library()
@@ -160,9 +157,22 @@ def media_status_readable(media_status):
 
 
 @register.filter
+def default_source(media_type):
+    """Return the default source for the media type."""
+    return config.get_default_source_name(media_type).label
+
+
+@register.filter
 def media_past_verb(media_type):
     """Return the past tense verb for the given media type."""
     return config.get_verb(media_type, past_tense=True)
+
+
+@register.filter
+def sample_search(media_type):
+    """Return a sample search URL for the given media type using GET parameters."""
+    return config.get_sample_search_url(media_type)
+
 
 @register.filter
 def short_unit(media_type):
@@ -220,129 +230,6 @@ def media_color(media_type):
 
 
 @register.filter
-def get_last_or_default_source(user, media_type):
-    """Get attribute from object dynamically."""
-    mapping = {
-        MediaTypes.MOVIE.value: user.last_source_used_movie,
-        MediaTypes.TV.value: user.last_source_used_tv,
-        MediaTypes.SEASON.value: user.last_source_used_tv,
-        MediaTypes.EPISODE.value: user.last_source_used_tv,
-        MediaTypes.ANIME.value: user.last_source_used_anime,
-        MediaTypes.MANGA.value: user.last_source_used_manga,
-        MediaTypes.GAME.value: user.last_source_used_game,
-        MediaTypes.BOOK.value: user.last_source_used_book,
-        MediaTypes.COMIC.value: user.last_source_used_comic,
-        MediaTypes.BOARDGAME.value: user.last_source_used_boardgame,
-    }
-
-    last_source = mapping.get(media_type)
-    
-     # If no last source, get the default
-    if not last_source:
-        last_source = helpers.get_default_source(user, media_type).value
-        
-    return last_source
-
-@register.filter
-def get_last_or_default_display(user, media_type):
-    """Get the display name for a source value."""
-    """Get attribute from object dynamically."""
-    mapping = {
-        MediaTypes.MOVIE.value: user.last_source_used_movie,
-        MediaTypes.TV.value: user.last_source_used_tv,
-        MediaTypes.SEASON.value: user.last_source_used_tv,
-        MediaTypes.EPISODE.value: user.last_source_used_tv,
-        MediaTypes.ANIME.value: user.last_source_used_anime,
-        MediaTypes.MANGA.value: user.last_source_used_manga,
-        MediaTypes.GAME.value: user.last_source_used_game,
-        MediaTypes.BOOK.value: user.last_source_used_book,
-        MediaTypes.COMIC.value: user.last_source_used_comic,
-        MediaTypes.BOARDGAME.value: user.last_source_used_boardgame,
-    }
-    last_source_code = mapping.get(media_type)
-    last_source = None
-    if last_source_code:
-        match last_source_code:
-            case Sources.TMDB.value:
-                last_source = Sources.TMDB.label
-            case Sources.TVDB.value:
-                last_source = Sources.TVDB.label
-            case Sources.MAL.value:
-                last_source = Sources.MAL.label
-            case Sources.MANGAUPDATES.value:
-                last_source = Sources.MANGAUPDATES.label
-            case Sources.IGDB.value:
-                last_source = Sources.IGDB.label
-            case Sources.OPENLIBRARY.value:
-                last_source = Sources.OPENLIBRARY.label
-            case Sources.HARDCOVER.value:
-                last_source = Sources.HARDCOVER.label
-            case Sources.COMICVINE.value:
-                last_source = Sources.COMICVINE.label
-            case Sources.BGG.value:
-                last_source = Sources.BGG.label
-            case Sources.MANUAL.value:
-                last_source = Sources.MANUAL.label
-            case _:
-                last_source = None
-
-     # If no last source, get the default
-    if not last_source:
-        last_source = helpers.get_default_source(user, media_type).label
-        
-    return last_source
-
-
-@register.filter
-def get_last_or_default_logo(user, media_type):
-    """Get the display name for a source value."""
-    """Get attribute from object dynamically."""
-    mapping = {
-        MediaTypes.MOVIE.value: user.last_source_used_movie,
-        MediaTypes.TV.value: user.last_source_used_tv,
-        MediaTypes.SEASON.value: user.last_source_used_tv,
-        MediaTypes.EPISODE.value: user.last_source_used_tv,
-        MediaTypes.ANIME.value: user.last_source_used_anime,
-        MediaTypes.MANGA.value: user.last_source_used_manga,
-        MediaTypes.GAME.value: user.last_source_used_game,
-        MediaTypes.BOOK.value: user.last_source_used_book,
-        MediaTypes.COMIC.value: user.last_source_used_comic,
-        MediaTypes.BOARDGAME.value: user.last_source_used_boardgame,
-    }
-    last_source_code = mapping.get(media_type)
-    last_source = None
-    if last_source_code:
-        match last_source_code:
-            case Sources.TMDB.value:
-                last_source = SOURCE_LOGOS.get(Sources.TMDB.value)
-            case Sources.TVDB.value:
-                last_source = SOURCE_LOGOS.get(Sources.TVDB.value)
-            case Sources.MAL.value:
-                last_source = SOURCE_LOGOS.get(Sources.MAL.value)
-            case Sources.MANGAUPDATES.value:
-                last_source = SOURCE_LOGOS.get(Sources.MANGAUPDATES.value)
-            case Sources.IGDB.value:
-                last_source = SOURCE_LOGOS.get(Sources.IGDB.value)
-            case Sources.OPENLIBRARY.value:
-                last_source = SOURCE_LOGOS.get(Sources.OPENLIBRARY.value)
-            case Sources.HARDCOVER.value:
-                last_source = SOURCE_LOGOS.get(Sources.HARDCOVER.value)
-            case Sources.COMICVINE.value:
-                last_source = SOURCE_LOGOS.get(Sources.COMICVINE.value)
-            case Sources.BGG.value:
-                last_source = SOURCE_LOGOS.get(Sources.BGG.value)
-            case Sources.MANUAL.value:
-                last_source = SOURCE_LOGOS.get(Sources.MANUAL.value)
-            case _:
-                last_source = None
-
-     # If no last source, get the default
-    if not last_source:
-        last_source = SOURCE_LOGOS.get(helpers.get_default_source(user, media_type).value)
-        
-    return last_source
-
-@register.filter
 def journal_accent(accent):
     """Return the badge background class and icon template for a journal accent."""
     return config.get_journal_accent(accent)
@@ -358,6 +245,7 @@ def status_config(status):
 def status_color(status):
     """Return the color associated with the status."""
     return config.get_status_text_color(status)
+
 
 @register.filter
 def status_icon(status):
@@ -386,20 +274,15 @@ def natural_day(datetime, user):
     days = (datetime_date - today).days
 
     if days == 0:
-        return _("Today %(time)s") % {
-            "time": formatted_time,
-        }
-
+        return f"Today {formatted_time}"
     if days == 1:
-        return _("Tomorrow %(time)s") % {
-            "time": formatted_time,
-        }
+        return f"Tomorrow {formatted_time}"
 
     return f"{formatted_date} {formatted_time}"
 
 
 @register.filter
-def media_url(media, order_type=None):
+def media_url(media):
     """Return the media URL for both metadata and model object cases."""
     is_dict = isinstance(media, dict)
 
@@ -416,20 +299,8 @@ def media_url(media, order_type=None):
             kwargs={
                 "source": source,
                 "media_id": media_id,
-                "order_type": order_type,
                 "title": slug(title),
                 "season_number": season_number,
-            },
-        )
-    elif media_type in [MediaTypes.TV.value]:
-        return reverse(
-            "media_details",
-            kwargs={
-                "source": source,
-                "media_type": media_type,
-                "media_id": media_id,
-                "order_type": order_type,
-                "title": slug(title),
             },
         )
 
@@ -443,9 +314,9 @@ def media_url(media, order_type=None):
         },
     )
 
+
 @register.simple_tag
 def media_view_url(view_name, media):
-
     """Return the modal URL for both metadata and model object cases."""
     is_dict = isinstance(media, dict)
 
@@ -454,7 +325,6 @@ def media_view_url(view_name, media):
         "source": media["source"] if is_dict else media.source,
         "media_type": media["media_type"] if is_dict else media.media_type,
         "media_id": media["media_id"] if is_dict else media.media_id,
-        "order_type": media["order_type"] if is_dict else media.order_type,
     }
 
     # Handle season/episode numbers if they exist
@@ -533,7 +403,7 @@ def icon(name, is_active, extra_classes="w-5 h-5"):
         extra_classes=extra_classes,
     )
 
-    return mark_safe(svg)
+    return format_html(svg)
 
 
 @register.filter
@@ -605,6 +475,7 @@ def show_media_score(rating, user):
     """
     return rating is not None and (not user.hide_zero_rating or rating > 0)
 
+
 @register.simple_tag
 def media_section_count(
     media,
@@ -633,6 +504,7 @@ def media_section_count(
     if media.get("time_to_beat"):
         count += 1
     return count
+
 
 @register.filter
 def seconds_to_duration(seconds):

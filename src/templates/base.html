@@ -1,22 +1,22 @@
 {% load static %}
 {% load app_tags %}
-{% load i18n %}
+
 <!DOCTYPE html>
 <html lang="en" class="scheme-dark bg-[#212529]">
   <head>
     {# Required meta tags #}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="keywords" content="{% trans 'OiOi-Track, Media Tracker' %}">
-    <meta name="description" content="{% trans 'Search and track media on OiOi-Track.' %}">
+    <meta name="keywords" content="Yamtrack, Media Tracker">
+    <meta name="description" content="Search and track media on Yamtrack.">
 
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="mobile-web-app-title" content="OiOi-Track">
+    <meta name="mobile-web-app-title" content="Yamtrack">
 
     <title>
       {% block title %}
-        {% trans "OiOi-Track" %}
+        Yamtrack
       {% endblock title %}
     </title>
 
@@ -68,14 +68,7 @@
         <aside class="fixed top-0 left-0 z-40 h-screen w-64 bg-[#1a1d20] transform transition-transform duration-300 ease-in-out border-r border-[#2c3136] -translate-x-full lg:translate-x-0 lg:sticky flex flex-col"
                :class="isMobileMenuOpen ? 'translate-x-0' : ''">
           <div class="h-16 border-b border-[#2c3136] flex items-center px-6">
-            <h1 class="text-2xl font-semibold text-gray-100">
-                {% if user.is_authenticated and user.theme == 'light' %}
-                    <img src="{% static 'img/oioitrack-purple.png' %}" alt="OiOi-Track" class="w-auto" style="height: 40px;">
-                {% else %}
-                    <!-- Default to dark theme (white logo) for non-logged in users or dark theme users -->
-                    <img src="{% static 'img/oioitrack-white.png' %}" alt="OiOi-Track" class="w-auto" style="height: 40px;">
-                {% endif %}
-            </h1>
+            <h1 class="text-2xl font-semibold text-gray-100">Yamtrack</h1>
           </div>
           <nav class="p-4 flex-1 overflow-y-auto">
             {% block sidebar_own_media %}
@@ -90,7 +83,7 @@
                       {% include "app/icons/house.svg" with classes="w-5 h-5" %}
 
                     {% endif %}
-                    <span>{% trans "Home" %}</span>
+                    <span>Home</span>
                   </a>
                 </li>
 
@@ -132,7 +125,7 @@
                         {% include "app/icons/circle-plus.svg" with classes="w-5 h-5" %}
 
                       {% endif %}
-                      <span>{% trans "Create Custom" %}</span>
+                      <span>Create Custom</span>
                     </a>
                   </li>
 
@@ -147,7 +140,7 @@
                         {% include "app/icons/bars-pyramid.svg" with classes="w-5 h-5" %}
 
                       {% endif %}
-                      <span>{% trans "Statistics" %}</span>
+                      <span>Statistics</span>
                     </a>
                   </li>
 
@@ -177,7 +170,7 @@
                         {% include "app/icons/folder-plus.svg" with classes="w-5 h-5" %}
 
                       {% endif %}
-                      <span>{% trans "Lists" %}</span>
+                      <span>Lists</span>
                     </a>
                   </li>
 
@@ -192,7 +185,7 @@
                         {% include "app/icons/calendar.svg" with classes="w-5 h-5" %}
 
                       {% endif %}
-                      <span>{% trans "Calendar" %}</span>
+                      <span>Calendar</span>
                     </a>
                   </li>
                 </ul>
@@ -218,7 +211,7 @@
                     {% include "app/icons/settings.svg" with classes="w-5 h-5" %}
 
                   {% endif %}
-                  <span>{% trans "Settings" %}</span>
+                  <span>Settings</span>
                 </a>
 
                 <form method="post" action="{% url 'account_logout' %}" class="w-full">
@@ -227,7 +220,7 @@
                           class="w-full flex items-center space-x-3 px-4 py-2 rounded-md text-gray-400 hover:bg-[#23272b] hover:text-white transition-colors duration-200 text-sm cursor-pointer">
                     {% include "app/icons/logout.svg" with classes="w-5 h-5" %}
 
-                    <span>{% trans "Logout" %}</span>
+                    <span>Logout</span>
                   </button>
                 </form>
               </div>
@@ -262,148 +255,8 @@
                 {% block search_bar %}
                   <div class="relative w-full max-w-2xl">
                     <form method="get"
-                      action="{% url 'search' %}"
-                      x-data=" { 
-                                  isOpen: false, 
-                                  isSourceOpen: false,
-                                  isOrderOpen: false,
-                                  sampleUrl: '',
-                                  selectedType: { 
-                                    display: '{{ search_type|media_type_readable_plural }}', 
-                                    value: '{{ search_type }}' 
-                                  },
-                                  selectedSource: {
-                                      value: '{{ user|get_last_or_default_source:search_type }}',
-                                      display: '{{ user|get_last_or_default_display:search_type }}',
-                                      logo: '{{ user|get_last_or_default_logo:search_type }}'
-                                  },
-                                  get selectedOrderDisplay() {
-                                      const order = this.orderTypes.find(
-                                          o => o[0] === Alpine.store('order').value
-                                      );
-                                      return order ? order[1] : 'Order';
-                                  },
-                                  mediaTypes: {% get_search_media_types user as search_types %}{{ search_types }},
-                                  sourceChoices: {{ source_choices|safe }}, 
-                                  defaultSources: {
-                                      {% for media_type in media_types_list %}
-                                          '{{ media_type }}': {
-                                              value: '{{ user|get_last_or_default_source:media_type }}',
-                                              display: '{{ user|get_last_or_default_display:media_type }}',
-                                              logo: '{{ user|get_last_or_default_logo:media_type }}'
-                                          }{% if not forloop.last %},{% endif %}
-                                      {% endfor %}
-                                  },
-                                  orderTypes: {{ order_types|safe }},
-                                  get sources() {
-                                      return this.sourceChoices[this.selectedType.value] || [];
-                                  },
-                                  async updateSampleUrl() {
-                                      const params = new URLSearchParams({
-                                          source: this.selectedSource.value,
-                                          media_type: this.selectedType.value,
-                                          order_type: Alpine.store('order').value,
-                                      });
-                                      const response = await fetch(
-                                          `/sample-url/?${params.toString()}`
-                                      );
-                                      const data = await response.json();
-                                      Alpine.store('search').sampleUrl = data.url;
-                                  },
-                                  init() {
-                                      const sources = this.sources;
-                                      if (sources.length > 0) {
-                                          const exists = sources.some(source => source[0] === this.selectedSource.value);
-                                          if (!exists || !this.selectedSource.value) {
-                                              const defaultSource = this.defaultSources[this.selectedType.value];
-                                              if (defaultSource && sources.some(s => s[0] === defaultSource.value)) {
-                                                  this.selectedSource = defaultSource;
-                                              } else {
-                                                  this.selectedSource = {
-                                                      value: sources[0][0],
-                                                      display: sources[0][1],
-                                                      logo: sources[0][2]
-                                                  }
-                                              }
-                                          }
-                                      };
-                                      console.log(
-                                          '{{ selected_order_type|escapejs }}'
-                                      );
-                                      console.log(this.selectedSource.value);
-                                      Alpine.store('order', {
-                                          value: this.selectedSource.value === 'tvdb'
-                                              ? '{{ selected_order_type|escapejs }}'
-                                              : 'official'
-                                      });
-                                      if (this.selectedSource.value === 'tvdb' && this.selectedType.value === 'tv') {
-                                        // optionally set to a default if selected_order_type isn't set
-                                        if (!Alpine.store('order').value || Alpine.store('order').value === 'official') {
-                                          Alpine.store('order').value = this.orderTypes.length ? this.orderTypes[0][0] : 'official';
-                                        }
-                                      };
-                                      Alpine.store('search', {
-                                          sampleUrl: ''
-                                      });
-                                      this.updateSampleUrl();
-                                  },
-                                  selectType(type) {
-                                      this.selectedType = type
-                                      const sources = this.sources;
-                                      const defaultSource = this.defaultSources[type.value];
-                                      
-                                      if (sources.length > 0) {
-                                          if (defaultSource && sources.some(s => s[0] === defaultSource.value)) {
-                                              this.selectedSource = defaultSource;
-                                          } else {
-                                              this.selectedSource = {
-                                                  value: sources[0][0],
-                                                  display: sources[0][1],
-                                                  logo: sources[0][2]
-                                              }
-                                          }
-                                      } else {
-                                          this.selectedSource = {
-                                              value: '',
-                                              display: 'Source'
-                                          }
-                                      }
-                                      this.isOpen = false;
-                                      this.updateOrderForSource(this.selectedSource.value);
-                                      this.updateSampleUrl();
-                                  },
-                                  selectSource(source) {
-                                      this.selectedSource = {
-                                          value: source[0],
-                                          display: source[1],
-                                          logo: source[2]
-                                      }
-                                      this.isSourceOpen = false;
-                                      this.updateOrderForSource(source[0]);
-                                      this.updateSampleUrl();
-                                  },
-                                  updateOrderForSource(sourceValue) {
-                                    if (sourceValue === 'tvdb' && this.selectedType.value === 'tv') {
-                                      // If switching to TVDB, set a default order (e.g., first available or fallback)
-                                      if (this.orderTypes.length) {
-                                        Alpine.store('order').value = this.orderTypes[0][0];
-                                      } else {
-                                        Alpine.store('order').value = 'official';
-                                      };
-                                      this.updateSampleUrl();
-                                    } else {
-                                      // For any other source, force 'official'
-                                      Alpine.store('order').value = 'official';
-                                      this.updateSampleUrl();
-                                    }
-                                  },
-
-                                  getPlaceholder() { 
-                                    return `Search ${this.selectedType.display.toLowerCase()}...` 
-                                  } 
-                                  
-                                }"
-                    >
+                          action="{% url 'search' %}"
+                          x-data=" { isOpen: false, selectedType: { display: '{{ search_type|media_type_readable_plural }}', value: '{{ search_type }}' }, mediaTypes: {% get_search_media_types user as search_types %}{{ search_types }}, getPlaceholder() { return `Search ${this.selectedType.display.toLowerCase()}...` } }">
                       <div class="flex">
                         <div class="relative grow">
                           {# Search input #}
@@ -421,111 +274,32 @@
                         </div>
 
                         <input type="hidden" name="media_type" :value="selectedType.value">
-                        <input type="hidden" name="source" :value="selectedSource.value">
-                        <input type="hidden" name="order_type" :value="$store.order.value">
-
 
                         {# Media type dropdown #}
-                        <div class="relative">
-                          <button type="button"
-                                  @click="isOpen = !isOpen"
-                                  @click.away="isOpen = false"
-                                  class="flex items-center justify-between w-38 px-3 py-2 text-sm text-gray-300 bg-[#272c31] border-l border-[#3a3f45] hover:bg-[#2a2e33] transition-colors cursor-pointer">
-                              <span class="truncate" x-text="selectedType.display"></span>
+                        <button type="button"
+                                @click="isOpen = !isOpen"
+                                @click.away="isOpen = false"
+                                class="flex items-center justify-between max-w-[110px] sm:max-w-none sm:w-32 px-2 sm:px-4 py-2 text-sm text-gray-300 bg-[#272c31] rounded-r-md focus:outline-none focus:ring-2 focus:ring-[#4a9eff] focus:ring-inset hover:bg-[#2a2e33] transition-colors duration-200 cursor-pointer">
+                          <span class="truncate sm:whitespace-normal" x-text="selectedType.display"></span>
+                          {% include "app/icons/chevron-down.svg" with classes="w-4 h-4 ml-2" %}
 
-                              {% include "app/icons/chevron-down.svg" with classes="w-4 h-4 ml-2" %}
-                          </button>
-                          <ul x-cloak
-                              x-show="isOpen"
-                              @keydown.escape.window="isOpen = false"
-                              x-transition:enter="transition ease-out duration-100"
-                              x-transition:enter-start="transform opacity-0 scale-95"
-                              x-transition:enter-end="transform opacity-100 scale-100"
-                              x-transition:leave="transition ease-in duration-75"
-                              x-transition:leave-start="transform opacity-100 scale-100"
-                              x-transition:leave-end="transform opacity-0 scale-95"
-                              class="absolute z-20 py-1 mt-10 overflow-auto text-sm text-gray-300 bg-[#2a2e33] rounded-md shadow-lg left-0 w-38">
-                            <template x-for="type in mediaTypes" :key="type.value">
-                              <li @click="selectType(type)"
-                                  class="px-4 py-2 cursor-pointer hover:bg-[#343a40] transition duration-150 ease-in-out"
-                                  x-text="type.display"></li>
-                            </template>
-                          </ul>
-                        </div>
-                        {# Source type dropdown #}
-                        <div class="relative">
-                          <button type="button" 
-                                  @click="isSourceOpen = !isSourceOpen" 
-                                  @click.away="isSourceOpen = false" 
-                                  class="flex items-center justify-between w-38 px-3 py-2 text-sm text-gray-300 bg-[#272c31] border-l border-[#3a3f45] hover:bg-[#2a2e33] transition-colors cursor-pointer">
-                              {#<span class="truncate" x-text="selectedSource.display || 'Source'"></span>#}
-                              <img
-                                  :src="`{% static '' %}${selectedSource.logo}`"
-                                  :alt="selectedSource.display"
-                                  class="h-5 w-auto object-contain"
-                              >
-                              {% include "app/icons/chevron-down.svg" with classes="w-4 h-4 ml-2" %}
-                          </button>
-
-                          <ul x-show="isSourceOpen" 
-                              @keydown.escape.window="isSourceOpen = false" 
-                              x-transition:enter="transition ease-out duration-100" 
-                              x-transition:enter-start="transform opacity-0 scale-95" 
-                              x-transition:enter-end="transform opacity-100 scale-100" 
-                              x-transition:leave="transition ease-in duration-75" 
-                              x-transition:leave-start="transform opacity-100 scale-100" 
-                              x-transition:leave-end="transform opacity-0 scale-95" 
-                              class="absolute z-20 py-1 mt-10 overflow-auto text-sm text-gray-300 bg-[#2a2e33] rounded-md shadow-lg left-0 w-38">
-                              
-                              <template x-for="source in sources" :key="source[0]">
-                                  <li @click="selectedSource = {value: source[0], display: source[1], logo: source[2]}; isSourceOpen = false; updateSampleUrl(); updateOrderForSource(source[0]);" 
-                                      class="px-4 py-2 cursor-pointer hover:bg-[#343a40]"
-                                      {#x-text="source[1]"#}>
-                                      <img
-                                          :src="`{% static '' %}${source[2]}`"
-                                          :alt="source[1]"
-                                          class="h-5 w-auto max-w-20 object-contain"
-                                      >
-                                  </li>
-                              </template>
-                          </ul>
-                        </div>
-
-                        {# Order dropdown – visible only when TVDB is selected #}
-                        <div
-                            class="relative min-w-[9rem]"
-                            x-show="selectedSource.value === 'tvdb' && selectedType.value === 'tv'"
-                            x-cloak
-                        >
-                            <button
-                                type="button"
-                                @click="isOrderOpen = !isOrderOpen"
-                                @click.away="isOrderOpen = false"
-                                class="flex items-center justify-between w-full px-3 py-2 text-sm text-gray-300 bg-[#272c31] border-l border-[#3a3f45] hover:bg-[#2a2e33] transition-colors cursor-pointer"
-                            >
-                                <span class="truncate" x-text="selectedOrderDisplay"></span>
-
-                                {% include "app/icons/chevron-down.svg" with classes="w-4 h-4 ml-2" %}
-                            </button>
-
-                            <ul
-                                x-cloak
-                                x-show="isOrderOpen"
-                                @keydown.escape.window="isOrderOpen = false"
-                                x-transition
-                                class="absolute left-0 z-20 mt-2 w-full py-1 text-sm text-gray-300 bg-[#2a2e33] rounded-md shadow-lg"
-                            >
-                                <template x-for="order in orderTypes" :key="order[0]">
-                                    <li
-                                        @click="$store.order.value = order[0]; isOrderOpen = false; updateSampleUrl();"
-                                        class="px-4 py-2 cursor-pointer hover:bg-[#343a40]"
-                                        x-text="order[1]"
-                                    ></li>
-                                </template>
-                            </ul>
-                        </div>
-
-
+                        </button>
+                        <ul x-cloak
+                            x-show="isOpen"
+                            @keydown.escape.window="isOpen = false"
+                            x-transition:enter="transition ease-out duration-100"
+                            x-transition:enter-start="transform opacity-0 scale-95"
+                            x-transition:enter-end="transform opacity-100 scale-100"
+                            x-transition:leave="transition ease-in duration-75"
+                            x-transition:leave-start="transform opacity-100 scale-100"
+                            x-transition:leave-end="transform opacity-0 scale-95"
+                            class="absolute z-20 py-1 mt-12 overflow-auto text-sm text-gray-300 bg-[#2a2e33] rounded-md shadow-lg right-0 w-32">
+                          <template x-for="type in mediaTypes" :key="type.value">
+                            <li @click="selectedType = type; isOpen = false"
+                                class="px-4 py-2 cursor-pointer hover:bg-[#343a40] transition duration-150 ease-in-out"
+                                x-text="type.display"></li>
+                          </template>
+                        </ul>
                       </div>
                     </form>
                   </div>

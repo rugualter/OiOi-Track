@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.utils.translation import gettext_lazy as _
+
 from lists.models import CustomList, CustomListItem
 
 
@@ -14,12 +14,12 @@ class CustomListAdmin(admin.ModelAdmin):
     autocomplete_fields = ["collaborators"]
     filter_horizontal = ["collaborators"]
 
-    @admin.display(description=_("Number of items"))
+    @admin.display(description="Number of items")
     def item_count(self, obj):
         """Return the number of items in the list."""
         return obj.items.count()
 
-    @admin.display(description=_("Last updated"))
+    @admin.display(description="Last updated")
     def get_last_update(self, obj):
         """Return the date of the last item added."""
         last_update = CustomListItem.objects.get_last_added_date(obj)
@@ -37,7 +37,7 @@ class CustomListItemAdmin(admin.ModelAdmin):
     autocomplete_fields = ["item", "custom_list"]
     readonly_fields = ["date_added"]
 
-    @admin.display(description=_("Media Type"))
+    @admin.display(description="Media Type")
     def get_media_type(self, obj):
         """Return the media type of the item."""
         return obj.item.get_media_type_display()

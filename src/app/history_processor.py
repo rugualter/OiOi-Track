@@ -6,7 +6,7 @@ from django.db.models import Q
 from django.template.defaultfilters import pluralize
 from django.utils import formats, timezone
 from django.utils.dateparse import parse_datetime
-from django.utils.translation import gettext_lazy as _
+
 from app import config, helpers
 from app.models import MediaTypes, Status
 from app.templatetags import app_tags
@@ -442,14 +442,10 @@ def apply_date_status_integration(changes, user):
         and status_change
         and status_change["new"] == Status.IN_PROGRESS.value
     ):
-        date_changes["start_date"]["description"] = _(
-            "Started on %(date)s"
-        ) % {
-            "date": app_tags.datetime_format(
-                date_changes["start_date"]["new"],
-                user,
-            )
-        }
+        date_changes["start_date"]["description"] = (
+            f"Started on "
+            f"{app_tags.datetime_format(date_changes['start_date']['new'], user)}"
+        )
         changes["status_change"] = None
 
     # Process end date with status
@@ -458,14 +454,10 @@ def apply_date_status_integration(changes, user):
         and status_change
         and status_change["new"] == Status.COMPLETED.value
     ):
-        date_changes["end_date"]["description"] = _(
-            "Finished on %(date)s"
-        ) % {
-            "date": app_tags.datetime_format(
-                date_changes["end_date"]["new"],
-                user,
-            )
-        }
+        date_changes["end_date"]["description"] = (
+            f"Finished on "
+            f"{app_tags.datetime_format(date_changes['end_date']['new'], user)}"
+        )
         changes["status_change"] = None
 
 
@@ -498,130 +490,75 @@ def format_description(field_name, old_value, new_value, media_type=None, user=N
     # If old_value is None, treat it as an initial setting
     if old_value is None:
         if field_name == "status":
-            action = _("Marked as")
+            verb = config.get_verb(media_type, past_tense=False)
+            action = "Marked as"
             if new_value == Status.IN_PROGRESS.value:
-                verb = config.get_verb(media_type, past_tense=False, gerund=True)
-                return _("%(action)s currently %(verb)s") % {
-                    "action": action,
-                    "verb": verb,
-                }
-
+                return f"{action} currently {verb}ing"
             if new_value == Status.COMPLETED.value:
-                return _("%(action)s finished") % {
-                    "action": action,
-                    "verb": verb,
-                }
-
+                return f"{action} finished {verb}ing"
             if new_value == Status.PLANNING.value:
-                verb = config.get_verb(media_type, past_tense=False, gerund=True)
-                return _("Added to %(verb)s list") % {
-                    "verb": verb,
-                }
-
+                return f"Added to {verb}ing list"
             if new_value == Status.DROPPED.value:
-                return _("%(action)s dropped") % {
-                    "action": action,
-                }
-
+                return f"{action} dropped"
             if new_value == Status.PAUSED.value:
-                verb = config.get_verb(media_type, past_tense=False, gerund=True)
-                return _("%(action)s paused") % {
-                    "action": action,
-                    "verb": verb,
-                }
+                return f"{action} paused {verb}ing"
 
         if field_name == "score":
-            return _("Rated %(score)s") % {
-                "score": new_value,
-            }
+            return f"Rated {new_value}/10"
 
         if field_name == "progress" and media_type:
-            verb = _(config.get_verb(media_type, past_tense=True)).title()
-
+            verb = config.get_verb(media_type, past_tense=True).title()
             if media_type == MediaTypes.GAME.value:
-                return _("%(verb)s for %(duration)s") % {
-                    "verb": verb,
-                    "duration": helpers.minutes_to_hhmm(new_value),
-                }
-
-            unit = _(config.get_unit(media_type, short=False).lower())
-
-            return _("%(verb)s up to %(unit)s %(value)s") % {
-                "verb": verb,
-                "unit": unit,
-                "value": new_value,
-            }
+                return f"{verb} for {helpers.minutes_to_hhmm(new_value)}"
+            unit = config.get_unit(media_type, short=False).lower()
+            return f"{verb} up to {unit} {new_value}"
 
         if field_name in ["start_date", "end_date"]:
-            field_display = _("Started") if field_name == "start_date" else _("Finished")
-
+            field_display = "Started" if field_name == "start_date" else "Finished"
             if new_value:
-                return _("%(field)s on %(date)s") % {
-                    "field": field_display,
-                    "date": new_value,
-                }
-
-            return _("%(field)s without date") % {
-                "field": field_display,
-            }
+                return f"{field_display} on {new_value}"
+            return f"{field_display} without date"
 
         if field_name == "notes":
-            return _("Added notes")
+            return "Added notes"
 
-        return _("Set %(field)s to %(value)s") % {
-            "field": field_name.replace("_", " ").lower(),
-            "value": new_value,
-        }
+        return f"Set {field_name.replace('_', ' ').lower()} to {new_value}"
 
     # Regular change (old_value to new_value)
     if field_name == "status":
-        verb = _(config.get_verb(media_type, past_tense=False, gerund=True))
-
+        verb = config.get_verb(media_type, past_tense=False)
+        # Status transitions
         transitions = {
             (
                 Status.PLANNING.value,
                 Status.IN_PROGRESS.value,
-            ): _("Currently %(verb)s") % {"verb": verb},
-
+            ): f"Currently {verb}ing",
             (
                 Status.IN_PROGRESS.value,
                 Status.COMPLETED.value,
-            ): _("Finished %(verb)s") % {"verb": verb},
-
+            ): f"Finished {verb}ing",
             (
                 Status.IN_PROGRESS.value,
                 Status.PAUSED.value,
-            ): _("Paused %(verb)s") % {"verb": verb},
-
+            ): f"Paused {verb}ing",
             (
                 Status.PAUSED.value,
                 Status.IN_PROGRESS.value,
-            ): _("Resumed %(verb)s") % {"verb": verb},
-
+            ): f"Resumed {verb}ing",
             (
                 Status.IN_PROGRESS.value,
                 Status.DROPPED.value,
-            ): _("Stopped %(verb)s") % {"verb": verb},
+            ): f"Stopped {verb}ing",
         }
-
         return transitions.get(
             (old_value, new_value),
-            _("Changed status from %(old)s to %(new)s") % {
-                "old": old_value,
-                "new": new_value,
-            },
+            f"Changed status from {old_value} to {new_value}",
         )
 
     if field_name == "score":
         if old_value == 0:
-            return _("Rated %(score)s") % {
-                "score": new_value,
-            }
-
-        return _("Changed rating from %(old)s to %(new)s") % {
-            "old": old_value,
-            "new": new_value,
-        }
+            return f"Rated {new_value}/10"
+        return f"Changed rating from {old_value} to {new_value}"
 
     if field_name == "progress":
         diff = new_value - old_value
@@ -629,49 +566,29 @@ def format_description(field_name, old_value, new_value, media_type=None, user=N
 
         if media_type == MediaTypes.GAME.value:
             if diff > 0:
-                return _("Added %(time)s of playtime") % {
-                    "time": helpers.minutes_to_hhmm(diff_abs),
-                }
+                return f"Added {helpers.minutes_to_hhmm(diff_abs)} of playtime"
+            return f"Removed {helpers.minutes_to_hhmm(diff_abs)} of playtime"
 
-            return _("Removed %(time)s of playtime") % {
-                "time": helpers.minutes_to_hhmm(diff_abs),
-            }
+        unit = (
+            f"{config.get_unit(media_type, short=False).lower()}{pluralize(new_value)}"
+        )
 
-        unit = _(
-            config.get_unit(media_type, short=False).lower()
-        ) + pluralize(new_value)
-
-        return _("Progress set to %(value)s %(unit)s") % {
-            "value": new_value,
-            "unit": unit,
-        }
+        return f"Progress set to {new_value} {unit}"
 
     if field_name in ["start_date", "end_date"]:
-        field_display = _("Start") if field_name == "start_date" else _("End")
+        field_display = "Start" if field_name == "start_date" else "End"
         if not new_value:
-            return _("Removed %(field)s date") % {
-                "field": field_display.lower(),
-            }
+            return f"Removed {field_display.lower()} date"
         if not old_value:
-             return _("%(field)s date set on %(date)s") % {
-                "field": field_display,
-                "date": new_value,
-            }
-        return _("%(field)s date changed to %(date)s") % {
-                "field": field_display,
-                "date": new_value,
-            }
+            return f"{field_display}ed on {new_value}"
+        return f"{field_display} date changed to {new_value}"
 
     if field_name == "notes":
         if not old_value:
-            return _("Added notes")
+            return "Added notes"
         if not new_value:
-            return _("Removed notes")
-        return _("Updated notes")
+            return "Removed notes"
+        return "Updated notes"
 
     field_label = field_name.replace("_", " ").lower()
-    return _("Updated %(field)s from %(old)s to %(new)s") % {
-        "field": field_label,
-        "old": old_value,
-        "new": new_value,
-    }
+    return f"Updated {field_label} from {old_value} to {new_value}"

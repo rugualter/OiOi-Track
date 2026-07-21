@@ -1,4 +1,4 @@
-"""WSGI config for OiOi-Track project.
+"""WSGI config for yamtrack project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 

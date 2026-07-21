@@ -50,6 +50,7 @@ class SentinelDatetime:
             tzinfo=UTC,
         )
 
+
 class EventManager(models.Manager):
     """Custom manager for the Event model."""
 

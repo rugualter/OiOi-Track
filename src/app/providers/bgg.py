@@ -9,7 +9,7 @@ import logging
 import requests
 from django.conf import settings
 from django.core.cache import cache
-from django.utils.translation import gettext_lazy as _
+
 from app import helpers
 from app.models import MediaTypes, Sources
 from app.providers import services
@@ -27,7 +27,7 @@ def handle_error(error):
         raise services.ProviderAPIError(
             Sources.BGG.value,
             error,
-            _("BGG API requires authorization"),
+            "BGG API requires authorization",
         )
     raise services.ProviderAPIError(Sources.BGG.value, error)
 
@@ -190,8 +190,7 @@ def boardgame(media_id):
 def get_title(item):
     """Return the primary name of the game."""
     name_elem = item.find(".//name[@type='primary']")
-    unknown = _("Unknown")
-    return name_elem.get("value", unknown) if name_elem is not None else unknown
+    return name_elem.get("value", "Unknown") if name_elem is not None else "Unknown"
 
 
 def get_image(item):
@@ -207,7 +206,7 @@ def get_description(item):
     desc_elem = item.find("description")
     if desc_elem is not None and desc_elem.text:
         return desc_elem.text
-    return _("No synopsis available")
+    return "No synopsis available"
 
 
 def get_year(item):
@@ -225,14 +224,8 @@ def get_players(item):
 
     if minplayers and maxplayers:
         if minplayers == maxplayers:
-            return _("%(count)s players") % {
-                "count": minplayers,
-            }
-        return _("%(min)s-%(max)s players") % {
-            "min": minplayers,
-            "max": maxplayers,
-        }
-
+            return f"{minplayers} players"
+        return f"{minplayers}-{maxplayers} players"
     return None
 
 

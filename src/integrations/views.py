@@ -15,12 +15,12 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
-from django.utils.translation import gettext_lazy as _
+
 import users
 from app import helpers as app_helpers
 from integrations import exports, tasks
 from integrations.imports import anilist, helpers, simkl, trakt
-from integrations.webhooks import emby, jellyfin, kodi, plex
+from integrations.webhooks import emby, jellyfin, plex
 
 logger = logging.getLogger(__name__)
 
@@ -61,11 +61,11 @@ def import_trakt_private(request):
     state_token = request.GET.get("state")
     state = request.session.get(state_token)
     if not state:
-        messages.error(request, _("Invalid or expired Trakt authorization request."))
+        messages.error(request, "Invalid or expired Trakt authorization request.")
         return redirect("import_data")
 
     if not request.GET.get("code"):
-        messages.error(request, _("Trakt authorization failed."))
+        messages.error(request, "Trakt authorization failed.")
         return redirect("import_data")
 
     redirect_uri = state.get("redirect_uri") or app_helpers.build_absolute_app_url(
@@ -87,7 +87,7 @@ def import_trakt_private(request):
             username=oauth_callback["username"],
             redirect_uri=redirect_uri,
         )
-        messages.info(request, _("The task to import media from Trakt has been queued."))
+        messages.info(request, "The task to import media from Trakt has been queued.")
     else:
         helpers.create_import_schedule(
             oauth_callback["username"],
@@ -108,7 +108,7 @@ def import_trakt_public(request):
     """View for importing Trakt data using public username."""
     username = request.POST.get("user")
     if not username:
-        messages.error(request, _("Trakt username is required."))
+        messages.error(request, "Trakt username is required.")
         return redirect("import_data")
 
     mode = request.POST["mode"]
@@ -121,7 +121,7 @@ def import_trakt_public(request):
             mode=mode,
             username=username,
         )
-        messages.info(request, _("The task to import media from Trakt has been queued."))
+        messages.info(request, "The task to import media from Trakt has been queued.")
     else:
         helpers.create_import_schedule(
             username=username,
@@ -178,7 +178,7 @@ def import_simkl_private(request):
 
     if frequency == "once":
         tasks.import_simkl.delay(token=enc_token, user_id=request.user.id, mode=mode)
-        messages.info(request, _("The task to import media from Simkl has been queued."))
+        messages.info(request, "The task to import media from Simkl has been queued.")
     else:
         helpers.create_import_schedule(
             oauth_callback["username"],
@@ -198,7 +198,7 @@ def import_mal(request):
     """View for importing anime and manga data from MyAnimeList."""
     username = request.POST.get("user")
     if not username:
-        messages.error(request, _("MyAnimeList username is required."))
+        messages.error(request, "MyAnimeList username is required.")
         return redirect("import_data")
 
     mode = request.POST["mode"]
@@ -208,7 +208,7 @@ def import_mal(request):
         tasks.import_mal.delay(username=username, user_id=request.user.id, mode=mode)
         messages.info(
             request,
-            _("The task to import media from MyAnimeList has been queued."),
+            "The task to import media from MyAnimeList has been queued.",
         )
     else:
         import_time = request.POST["time"]
@@ -263,7 +263,7 @@ def import_anilist_private(request):
     username = oauth_callback["username"]
 
     if not username:
-        messages.error(request, _("AniList username is required."))
+        messages.error(request, "AniList username is required.")
         return redirect("import_data")
 
     frequency = request.session[state_token]["frequency"]
@@ -277,7 +277,7 @@ def import_anilist_private(request):
             username=username,
             token=enc_token,
         )
-        messages.info(request, _("AniList import queued."))
+        messages.info(request, "AniList import queued.")
     else:
         helpers.create_import_schedule(
             username=username,
@@ -296,7 +296,7 @@ def import_anilist_public(request):
     """View for importing anime and manga data from AniList."""
     username = request.POST.get("user")
     if not username:
-        messages.error(request, _("AniList username is required."))
+        messages.error(request, "AniList username is required.")
         return redirect("import_data")
 
     mode = request.POST["mode"]
@@ -309,7 +309,7 @@ def import_anilist_public(request):
             mode=mode,
             username=username,
         )
-        messages.info(request, _("AniList import queued."))
+        messages.info(request, "AniList import queued.")
     else:
         helpers.create_import_schedule(
             username=username,
@@ -327,7 +327,7 @@ def import_kitsu(request):
     """View for importing anime and manga data from Kitsu by user ID."""
     kitsu_id = request.POST.get("user")
     if not kitsu_id:
-        messages.error(request, _("Kitsu user ID is required."))
+        messages.error(request, "Kitsu user ID is required.")
         return redirect("import_data")
 
     mode = request.POST["mode"]
@@ -335,7 +335,7 @@ def import_kitsu(request):
 
     if frequency == "once":
         tasks.import_kitsu.delay(username=kitsu_id, user_id=request.user.id, mode=mode)
-        messages.info(request, _("The task to import media from Kitsu has been queued."))
+        messages.info(request, "The task to import media from Kitsu has been queued.")
     else:
         import_time = request.POST["time"]
         helpers.create_import_schedule(
@@ -350,23 +350,23 @@ def import_kitsu(request):
 
 
 @require_POST
-def import_oioitrack(request):
-    """View for importing anime and manga data from OiOi-Track CSV."""
-    file = request.FILES.get("oioitrack_csv")
+def import_yamtrack(request):
+    """View for importing anime and manga data from Yamtrack CSV."""
+    file = request.FILES.get("yamtrack_csv")
 
     if not file:
-        messages.error(request, _("OiOi-Track CSV file is required."))
+        messages.error(request, "Yamtrack CSV file is required.")
         return redirect("import_data")
 
     mode = request.POST["mode"]
-    tasks.import_oioitrack.delay(
-        file=request.FILES["oioitrack_csv"],
+    tasks.import_yamtrack.delay(
+        file=request.FILES["yamtrack_csv"],
         user_id=request.user.id,
         mode=mode,
     )
     messages.info(
         request,
-        _("The task to import media from OiOi-Track CSV file has been queued."),
+        "The task to import media from Yamtrack CSV file has been queued.",
     )
     return redirect("import_data")
 
@@ -377,7 +377,7 @@ def import_hltb(request):
     file = request.FILES.get("hltb_csv")
 
     if not file:
-        messages.error(request, _("HowLongToBeat CSV file is required."))
+        messages.error(request, "HowLongToBeat CSV file is required.")
         return redirect("import_data")
 
     mode = request.POST["mode"]
@@ -388,7 +388,7 @@ def import_hltb(request):
     )
     messages.info(
         request,
-        _("The task to import media from HowLongToBeat CSV file has been queued."),
+        "The task to import media from HowLongToBeat CSV file has been queued.",
     )
     return redirect("import_data")
 
@@ -398,7 +398,7 @@ def import_steam(request):
     """View for importing game data from Steam."""
     steam_id = request.POST.get("user")
     if not steam_id:
-        messages.error(request, _("Steam ID is required."))
+        messages.error(request, "Steam ID is required.")
         return redirect("import_data")
 
     mode = request.POST["mode"]
@@ -406,7 +406,7 @@ def import_steam(request):
 
     if frequency == "once":
         tasks.import_steam.delay(username=steam_id, user_id=request.user.id, mode=mode)
-        messages.info(request, _("The task to import media from Steam has been queued."))
+        messages.info(request, "The task to import media from Steam has been queued.")
     else:
         import_time = request.POST["time"]
         helpers.create_import_schedule(
@@ -425,7 +425,7 @@ def import_imdb(request):
     file = request.FILES.get("imdb_csv")
 
     if not file:
-        messages.error(request, _("IMDB CSV file is required."))
+        messages.error(request, "IMDB CSV file is required.")
         return redirect("import_data")
 
     mode = request.POST["mode"]
@@ -436,31 +436,10 @@ def import_imdb(request):
     )
     messages.info(
         request,
-        _("The task to import media from IMDB CSV file has been queued."),
+        "The task to import media from IMDB CSV file has been queued.",
     )
     return redirect("import_data")
 
-@require_POST
-def import_tvtime(request):
-    """View for importing TV shows from a TV Time export zip."""
-    file = request.FILES.get("tvtime_zip")
-
-    if not file:
-        messages.error(request, _("TV Time export zip file is required."))
-        return redirect("import_data")
-
-    mode = request.POST["mode"]
-    tasks.import_tvtime.delay(
-        file=request.FILES["tvtime_zip"],
-        user_id=request.user.id,
-        mode=mode,
-        password=request.POST.get("tvtime_password") or None,
-    )
-    messages.info(
-        request,
-        _("The task to import media from the TV Time export has been queued."),
-    )
-    return redirect("import_data")
 
 @require_POST
 def import_goodreads(request):
@@ -468,7 +447,7 @@ def import_goodreads(request):
     file = request.FILES.get("goodreads_csv")
 
     if not file:
-        messages.error(request, _("GoodReads CSV file is required."))
+        messages.error(request, "GoodReads CSV file is required.")
         return redirect("import_data")
 
     mode = request.POST["mode"]
@@ -479,7 +458,7 @@ def import_goodreads(request):
     )
     messages.info(
         request,
-        _("The task to import media from GoodReads CSV file has been queued."),
+        "The task to import media from GoodReads CSV file has been queued.",
     )
     return redirect("import_data")
 
@@ -491,7 +470,7 @@ def export_csv(request):
     response = StreamingHttpResponse(
         streaming_content=exports.generate_rows(request.user),
         content_type="text/csv",
-        headers={"Content-Disposition": f'attachment; filename="oioitrack_{now}.csv"'},
+        headers={"Content-Disposition": f'attachment; filename="yamtrack_{now}.csv"'},
     )
     logger.info("User %s started CSV export", request.user.username)
     return response
@@ -580,39 +559,9 @@ def emby_webhook(request, token):
     data = request.POST.get("data")
     if not data:
         logger.warning("Missing payload in Emby webhook request")
-        return HttpResponse(_("Missing payload"), status=400)
-
-    payload = json.loads(data)
-    processor = emby.EmbyWebhookProcessor()
-    processor.process_payload(payload, user)
-    return HttpResponse(status=200)
-
-@login_not_required
-@csrf_exempt
-@require_POST
-def kodi_webhook(request, token):
-    """Handle Kodi webhook notifications for media playback."""
-    try:
-        user = users.models.User.objects.get(token=token)
-    except ObjectDoesNotExist:
-        logger.warning(
-            "Could not process Kodi webhook: Invalid token: %s",
-            token,
-        )
-        return HttpResponse(status=401)
-
-    # Attach User instance so history_user_id is populated
-    request.user = user
-
-    # The payload is sent in JSON format as the body of a
-    # HTTP POST request.
-
-    data = request.body
-    if not data:
-        logger.warning("Missing payload in Kodi webhook request")
         return HttpResponse("Missing payload", status=400)
 
     payload = json.loads(data)
-    processor = kodi.KodiWebhookProcessor()
+    processor = emby.EmbyWebhookProcessor()
     processor.process_payload(payload, user)
     return HttpResponse(status=200)

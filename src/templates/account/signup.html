@@ -1,13 +1,12 @@
 {% extends "account/base_entrance.html" %}
 {% load allauth account %}
-{% load i18n %}
 
 {% block head_title %}
-  {% trans "Register" %}
+  Register
 {% endblock head_title %}
 
 {% block content_title %}
-  {% trans "Create your account" %}
+  Create your account
 {% endblock content_title %}
 
 {% block content %}
@@ -23,7 +22,7 @@
       {% endslot %}
       {% slot actions %}
         {% element button tags="prominent,signup" type="submit" icon='<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path> <circle cx="9" cy="7" r="4"></circle><line x1="19" x2="19" y1="8" y2="14"></line><line x1="22" x2="16" y1="11" y2="11"></line>' %}
-          {% trans "Create Account" %}
+          Create Account
         {% endelement %}
       {% endslot %}
     {% endelement %}
@@ -35,9 +34,9 @@
 
   <div class="mt-6 text-center">
     <p class="text-gray-400">
-      {% trans "Already have an account?" %}
+      Already have an account?
       <a class="text-indigo-400 hover:text-indigo-300"
-         href="{% url 'account_login' %}">{% trans "Sign in" %}</a>
+         href="{% url 'account_login' %}">Sign in</a>
     </p>
   </div>
 

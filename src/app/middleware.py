@@ -14,7 +14,7 @@ class AutoLoginMiddleware:
 
     def __call__(self, request):
         """Handle authorization request."""
-        auto_login_username = settings.OIOIWATCH_AUTO_LOGIN_USERNAME
+        auto_login_username = settings.YAMTRACK_AUTO_LOGIN_USERNAME
         if auto_login_username and not request.user.is_authenticated:
             user_model = get_user_model()
             try:

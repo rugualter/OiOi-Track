@@ -4,7 +4,7 @@ from django.db.models import Exists, OuterRef, Q, Subquery
 from django.utils import timezone
 
 from app.models import Item, MediaTypes, Sources
-from app.providers import services
+from app.providers import services, tmdb
 from events.models import Event
 
 logger = logging.getLogger(__name__)
@@ -40,27 +40,17 @@ def filter_items_to_fetch(items):
     now = timezone.now()
     one_year_ago = now - timezone.timedelta(days=365)
 
-    tv_items_to_include = []
-    movie_items_to_include = []
-    
-    sources = items.values_list("source", flat=True).distinct()
-    
-    for source in sources:
-        tv_items = items.filter(
-            media_type=MediaTypes.TV.value,
-            source=source,
-        )
-        tv_items_to_include.extend(
-            get_tv_items_to_include(tv_items, source)
-        )
+    tv_items = items.filter(
+        media_type=MediaTypes.TV.value,
+        source=Sources.TMDB.value,
+    )
+    tv_items_to_include = get_tv_items_to_include(tv_items)
 
-        movie_items = items.filter(
-            media_type=MediaTypes.MOVIE.value,
-            source=source,
-        )
-        movie_items_to_include.extend(
-            get_movie_items_to_include(movie_items, source)
-        )
+    movie_items = items.filter(
+        media_type=MediaTypes.MOVIE.value,
+        source=Sources.TMDB.value,
+    )
+    movie_items_to_include = get_movie_items_to_include(movie_items)
 
     future_events = Event.objects.filter(
         item=OuterRef("pk"),
@@ -86,20 +76,20 @@ def filter_items_to_fetch(items):
 
     other_q = (
         ~Q(media_type__in=[MediaTypes.TV.value, MediaTypes.COMIC.value])
-        & ~Q(media_type=MediaTypes.MOVIE.value)
+        & ~Q(media_type=MediaTypes.MOVIE.value, source=Sources.TMDB.value)
         & (Q(event__isnull=True) | Q(has_future_events=True))
     )
 
     return annotated.filter(tv_q | movie_q | comic_q | other_q).distinct()
 
 
-def get_tv_items_to_include(tv_items, source):
-    """Return tracked Provider TV item ids that should be refreshed."""
+def get_tv_items_to_include(tv_items):
+    """Return tracked TMDB TV item ids that should be refreshed."""
     tracked_count = tv_items.count()
     if not tracked_count:
         return []
 
-    changed_tv_ids = get_changed_tv_ids(source)
+    changed_tv_ids = get_changed_tmdb_tv_ids()
     season_events = Event.objects.filter(
         item__media_id=OuterRef("media_id"),
         item__source=OuterRef("source"),
@@ -117,7 +107,7 @@ def get_tv_items_to_include(tv_items, source):
     )
 
     logger.info(
-        "TV selection: %d tracked Provider shows, %d changed ids, %d selected",
+        "TV selection: %d tracked TMDB shows, %d changed ids, %d selected",
         tracked_count,
         len(changed_tv_ids),
         len(included_tv_rows),
@@ -126,7 +116,7 @@ def get_tv_items_to_include(tv_items, source):
     for item in included_tv_rows:
         if item["media_id"] in changed_tv_ids:
             logger.info(
-                "TV selection: including %s (%s) because Provider reported changes",
+                "TV selection: including %s (%s) because TMDB reported changes",
                 item["title"],
                 item["media_id"],
             )
@@ -140,12 +130,12 @@ def get_tv_items_to_include(tv_items, source):
     return [item["id"] for item in included_tv_rows]
 
 
-def get_movie_items_to_include(movie_items, source):
-    """Return tracked Provider movie item ids that should be refreshed."""
+def get_movie_items_to_include(movie_items):
+    """Return tracked TMDB movie item ids that should be refreshed."""
     if not movie_items.exists():
         return []
 
-    changed_movie_ids = get_changed_movie_ids(source)
+    changed_movie_ids = get_changed_tmdb_movie_ids()
 
     return list(
         movie_items.filter(
@@ -154,25 +144,19 @@ def get_movie_items_to_include(movie_items, source):
     )
 
 
-def get_changed_tv_ids(source):
-    """Return changed Provider TV ids, tolerating provider errors."""
+def get_changed_tmdb_tv_ids():
+    """Return changed TMDB TV ids, tolerating provider errors."""
     try:
-        return services.get_media_metadata(
-            media_type = "get_changed_tv_ids", 
-            source = source
-        )
+        return tmdb.tv_changes()
     except services.ProviderAPIError:
-        logger.warning("Failed to fetch Provider TV changes")
+        logger.warning("Failed to fetch TMDB TV changes")
         return set()
 
 
-def get_changed_movie_ids(source):
-    """Return changed Provider movie ids, tolerating provider errors."""
+def get_changed_tmdb_movie_ids():
+    """Return changed TMDB movie ids, tolerating provider errors."""
     try:
-        return services.get_media_metadata(
-            media_type = "get_changed_movie_ids", 
-            source = source
-        )
+        return tmdb.movie_changes()
     except services.ProviderAPIError:
-        logger.warning("Failed to fetch Provider movie changes")
+        logger.warning("Failed to fetch TMDB movie changes")
         return set()

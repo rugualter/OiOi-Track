@@ -13,9 +13,9 @@ def process_comic(item, events_bulk):
     logger.info("Fetching releases for %s", item)
     try:
         metadata = services.get_media_metadata(
-            media_type = item.media_type,
-            media_id = item.media_id,
-            source = item.source,
+            item.media_type,
+            item.media_id,
+            item.source,
         )
     except services.ProviderAPIError:
         logger.warning(

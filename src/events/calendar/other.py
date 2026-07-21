@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from app import config, helpers
+from app import config
 from app.models import MediaTypes, Sources
 from app.providers import services
 from events.models import Event
@@ -12,16 +12,14 @@ from .helpers import date_parser
 logger = logging.getLogger(__name__)
 
 
-def process_other(item, events_bulk, user):
+def process_other(item, events_bulk):
     """Process other types of items and add events to the event list."""
     logger.info("Fetching releases for %s", item)
     try:
-        provider = helpers.get_default_provider(user, item.source),
         metadata = services.get_media_metadata(
-            media_type = item.media_type,
-            media_id = item.media_id,
-            order_type = item.order_type,
-            source = item.source,
+            item.media_type,
+            item.media_id,
+            item.source,
         )
     except services.ProviderAPIError:
         logger.warning(

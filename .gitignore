@@ -5,9 +5,6 @@ __pycache__
 .venv
 src/staticfiles
 site
-.vscode
-node_modules
-package-lock.json
 src/db/db.sqlite3
 db.sqlite3-shm
 db.sqlite3-wal
@@ -20,4 +17,3 @@ requests.http
 TODO.txt
 .codex
 .cache
-.github

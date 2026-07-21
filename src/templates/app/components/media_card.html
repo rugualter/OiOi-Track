@@ -1,9 +1,9 @@
 {% load app_tags %}
-{% load i18n %}
+
 <div class="{% if secondary_color %}bg-[#39404b]{% else %}bg-[#2a2f35]{% endif %} rounded-lg overflow-hidden shadow-lg relative {% if active %}ring-[1.5px] ring-slate-400{% endif %}"
      x-data="{ trackOpen: false, listsOpen: false, historyOpen: false }">
   <div class="relative">
-    <a href="{{ item|media_url:item.order_type }}">
+    <a href="{{ item|media_url }}">
       <img alt="{{ title }}"
            class="lazyload w-full {% if from_grid %}aspect-2/3{% else %}h-48{% endif %} bg-[#3e454d] {% if item.image != IMG_NONE %}object-cover{% endif %}"
            data-src="{{ item.image }}"
@@ -53,7 +53,7 @@
 
     {% with user=target_user|default:user %}
       <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 hover-tap:opacity-100{% if user.clickable_media_cards %} pointer-coarse:hidden{% endif %}">
-        <a href="{{ item|media_url:item.order_type }}" class="absolute inset-0"></a>
+        <a href="{{ item|media_url }}" class="absolute inset-0"></a>
         {% if request.user == user %}
           <div class="relative flex items-center justify-center space-x-2.5">
             {% if item.media_type == MediaTypes.EPISODE.value %}
@@ -68,7 +68,7 @@
             {% else %}
               {# Track Button #}
               <button class="p-2.5 bg-indigo-600 text-white rounded-full hover:bg-indigo-500 hover:scale-110 hover:shadow-[0_0_15px_rgba(99,102,241,0.5)] transition-all duration-200 cursor-pointer"
-                      title="{% trans 'Add to tracker' %}"
+                      title="Add to tracker"
                       hx-get="{% media_view_url 'track_modal' item %}"
                       hx-vals='{"return_url": "{{ request.get_full_path|urlencode }}", "instance_id": "{{ media.id }}"}'
                       hx-target="#{% component_id 'track' item media.id %}"
@@ -78,7 +78,7 @@
 
             {# Lists Button #}
             <button class="p-2.5 bg-emerald-600 text-white rounded-full hover:bg-emerald-500 hover:scale-110 hover:shadow-[0_0_15px_rgba(16,185,129,0.5)] transition-all duration-200 cursor-pointer"
-                    title="{% trans 'Add to custom lists' %}"
+                    title="Add to custom lists"
                     hx-get="{% media_view_url 'lists_modal' item %}"
                     hx-vals='{"return_url": "{{ request.get_full_path|urlencode }}"}'
                     hx-target="#{% component_id 'lists' item %}"
@@ -87,7 +87,7 @@
 
             {# History Button #}
             <button class="p-2.5 bg-amber-600 text-white rounded-full hover:bg-amber-500 hover:scale-110 hover:shadow-[0_0_15px_rgba(245,158,11,0.5)] transition-all duration-200 cursor-pointer"
-                    title="{% trans 'View your activity history' %}"
+                    title="View your activity history"
                     hx-get="{% media_view_url 'history_modal' item %}"
                     hx-vals='{"return_url": "{{ request.get_full_path|urlencode }}"}'
                     hx-target="#{% component_id 'history' item %}"
@@ -100,34 +100,9 @@
   </div>
 
   <div class="p-3">
-    <div class="text-xs text-gray-400 mt-1 line-clamp-1">
-      {% if item.media_type == MediaTypes.SEASON.value %}
-        {% if item.season_number == 0 %}
-          {% trans 'Specials' %}
-        {% else %}
-          {% trans 'Season' %} {{ item.season_number }}
-        {% endif %}
-      {% endif %}
-    </div>
-    <a href="{{ item|media_url:item.order_type }}"
+    <a href="{{ item|media_url }}"
        class="text-sm font-semibold text-white hover:text-indigo-400 transition duration-300 line-clamp-1"
-       {% if item.media_type == MediaTypes.SEASON.value %}
-        {% if item.season_title is None or item.season_title == item.title %}
-          {% if item.season_number == 0 %}
-            title="{% trans 'Specials' %}">{% trans 'Specials' %}</a>
-          {% else %}
-            title="{% trans 'Season' %} {{ item.season_number }}">{% trans 'Season' %} {{ item.season_number }}</a>
-          {% endif %}
-        {% else %}
-          title="{{ title }}">{{ item.season_title }}</a>
-        {% endif %}
-       {% else %}
-        title="{{ title }}">{{ item.title }}</a>
-       {% endif %}
-       
-    {% if item.release_year or item.season_release_year %}
-      <div class="text-xs text-gray-400 mt-1 line-clamp-1">{% firstof item.season_release_year item.release_year %}</div>
-    {% endif %} 
+       title="{{ title }}">{{ title }}</a>
   </div>
 
   {% if item.media_type == MediaTypes.EPISODE.value %}

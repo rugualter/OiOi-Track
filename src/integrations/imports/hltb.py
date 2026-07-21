@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 
 from django.apps import apps
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
+
 import app
 import app.providers
 from app.models import MediaTypes, Sources, Status
@@ -57,7 +57,7 @@ class HowLongToBeatImporter:
         try:
             decoded_file = self.file.read().decode("utf-8").splitlines()
         except UnicodeDecodeError as e:
-            msg = _("Invalid file format. Please upload a CSV file.")
+            msg = "Invalid file format. Please upload a CSV file."
             raise MediaImportError(msg) from e
 
         reader = DictReader(decoded_file)
@@ -72,7 +72,7 @@ class HowLongToBeatImporter:
             try:
                 self._process_first_pass(row, media_id_counts, media_id_titles)
             except Exception as error:
-                error_msg = _("Error processing entry: %(row)s") % {"row": row}
+                error_msg = f"Error processing entry: {row}"
                 raise MediaImportUnexpectedError(error_msg) from error
 
         # Second pass: add non-duplicates to bulk_media
@@ -80,7 +80,7 @@ class HowLongToBeatImporter:
             try:
                 self._process_second_pass(row, media_id_counts)
             except Exception as error:
-                error_msg = _("Error processing entry: %(row)s") % {"row": row}
+                error_msg = f"Error processing entry: {row}"
                 raise MediaImportUnexpectedError(error_msg) from error
 
         # Add consolidated warnings for duplicates
@@ -102,10 +102,8 @@ class HowLongToBeatImporter:
         game = self._search_game(row)
         if not game:
             self.warnings.append(
-                _("%(title)s: Couldn't find a game with this title in %(source)s") % {
-                    "title": row["Title"],
-                    "source": Sources.IGDB.label,
-                }
+                f"{row['Title']}: Couldn't find a game with this title in "
+                f"{Sources.IGDB.label}",
             )
             return
 
@@ -148,10 +146,8 @@ class HowLongToBeatImporter:
                 titles = media_id_titles[media_id]
                 title_list = helpers.join_with_commas_and(titles)
                 self.warnings.append(
-                    _("%(title_list)s: They were matched to the same ID %(media_id)s - none imported") % {
-                        "title_list": title_list,
-                        "media_id": media_id,
-                    }
+                    f"{title_list}: They were matched to the same ID {media_id} "
+                    "- none imported",
                 )
 
     def _format_time(self, time):

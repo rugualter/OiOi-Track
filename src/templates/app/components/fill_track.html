@@ -1,5 +1,5 @@
 {% load widget_tweaks %}
-{% load i18n %}
+
 <div class="bg-[#2a2f35] p-6 rounded-lg max-h-[70svh] overflow-y-auto">
   <div class="flex items-center justify-between mb-6">
     <h2 class="text-2xl font-bold text-white line-clamp-1">{{ title }}</h2>
@@ -17,13 +17,12 @@
     {{ form.source }}
     {{ form.media_id }}
     {{ form.season_number }}
-    {{ form.order_type }}
 
     {% with total_fields=form.fields|length %}
       {% if total_fields > 8 %}<div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4">{% endif %}
 
         {% for field in form %}
-          {% if field.name != 'notes' and field.name != 'instance_id' and field.name != 'media_type' and field.name != 'source' and field.name != 'media_id' and field.name != 'season_number' and field.name != 'order_type' %}
+          {% if field.name != 'notes' and field.name != 'instance_id' and field.name != 'media_type' and field.name != 'source' and field.name != 'media_id' and field.name != 'season_number' %}
             <div class="mb-5 {% if field.name == 'status' and total_fields|divisibleby:2 %}sm:col-span-2{% endif %}">
               <label class="block text-sm font-medium mb-1 text-gray-300"
                      for="{{ field.id_for_label }}">{{ field.label }}</label>
@@ -70,9 +69,9 @@
       <button type="submit"
               class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 cursor-pointer">
         {% if media %}
-          {% trans "Update" %}
+          Update
         {% else %}
-          {% trans "Add" %}
+          Add
         {% endif %}
       </button>
       <button type="submit"
@@ -80,7 +79,7 @@
               hx-include="closest form"
               hx-swap="none"
               class="px-4 py-2 rounded-md transition duration-300 {% if media %}bg-red-700 text-white hover:bg-red-800 cursor-pointer{% else %}bg-gray-600 text-gray-300 cursor-not-allowed{% endif %}"
-              {% if not media %}disabled{% endif %}>{% trans "Delete" %}</button>
+              {% if not media %}disabled{% endif %}>Delete</button>
     </div>
   </form>
 </div>

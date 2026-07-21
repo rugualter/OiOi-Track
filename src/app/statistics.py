@@ -405,7 +405,6 @@ def _consumed_value_and_unit(media_type, queryset, item_count):
     return value, unit[1].lower() if unit else None
 
 
-
 def _consumption_label(media_type):
     """Human media type name for a consumption card (season data is TV)."""
     if media_type == MediaTypes.SEASON.value:
@@ -461,7 +460,6 @@ def get_consumption_stats(user_media, media_count):
         )
 
     return results
-
 
 
 def _build_month_labels(date_range, week_start_weekday):
