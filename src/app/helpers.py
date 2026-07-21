@@ -1,8 +1,8 @@
-import json
 from datetime import date, datetime
 from urllib.parse import parse_qsl, urlencode, urljoin, urlparse
-
+import json
 from django.apps import apps
+from app import config
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
@@ -13,8 +13,9 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.encoding import iri_to_uri
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.translation import gettext_lazy as _
 
-from app.models import BasicMedia, Item, MediaTypes, Status
+from app.models import BasicMedia, Item, MediaTypes, Status, Sources
 
 YEAR_ONLY_PARTS = 1
 YEAR_MONTH_PARTS = 2
@@ -35,7 +36,7 @@ def get_owned_media_or_404(request, media_type, instance_id, *, prefetch=False):
             instance_id,
         )
     except ObjectDoesNotExist as exc:
-        msg = "Media not found"
+        msg = _("Media not found")
         raise Http404(msg) from exc
 
 
@@ -99,7 +100,10 @@ def redirect_back(request):
 
         # Reconstruct the URL without the removed params
         new_query = urlencode(query_params)
+
+        # Convert back to a URL string
         clean_url = iri_to_uri(parsed_url._replace(query=new_query).geturl())
+
     else:
         clean_url = None
 
@@ -115,7 +119,7 @@ def redirect_back(request):
             },
         )
         return response
-
+    
     if clean_url:
         return HttpResponseRedirect(clean_url)
 
@@ -268,3 +272,62 @@ def _should_skip_completed_recommendation(user, section_name, media_item):
         and media_item is not None
         and media_item.status == Status.COMPLETED.value
     )
+
+
+def sample_search(source, media_type, user, order_type):
+    """Return a sample search URL for the given media type using GET parameters."""
+    return config.get_sample_search_url(source, media_type, user, order_type)
+
+
+def get_default_source(user, media_type):
+    """Return the user's preferred source for a media type."""
+
+    mapping = {
+        MediaTypes.MOVIE.value: user.default_movie_source,
+        MediaTypes.TV.value: user.default_tv_source,
+        MediaTypes.SEASON.value: user.default_tv_source,
+        MediaTypes.EPISODE.value: user.default_tv_source,
+        MediaTypes.ANIME.value: user.default_anime_source,
+        MediaTypes.MANGA.value: user.default_manga_source,
+        MediaTypes.GAME.value: user.default_game_source,
+        MediaTypes.BOOK.value: user.default_book_source,
+        MediaTypes.COMIC.value: user.default_comic_source,
+        MediaTypes.BOARDGAME.value: user.default_boardgame_source,
+    }
+
+    return mapping.get(media_type)
+
+def get_default_provider(user, source):
+    """Return the user's preferred provider for a source."""
+
+    provider_map = {
+        Sources.TMDB: user.watch_provider_tmdb,
+        Sources.TVDB: user.watch_provider_tvdb,
+        ##Sources.MAL: user.anime_provider_mal,
+        ##Sources.MANGAUPDATES: user.manga_provider_mangaupdates,
+        ##Sources.IGDB: user.game_provider_igdb,
+        ##Sources.OPENLIBRARY: user.book_provider_openlibrary,
+        ##Sources.HARDCOVER: user.book_provider_hardcover,
+        ##Sources.COMICVINE: user.comic_provider_comicvine,
+        ##Sources.BGG: user.boardgame_provider_bgg,
+    }
+
+    return provider_map.get(source)
+
+
+def get_default_region_provider(user, source):
+    """Return the user's preferred provider for a source."""
+
+    provider_map = {
+        Sources.TMDB: user.watch_provider_region_tmdb,
+        Sources.TVDB: user.watch_provider_region_tvdb,
+        ##Sources.MAL: user.anime_provider_mal,
+        ##Sources.MANGAUPDATES: user.manga_provider_mangaupdates,
+        ##Sources.IGDB: user.game_provider_igdb,
+        ##Sources.OPENLIBRARY: user.book_provider_openlibrary,
+        ##Sources.HARDCOVER: user.book_provider_hardcover,
+        ##Sources.COMICVINE: user.comic_provider_comicvine,
+        ##Sources.BGG: user.boardgame_provider_bgg,
+    }
+
+    return provider_map.get(source)

@@ -1,7 +1,8 @@
 from django.urls import reverse
 from django.utils.http import urlencode
-
+from django.utils.translation import gettext_lazy as _
 from app.models import MediaTypes, Sources, Status
+from app import  helpers
 
 # --- Color Constants ---
 COLORS = {
@@ -13,7 +14,7 @@ COLORS = {
     },
     "purple": {
         "text": "text-purple-400",
-        "background": "bg-purple-400",
+        "background_strong": "bg-indigo-500",
         "hex": "#a855f7",
     },
     "indigo": {
@@ -71,11 +72,10 @@ COLORS = {
 # --- Central Configuration Dictionary ---
 MEDIA_TYPE_CONFIG = {
     MediaTypes.TV.value: {
-        "sources": [Sources.TMDB],
-        "default_source": Sources.TMDB,
+        "sources": [Sources.TMDB, Sources.TVDB],
         "sample_query": "Breaking Bad",
         "unicode_icon": "📺",
-        "verb": ("watch", "watched"),
+        "verb": (_("watch"), _("watched"), _("watching")),
         "text_color": COLORS["emerald"]["text"],
         "stats_color": COLORS["emerald"]["hex"],
         "svg_icon": """
@@ -83,10 +83,9 @@ MEDIA_TYPE_CONFIG = {
             <polyline points="17 2 12 7 7 2"/>""",
     },
     MediaTypes.SEASON.value: {
-        "sources": [Sources.TMDB],
-        "default_source": Sources.TMDB,
+        "sources": [Sources.TMDB, Sources.TVDB],
         "unicode_icon": "📺",
-        "verb": ("watch", "watched"),
+        "verb": (_("watch"), _("watched"), _("watching")),
         "text_color": COLORS["purple"]["text"],
         "stats_color": COLORS["purple"]["hex"],
         "svg_icon": """
@@ -97,20 +96,18 @@ MEDIA_TYPE_CONFIG = {
         "unit": ("E", "Episode"),
     },
     MediaTypes.EPISODE.value: {
-        "sources": [Sources.TMDB],
-        "default_source": Sources.TMDB,
+        "sources": [Sources.TMDB, Sources.TVDB],
         "unicode_icon": "📺",
-        "verb": ("watch", "watched"),
+        "verb": (_("watch"), _("watched"), _("watching")),
         "text_color": COLORS["indigo"]["text"],
         "stats_color": COLORS["indigo"]["hex"],
         "svg_icon": """<polygon points="6 3 20 12 6 21 6 3"/>""",
     },
     MediaTypes.MOVIE.value: {
-        "sources": [Sources.TMDB],
-        "default_source": Sources.TMDB,
+        "sources": [Sources.TMDB, Sources.TVDB],
         "sample_query": "The Shawshank Redemption",
         "unicode_icon": "🎬",
-        "verb": ("watch", "watched"),
+        "verb": (_("watch"), _("watched"), _("watching")),
         "text_color": COLORS["orange"]["text"],
         "stats_color": COLORS["orange"]["hex"],
         "svg_icon": """
@@ -126,10 +123,9 @@ MEDIA_TYPE_CONFIG = {
     },
     MediaTypes.ANIME.value: {
         "sources": [Sources.MAL],
-        "default_source": Sources.MAL,
         "sample_query": "Perfect Blue",
         "unicode_icon": "🎭",
-        "verb": ("watch", "watched"),
+        "verb": (_("watch"), _("watched"), _("watching")),
         "text_color": COLORS["blue"]["text"],
         "stats_color": COLORS["blue"]["hex"],
         "svg_icon": """
@@ -140,10 +136,9 @@ MEDIA_TYPE_CONFIG = {
     },
     MediaTypes.MANGA.value: {
         "sources": [Sources.MAL, Sources.MANGAUPDATES],
-        "default_source": Sources.MAL,
         "sample_query": "Berserk",
         "unicode_icon": "📚",
-        "verb": ("read", "read"),
+        "verb": (_("read"), _("read"), _("reading")),
         "text_color": COLORS["red"]["text"],
         "stats_color": COLORS["red"]["hex"],
         "svg_icon": """
@@ -158,10 +153,9 @@ MEDIA_TYPE_CONFIG = {
     },
     MediaTypes.GAME.value: {
         "sources": [Sources.IGDB],
-        "default_source": Sources.IGDB,
         "sample_query": "Half-Life",
         "unicode_icon": "🎮",
-        "verb": ("play", "played"),
+        "verb": (_("play"), _("played"), _("playing")),
         "text_color": COLORS["yellow"]["text"],
         "stats_color": COLORS["yellow"]["hex"],
         "svg_icon": """
@@ -180,10 +174,9 @@ MEDIA_TYPE_CONFIG = {
     },
     MediaTypes.BOOK.value: {
         "sources": [Sources.HARDCOVER, Sources.OPENLIBRARY],
-        "default_source": Sources.HARDCOVER,
         "sample_query": "The Great Gatsby",
         "unicode_icon": "📖",
-        "verb": ("read", "read"),
+        "verb": (_("read"), _("read"), _("reading")),
         "text_color": COLORS["fuchsia"]["text"],
         "stats_color": COLORS["fuchsia"]["hex"],
         "svg_icon": """
@@ -194,10 +187,9 @@ MEDIA_TYPE_CONFIG = {
     },
     MediaTypes.COMIC.value: {
         "sources": [Sources.COMICVINE],
-        "default_source": Sources.COMICVINE,
         "sample_query": "Batman",
         "unicode_icon": "📕",
-        "verb": ("read", "read"),
+        "verb": (_("read"), _("read"), _("reading")),
         "text_color": COLORS["cyan"]["text"],
         "stats_color": COLORS["cyan"]["hex"],
         "svg_icon": """
@@ -209,10 +201,9 @@ MEDIA_TYPE_CONFIG = {
     },
     MediaTypes.BOARDGAME.value: {
         "sources": [Sources.BGG],
-        "default_source": Sources.BGG,
         "sample_query": "Catan",
         "unicode_icon": "🎲",
-        "verb": ("play", "played"),
+        "verb": (_("play"), _("played"), _("playing")),
         "text_color": COLORS["lime"]["text"],
         "stats_color": COLORS["lime"]["hex"],
         "svg_icon": """
@@ -260,7 +251,7 @@ STATUS_CONFIG = {
         "text_color": COLORS["red"]["text"],
         "stats_color": COLORS["red"]["hex"],
         "background_color": COLORS["red"]["background"],
-        "background_color_strong": COLORS["red"]["background_strong"],
+         "background_color_strong": COLORS["red"]["background_strong"],
         "icon": "app/icons/states/dropped.svg",
     },
 }
@@ -301,25 +292,23 @@ def get_sources(media_type):
     return get_property(media_type, "sources")
 
 
-def get_default_source_name(media_type):
-    """Get the human-readable default source name."""
-    return get_property(media_type, "default_source")
-
-
 def get_sample_query(media_type):
     """Get the sample search query."""
     return get_property(media_type, "sample_query")
 
 
-def get_sample_search_url(media_type):
+def get_sample_search_url(source, media_type, user, order_type):
     """Get the full sample search URL."""
-    if media_type == MediaTypes.SEASON.value:
+    if media_type == MediaTypes.SEASON.value or media_type == MediaTypes.EPISODE.value:
         media_type = MediaTypes.TV.value
 
     query = get_sample_query(media_type)
 
     base_url = reverse("search")
-    query_params = {"media_type": media_type, "q": query}
+    query_params = {"source": source, "media_type": media_type, "q": query}
+    if order_type and media_type == MediaTypes.TV.value:
+        query_params = {"order_type": order_type, "source": source, "media_type": media_type, "q": query}
+    
     return f"{base_url}?{urlencode(query_params)}"
 
 
@@ -328,10 +317,16 @@ def get_unicode_icon(media_type):
     return get_property(media_type, "unicode_icon")
 
 
-def get_verb(media_type, past_tense):
+def get_verb(media_type, past_tense=False, gerund=False):
     """Get the verb (present or past tense)."""
     verbs = get_property(media_type, "verb")
-    return verbs[1] if past_tense else verbs[0]
+    #if gerund verbs[2], if past_tense verbs[1], else verbs[0]
+    if gerund:
+        return verbs[2]
+    elif past_tense:
+        return verbs[1]
+    else:
+        return verbs[0]
 
 
 def get_text_color(media_type):
@@ -391,7 +386,6 @@ def get_status_stats_color(status):
 def get_status_background_color(status):
     """Get the background color for a status."""
     return get_status_property(status, "background_color")
-
 
 def get_status_icon(status):
     """Get the icon template for a status."""

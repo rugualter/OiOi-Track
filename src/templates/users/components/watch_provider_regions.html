@@ -1,0 +1,11 @@
+<select 
+    name="watch_provider_region_{{ source }}"
+    class="w-full p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600">
+
+    {% for choice in regions %}
+        <option value="{{ choice.0 }}" {% if choice.0 == default %}selected{% endif %}>
+            {{ choice.1 }}
+        </option>
+    {% endfor %}
+
+</select>

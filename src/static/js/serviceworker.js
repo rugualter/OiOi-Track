@@ -1,4 +1,4 @@
-const CACHE_NAME = 'yamtrack-v1';
+const CACHE_NAME = 'oioitrack-v1';
 const urlsToCache = [
   '/',
   '/static/css/main.css',
@@ -24,7 +24,7 @@ self.addEventListener('fetch', (event) => {
       .then((response) => {
         return response || fetch(event.request);
       }
-    )
+      )
   );
 });
 

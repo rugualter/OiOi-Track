@@ -1,20 +1,215 @@
 {% extends "users/base.html" %}
 {% load user_tags %}
 {% load app_tags %}
-
+{% load i18n %}
 {% block title %}
-  Preferences - Yamtrack
+  {% trans "Preferences - OiOi-Track" %}
 {% endblock title %}
 
 {% block settings_content %}
   <div class="bg-[#2a2f35] rounded-lg p-6">
     <div class="flex items-center mb-4">
       {% include "app/icons/vertical-sliders.svg" with classes="w-6 h-6 text-indigo-400 mr-3" %}
-      <h2 class="text-xl font-semibold">Preferences</h2>
+      <h2 class="text-xl font-semibold">{% trans "Preferences" %}</h2>
     </div>
-    <p class="text-gray-400 mb-5 text-sm">Customize the look and behavior of the application.</p>
+    <p class="text-gray-400 mb-5 text-sm">{% trans "Customize the look and behavior of the application." %}</p>
     <form method="post">
       {% csrf_token %}
+
+
+      {# Language Selection #}
+      <div class="mb-5">
+        <div class="flex items-center justify-between p-3 bg-[#39404b] rounded-md">
+          <div class="flex-1">
+            <div class="flex items-center text-gray-200 mb-1">
+              {% include "app/icons/language.svg" with classes="w-5 h-5 mr-2 mt-1" %}
+              <span class="text-sm font-medium">{% trans "Language" %}</span>
+            </div>
+            <p class="text-xs text-gray-400 ml-7">
+              {% trans "Main Language preference for the application. This will affect the language of the interface and any content and component that supports multiple languages." %}
+            </p>
+          </div>
+          <select name="language"
+                  class="ml-4 p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+            {% for code, name in LANGUAGES %}
+              <option value="{{ code }}"
+                      {% if user.language == code %}selected{% endif %}>
+                {{ name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      {# Theme Selection #}
+      <div class="mb-5">
+        <div class="flex items-center justify-between p-3 bg-[#39404b] rounded-md">
+          <div class="flex-1">
+            <div class="flex items-center text-gray-200 mb-1">
+              {% include "app/icons/theme.svg" with classes="w-5 h-5 mr-2 mt-1" %}
+              <span class="text-sm font-medium">{% trans "Theme" %}</span>
+            </div>
+            <p class="text-xs text-gray-400 ml-7">
+              {% trans "Choose a theme for the application interface." %}
+            </p>
+          </div>
+          <select name="theme"
+                  class="ml-4 p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+            {% for choice in theme_choices %}
+              <option value="{{ choice.0 }}"
+                      {% if user.theme == choice.0 %}selected{% endif %}>{{ choice.1 }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      {# Default Sources #}
+      <div class="mb-5">
+        <div class="p-4 bg-[#39404b] rounded-md">
+          <div class="flex items-start mb-4">
+            {% include "app/icons/database.svg" with classes="w-5 h-5 mr-2 mt-1 text-gray-200" %}
+            <div>
+              <div class="text-sm font-medium text-gray-200">
+                {% trans "Default Sources" %}
+              </div>
+              <p class="text-xs text-gray-400 mt-1">
+                {% trans "Choose which metadata source should be used by default for each media type when multiple sources are available." %}
+              </p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">{% trans "Movies" %}</label>
+              <select name="movie_source"
+                      class="w-full p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                {% for choice in movie_source_choices %}
+                  <option value="{{ choice.0 }}"
+                          {% if user.default_movie_source == choice.0 %}selected{% endif %}>
+                    {{ choice.1 }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">{% trans "TV Shows" %}</label>
+              <select name="tv_source"
+                      class="w-full p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                {% for choice in tv_source_choices %}
+                  <option value="{{ choice.0 }}"
+                          {% if user.default_tv_source == choice.0 %}selected{% endif %}>
+                    {{ choice.1 }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">{% trans "Anime" %}</label>
+              <select name="anime_source"
+                      class="w-full p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                {% for choice in anime_source_choices %}
+                  <option value="{{ choice.0 }}"
+                          {% if user.default_anime_source == choice.0 %}selected{% endif %}>
+                    {{ choice.1 }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">{% trans "Manga" %}</label>
+              <select name="manga_source"
+                      class="w-full p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                {% for choice in manga_source_choices %}
+                  <option value="{{ choice.0 }}"
+                          {% if user.default_manga_source == choice.0 %}selected{% endif %}>
+                    {{ choice.1 }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">{% trans "Games" %}</label>
+              <select name="game_source"
+                      class="w-full p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                {% for choice in game_source_choices %}
+                  <option value="{{ choice.0 }}"
+                          {% if user.default_game_source == choice.0 %}selected{% endif %}>
+                    {{ choice.1 }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">{% trans "Books" %}</label>
+              <select name="book_source"
+                      class="w-full p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                {% for choice in book_source_choices %}
+                  <option value="{{ choice.0 }}"
+                          {% if user.default_book_source == choice.0 %}selected{% endif %}>
+                    {{ choice.1 }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">{% trans "Comics" %}</label>
+              <select name="comic_source"
+                      class="w-full p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                {% for choice in comic_source_choices %}
+                  <option value="{{ choice.0 }}"
+                          {% if user.default_comic_source == choice.0 %}selected{% endif %}>
+                    {{ choice.1 }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">{% trans "Board Games" %}</label>
+              <select name="boardgame_source"
+                      class="w-full p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                {% for choice in boardgame_source_choices %}
+                  <option value="{{ choice.0 }}"
+                          {% if user.default_boardgame_source == choice.0 %}selected{% endif %}>
+                    {{ choice.1 }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+
+      {# TVDB AirOrder Selection #}
+      <div class="mb-5">
+        <div class="flex items-center justify-between p-3 bg-[#39404b] rounded-md">
+          <div class="flex-1">
+            <div class="flex items-center text-gray-200 mb-1">
+              {% include "app/icons/order_sort.svg" with classes="w-5 h-5 mr-2 mt-1" %}
+              <span class="text-sm font-medium">{% trans "TVDB Air Order" %}</span>
+            </div>
+            <p class="text-xs text-gray-400 ml-7">
+              {% trans "Choose an Air Order preference for TVDB this will be the prefered order on sign-in." %}
+            </p>
+          </div>
+          <select name="air_order"
+                  class="ml-4 p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+            {% for choice in tvdb_air_order_choices %}
+              <option value="{{ choice.0 }}"
+                      {% if user.prefered_air_order == choice.0 %}selected{% endif %}>{{ choice.1 }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
 
       {# Media Card Overlay #}
       <div class="mb-5">
@@ -22,11 +217,11 @@
           <div class="flex-1">
             <div class="flex items-center text-gray-200 mb-1">
               {% include "app/icons/image.svg" with classes="w-5 h-5 mr-2" %}
-              <span class="text-sm font-medium">Hide Hover Overlay on Touch Devices</span>
+              <span class="text-sm font-medium">{% trans "Hide Hover Overlay on Touch Devices" %}</span>
             </div>
             <p class="text-xs text-gray-400 ml-7">
-              Hide the media card hover overlay with action buttons on touch devices for a cleaner mobile experience.
-              On desktop, the overlay will still appear when you hover your mouse over media cards.
+              {% trans "Hide the media card hover overlay with action buttons on touch devices for a cleaner mobile experience." %}
+              {% trans "On desktop, the overlay will still appear when you hover your mouse over media cards." %}
             </p>
           </div>
           <label class="relative inline-flex items-center cursor-pointer ml-4">
@@ -46,9 +241,11 @@
           <div class="flex-1">
             <div class="flex items-center text-gray-200 mb-1">
               {% include "app/icons/eye.svg" with classes="w-5 h-5 mr-2" %}
-              <span class="text-sm font-medium">Obfuscate Unseen Episodes</span>
+              <span class="text-sm font-medium">{% trans "Obfuscate Unseen Episodes" %}</span>
             </div>
-            <p class="text-xs text-gray-400 ml-7">When enabled, unseen episode images and descriptions will be blurred.</p>
+            <p class="text-xs text-gray-400 ml-7">
+              {% trans "When enabled, unseen episode images and descriptions will be blurred." %}
+            </p>
           </div>
           <label class="relative inline-flex items-center cursor-pointer ml-4">
             <input class="sr-only peer"
@@ -67,10 +264,10 @@
           <div class="flex-1">
             <div class="flex items-center text-gray-200 mb-1">
               {% include "app/icons/clock.svg" with classes="w-5 h-5 mr-2" %}
-              <span class="text-sm font-medium">Bulk Completion Date</span>
+              <span class="text-sm font-medium">{% trans "Bulk Completion Date" %}</span>
             </div>
             <p class="text-xs text-gray-400 ml-7">
-              When marking a TV show or season as completed, its episodes will be marked as completed with this date.
+              {% trans "When marking a TV show or season as completed, its episodes will be marked as completed with this date." %}
             </p>
           </div>
           <select name="quick_watch_date"
@@ -89,10 +286,10 @@
           <div class="flex-1">
             <div class="flex items-center text-gray-200 mb-1">
               {% include "app/icons/minus.svg" with classes="w-5 h-5 mr-2" %}
-              <span class="text-sm font-medium">Show progress bar on media items</span>
+              <span class="text-sm font-medium">{% trans "Show progress bar on media items" %}</span>
             </div>
             <p class="text-xs text-gray-400 ml-7">
-              Display a progress bar on media items. Items which don't have max progress will be using a dotted line.
+              {% trans "Display a progress bar on media items. Items which don't have max progress will be using a dotted line." %}
             </p>
           </div>
           <label class="relative inline-flex items-center cursor-pointer ml-4">
@@ -112,10 +309,10 @@
           <div class="flex-1">
             <div class="flex items-center text-gray-200 mb-1">
               {% include "app/icons/circle-check.svg" with classes="w-5 h-5 mr-2" %}
-              <span class="text-sm font-medium">Hide completed media in recommendations</span>
+              <span class="text-sm font-medium">{% trans "Hide completed media in recommendations" %}</span>
             </div>
             <p class="text-xs text-gray-400 ml-7">
-              Hide media you've already completed from the recommendations section on detail pages.
+              {% trans "Hide media you've already completed from the recommendations section on detail pages." %}
             </p>
           </div>
           <label class="relative inline-flex items-center cursor-pointer ml-4">
@@ -135,9 +332,11 @@
           <div class="flex-1">
             <div class="flex items-center text-gray-200 mb-1">
               {% include "app/icons/star.svg" with classes="w-5 h-5 mr-2" %}
-              <span class="text-sm font-medium">Hide zero ratings</span>
+              <span class="text-sm font-medium">{% trans "Hide zero ratings" %}</span>
             </div>
-            <p class="text-xs text-gray-400 ml-7">Hide the rating badge from media cards when the rating is zero.</p>
+            <p class="text-xs text-gray-400 ml-7">
+              {% trans "Hide the rating badge from media cards when the rating is zero." %}
+            </p>
           </div>
           <label class="relative inline-flex items-center cursor-pointer ml-4">
             <input class="sr-only peer"
@@ -156,9 +355,11 @@
           <div class="flex-1">
             <div class="flex items-center text-gray-200 mb-1">
               {% include "app/icons/calendar.svg" with classes="w-5 h-5 mr-2" %}
-              <span class="text-sm font-medium">Date Format</span>
+              <span class="text-sm font-medium">{% trans "Date Format" %}</span>
             </div>
-            <p class="text-xs text-gray-400 ml-7">Choose how dates are displayed throughout the application.</p>
+            <p class="text-xs text-gray-400 ml-7">
+              {% trans "Choose how dates are displayed throughout the application." %}
+            </p>
           </div>
           <select name="date_format"
                   class="ml-4 p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
@@ -176,9 +377,11 @@
           <div class="flex-1">
             <div class="flex items-center text-gray-200 mb-1">
               {% include "app/icons/clock.svg" with classes="w-5 h-5 mr-2" %}
-              <span class="text-sm font-medium">Time Format</span>
+              <span class="text-sm font-medium">{% trans "Time Format" %}</span>
             </div>
-            <p class="text-xs text-gray-400 ml-7">Choose between 12-hour or 24-hour clock display.</p>
+            <p class="text-xs text-gray-400 ml-7">
+              {% trans "Choose between 12-hour or 24-hour clock display." %}
+            </p>
           </div>
           <select name="time_format"
                   class="ml-4 p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
@@ -196,9 +399,11 @@
           <div class="flex-1">
             <div class="flex items-center text-gray-200 mb-1">
               {% include "app/icons/week.svg" with classes="w-5 h-5 mr-2" %}
-              <span class="text-sm font-medium">Week Start Day</span>
+              <span class="text-sm font-medium">{% trans "Week Start Day" %}</span>
             </div>
-            <p class="text-xs text-gray-400 ml-7">Choose which day the week starts on for calendars and statistics.</p>
+            <p class="text-xs text-gray-400 ml-7">
+              {% trans "Choose which day the week starts on for calendars and statistics." %}
+            </p>
           </div>
           <select name="week_start_day"
                   class="ml-4 p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
@@ -210,25 +415,104 @@
         </div>
       </div>
 
-      {# Watch Provider Region #}
+      {# Watch Providers #}
       <div class="mb-5">
-        <div class="flex items-center justify-between p-3 bg-[#39404b] rounded-md">
-          <div class="flex-1">
-            <div class="flex items-center text-gray-200 mb-1">
-              {% include "app/icons/globe.svg" with classes="w-5 h-5 mr-2" %}
-              <span class="text-sm font-medium">Watch provider region</span>
+        <div class="p-4 bg-[#39404b] rounded-md">
+          <div class="flex items-start mb-4">
+            {% include "app/icons/globe.svg" with classes="w-5 h-5 mr-2 mt-1 text-gray-200" %}
+            <div>
+              <div class="text-sm font-medium text-gray-200">
+                {% trans "Watch Providers" %}
+              </div>
+              <p class="text-xs text-gray-400 mt-1">
+                {% trans "Choose which provider service and region should be used for each metadata source. Setting the region to Disabled hides watch providers." %}
+              </p>
             </div>
-            <p class="text-xs text-gray-400 ml-7">
-              Choose the region to show watch providers for. Setting this to disabled will hide the box from the media page.
-            </p>
           </div>
-          <select name="watch_provider_region"
-                  class="ml-4 p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
-            {% for choice in watch_provider_choices %}
-              <option value="{{ choice.0 }}"
-                      {% if user.watch_provider_region == choice.0 %}selected{% endif %}>{{ choice.1 }}</option>
-            {% endfor %}
-          </select>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            {# TMDB #}
+            <div>
+              <label class="block text-xs text-gray-400 mb-2">
+                {% trans "TMDB" %}
+              </label>
+
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[11px] text-gray-500 mb-1">
+                    {% trans "Provider" %}
+                  </label>
+                  <select 
+                      name="provider_tmdb"
+                      hx-get="{% url 'watch-provider-regions' %}"
+                      hx-target="#tmdb-region-select"
+                      hx-trigger="change"
+                      hx-vals='{"source":"tmdb"}'
+                      hx-include="this"
+                      class="w-full p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+
+                      {% for choice in watch_provider_tmdb %}
+                          <option value="{{ choice.0 }}"
+                              {% if user.watch_provider_tmdb == choice.0 %}selected{% endif %}>
+                              {{ choice.1 }}
+                          </option>
+                      {% endfor %}
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-[11px] text-gray-500 mb-1">
+                    {% trans "Region" %}
+                  </label>
+                  <div id="tmdb-region-select">
+                      {% include "users/components/watch_provider_regions.html" with regions=watch_provider_choices_tmdb source="tmdb" default=user.watch_provider_region_tmdb %}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {# TVDB #}
+            <div>
+              <label class="block text-xs text-gray-400 mb-2">
+                {% trans "TVDB" %}
+              </label>
+
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[11px] text-gray-500 mb-1">
+                    {% trans "Provider" %}
+                  </label>
+                  <select 
+                      name="provider_tvdb"
+                      hx-get="{% url 'watch-provider-regions' %}"
+                      hx-target="#tvdb-region-select"
+                      hx-trigger="change"
+                      hx-vals='{"source":"tvdb"}'
+                      hx-include="this"
+                      class="w-full p-2 bg-[#39404b] rounded-md text-white text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+
+                      {% for choice in watch_provider_tvdb %}
+                          <option value="{{ choice.0 }}"
+                              {% if user.watch_provider_tvdb == choice.0 %}selected{% endif %}>
+                              {{ choice.1 }}
+                          </option>
+                      {% endfor %}
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-[11px] text-gray-500 mb-1">
+                    {% trans "Region" %}
+                  </label>
+                  <div id="tvdb-region-select">
+                      {% include "users/components/watch_provider_regions.html" with regions=watch_provider_choices_tvdb source="tvdb" default=user.watch_provider_region_tvdb %}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
         </div>
       </div>
 
@@ -238,10 +522,10 @@
       <div class="mb-5">
         <div class="flex items-center mb-4">
           {% include "app/icons/four-square.svg" with classes="w-5 h-5 text-indigo-400 mr-2" %}
-          <h3 class="text-lg font-semibold">Media Types</h3>
+          <h3 class="text-lg font-semibold">{% trans "Media Types" %}</h3>
         </div>
         <p class="text-gray-400 mb-4 text-sm">
-          Control which media types are visible throughout the app (sidebar, search, calendar, notifications).
+          {% trans "Control which media types are visible throughout the app (sidebar, search, calendar, notifications)." %}
         </p>
 
         <div class="grid gap-3 md:grid-cols-3">
@@ -271,7 +555,7 @@
         <button type="submit"
                 class="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors text-sm cursor-pointer">
           {% include "app/icons/save.svg" with classes="w-4 h-4 mr-2" %}
-          Save Preferences
+          {% trans "Save Preferences" %}
         </button>
       </div>
     </form>

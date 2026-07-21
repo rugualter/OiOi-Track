@@ -1,10 +1,12 @@
 {% extends "base.html" %}
+{% load static %}
 {% load app_tags %}
+{% load i18n %}
 
 {% block title %}
   {% block head_title %}
   {% endblock head_title %}
-  - Yamtrack
+  {% trans "- OiOi-Track" %}
 {% endblock title %}
 
 {% block body %}

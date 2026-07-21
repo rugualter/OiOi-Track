@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 import requests
 from django.core.cache import cache
@@ -8,8 +9,9 @@ from django.db.models import Prefetch
 from django.utils import timezone
 from simple_history.utils import bulk_create_with_history, bulk_update_with_history
 
+from app import helpers
 from app.models import TV, Item, MediaTypes, Season, Status
-from app.providers import services, tmdb
+from app.providers import services
 from events.models import Event
 
 from .helpers import date_parser, resolve_episode_datetimes
@@ -17,12 +19,12 @@ from .helpers import date_parser, resolve_episode_datetimes
 logger = logging.getLogger(__name__)
 
 
-def process_tv(tv_item, events_bulk):
+def process_tv(tv_item, events_bulk, user):
     """Process TV item and create events for all seasons and episodes."""
     logger.info("Processing TV show: %s", tv_item)
 
     try:
-        seasons_to_process = get_seasons_to_process(tv_item)
+        seasons_to_process = get_seasons_to_process(tv_item, user)
 
         if not seasons_to_process:
             logger.info("%s - No seasons need processing", tv_item)
@@ -48,9 +50,16 @@ def process_tv(tv_item, events_bulk):
         logger.exception("Error processing %s", tv_item)
 
 
-def get_seasons_to_process(tv_item):
+def get_seasons_to_process(tv_item, user):
     """Identify which seasons of a TV show need to be processed."""
-    tv_metadata = tmdb.tv(tv_item.media_id)
+    provider = helpers.get_default_provider(user, tv_item.source)
+    tv_metadata = services.get_media_metadata(
+        media_type = MediaTypes.TV.value,
+        media_id = tv_item.media_id,
+        order_type = tv_item.order_type,
+        provider = provider,
+        source = tv_item.source,
+    )
 
     if not tv_metadata.get("related", {}).get("seasons"):
         logger.warning("No seasons found for TV show: %s", tv_item)
@@ -72,12 +81,23 @@ def get_seasons_to_process(tv_item):
         item__media_type=MediaTypes.SEASON.value,
     ).select_related("item")
 
-    seasons_with_events = {event.item.season_number for event in existing_season_events}
+    events_per_season = {}
+    seasons_with_events = set()
+    for sn in existing_season_events.values_list("item__season_number", flat=True):
+        seasons_with_events.add(sn)
+        events_per_season[sn] = events_per_season.get(sn, 0) + 1
+    
+    episode_count = {
+        season["season_number"]: season.get("max_progress", 0)
+        for season in tv_metadata["related"]["seasons"]
+    }
+    
     seasons_to_process = [
         season_num
         for season_num in season_numbers
         if season_num not in seasons_with_events
         or (next_episode_season and season_num >= next_episode_season)
+        or events_per_season.get(season_num, 0) < episode_count.get(season_num, 0)
     ]
 
     if not seasons_to_process:
@@ -93,12 +113,18 @@ def get_seasons_to_process(tv_item):
     return seasons_to_process
 
 
-def process_tv_seasons(tv_item, seasons_to_process, events_bulk):
+def process_tv_seasons(tv_item, seasons_to_process, events_bulk, user):
     """Process specific seasons of a TV show."""
-    process_seasons_data = tmdb.tv_with_seasons(
-        tv_item.media_id,
-        seasons_to_process,
+    provider = helpers.get_default_provider(user, tv_item.source)
+    process_seasons_data = services.get_media_metadata(
+        media_type = "tv_with_seasons",
+        media_id = tv_item.media_id,
+        source = tv_item.source,
+        order_type = tv_item.order_type,
+        provider = provider,
+        season_numbers = seasons_to_process,
     )
+    
     processed_season_items = []
 
     for season_number in seasons_to_process:
@@ -310,7 +336,7 @@ def get_episode_datetime(episode, season_number, episode_number, tvmaze_map):
             return date_parser(episode["air_date"])
         except ValueError:
             logger.warning(
-                "Invalid air date for S%sE%s from TMDB: %s",
+                "Invalid air date for S%sE%s from: %s",
                 season_number,
                 episode_number,
                 episode["air_date"],

@@ -6,9 +6,9 @@ from django.db.models import Count, F, OuterRef, Q, Subquery
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_GET, require_POST
-
+from django.utils.translation import gettext_lazy as _
 from app import helpers
-from app.models import Item, MediaManager, MediaTypes
+from app.models import Item, MediaManager, MediaTypes, MediaSourceChoices, AirOrder
 from app.providers import services
 from lists.forms import CustomListForm
 from lists.models import CustomList, CustomListItem
@@ -74,6 +74,35 @@ def lists(request):
         )
 
     create_list_form = CustomListForm()
+    
+    order_types = [list(choice) for choice in AirOrder.choices]
+    
+    selected_order_type = (
+        request.user.last_order_type
+        or request.user.prefered_air_order
+    )
+    
+    source_preference_map = {
+        MediaTypes.TV.value: request.user.last_source_used_tv,
+        MediaTypes.MOVIE.value: request.user.last_source_used_movie,
+        MediaTypes.ANIME.value: request.user.last_source_used_anime,
+        MediaTypes.MANGA.value: request.user.last_source_used_manga,
+        MediaTypes.GAME.value: request.user.last_source_used_game,
+        MediaTypes.BOOK.value: request.user.last_source_used_book,
+        MediaTypes.COMIC.value: request.user.last_source_used_comic,
+        MediaTypes.BOARDGAME.value: request.user.last_source_used_boardgame,
+    }
+    
+    preference_key = source_preference_map.get(MediaTypes.TV.value)
+    
+    source = preference_key or helpers.get_default_source(request.user, MediaTypes.TV.value)
+
+    sample_url = helpers.sample_search(
+        source=source,
+        media_type=MediaTypes.TV.value,
+        user=request.user,
+        order_type=selected_order_type,
+    )
 
     return render(
         request,
@@ -83,6 +112,10 @@ def lists(request):
             "form": create_list_form,
             "current_sort": sort_by,
             "sort_choices": ListSortChoices.choices,
+            "order_types": order_types,
+            "selected_order_type": selected_order_type,
+            "source_choices": MediaSourceChoices.all(),
+            "sample_url": sample_url,
         },
     )
 
@@ -96,7 +129,7 @@ def list_detail(request, list_id):
     )
 
     if not custom_list.user_can_view(request.user):
-        msg = "List not found"
+        msg = _("List not found")
         raise Http404(msg)
 
     # Get and process request parameters
@@ -169,6 +202,36 @@ def list_detail(request, list_id):
     # Annotate items with media objects
     for item in items_page:
         item.media = media_by_item_id.get(item.id)
+        
+        
+    order_types = [list(choice) for choice in AirOrder.choices]
+    
+    selected_order_type = (
+        request.user.last_order_type
+        or request.user.prefered_air_order
+    )
+    
+    source_preference_map = {
+        MediaTypes.TV.value: request.user.last_source_used_tv,
+        MediaTypes.MOVIE.value: request.user.last_source_used_movie,
+        MediaTypes.ANIME.value: request.user.last_source_used_anime,
+        MediaTypes.MANGA.value: request.user.last_source_used_manga,
+        MediaTypes.GAME.value: request.user.last_source_used_game,
+        MediaTypes.BOOK.value: request.user.last_source_used_book,
+        MediaTypes.COMIC.value: request.user.last_source_used_comic,
+        MediaTypes.BOARDGAME.value: request.user.last_source_used_boardgame,
+    }
+    
+    preference_key = source_preference_map.get(MediaTypes.TV.value)
+    
+    source = preference_key or helpers.get_default_source(request.user, MediaTypes.TV.value)
+
+    sample_url = helpers.sample_search(
+        source=source,
+        media_type=MediaTypes.TV.value,
+        user=request.user,
+        order_type=selected_order_type,
+    )
 
     # Base context for both full and partial responses
     context = {
@@ -182,6 +245,10 @@ def list_detail(request, list_id):
         "current_status": params["status_filter"] or MediaStatusChoices.ALL,
         "sort_choices": ListDetailSortChoices.choices,
         "status_choices": MediaStatusChoices.choices,
+        "order_types": order_types,
+        "selected_order_type": selected_order_type,
+        "source_choices": MediaSourceChoices.all(),
+        "sample_url": sample_url,
     }
 
     # Additional context for full page render. Soft-navigation body swaps (e.g.
@@ -230,7 +297,7 @@ def edit(request):
             form.save()
             logger.info("%s list edited successfully.", custom_list)
     else:
-        messages.error(request, "You do not have permission to edit this list.")
+        messages.error(request, _("You do not have permission to edit this list."))
     return helpers.redirect_back(request)
 
 
@@ -244,7 +311,7 @@ def delete(request):
         logger.info("%s list deleted successfully.", custom_list)
         return redirect("lists")
 
-    messages.error(request, "You do not have permission to delete this list.")
+    messages.error(request, _("You do not have permission to delete this list."))
     return helpers.redirect_back(request)
 
 
@@ -254,25 +321,33 @@ def lists_modal(
     source,
     media_type,
     media_id,
+    order_type=None,
     season_number=None,
     episode_number=None,
 ):
+
     """Return the modal showing all custom lists and allowing to add to them."""
+    
+    provider = helpers.get_default_provider(request.user, source)
+    
     try:
         item = Item.objects.get(
             media_id=media_id,
             source=source,
             media_type=media_type,
+            order_type=order_type,
             season_number=season_number,
             episode_number=episode_number,
         )
     except Item.DoesNotExist:
         metadata = services.get_media_metadata(
-            media_type,
-            media_id,
-            source,
-            [season_number],
-            episode_number,
+            media_type = media_type,
+            media_id = media_id,
+            source = source,
+            season_numbers = [season_number],
+            episode_number = episode_number,
+            order_type = order_type,
+            provider = provider,
         )
         item = Item.objects.create(
             media_id=media_id,
@@ -280,16 +355,54 @@ def lists_modal(
             media_type=media_type,
             season_number=season_number,
             episode_number=episode_number,
+            order_type=order_type,
+            provider=provider,
             title=metadata["title"],
             image=metadata["image"],
         )
 
     custom_lists = CustomList.objects.get_user_lists_with_item(request.user, item)
+    order_type = request.user.update_preference(
+        "last_order_type",
+        (order_type or request.user.prefered_air_order),
+    )
+    order_types = [list(choice) for choice in AirOrder.choices]
+        
+    selected_order_type = order_type
+    
+    source_preference_map = {
+        MediaTypes.TV.value: request.user.last_source_used_tv,
+        MediaTypes.MOVIE.value: request.user.last_source_used_movie,
+        MediaTypes.ANIME.value: request.user.last_source_used_anime,
+        MediaTypes.MANGA.value: request.user.last_source_used_manga,
+        MediaTypes.GAME.value: request.user.last_source_used_game,
+        MediaTypes.BOOK.value: request.user.last_source_used_book,
+        MediaTypes.COMIC.value: request.user.last_source_used_comic,
+        MediaTypes.BOARDGAME.value: request.user.last_source_used_boardgame,
+    }
+    
+    preference_key = source_preference_map.get(media_type)
+    
+    source = preference_key or helpers.get_default_source(request.user, media_type)
+
+    sample_url = helpers.sample_search(
+        source=source,
+        media_type=media_type,
+        user=request.user,
+        order_type=selected_order_type,
+    )
 
     return render(
         request,
         "lists/components/fill_lists.html",
-        {"item": item, "custom_lists": custom_lists},
+        {
+            "item": item, 
+            "custom_lists": custom_lists,
+            "order_types": order_types,
+            "selected_order_type": selected_order_type,
+            "source_choices": MediaSourceChoices.all(),
+            "sample_url": sample_url,
+         },
     )
 
 
@@ -316,8 +429,46 @@ def list_item_toggle(request):
         logger.info("%s added to %s.", item, custom_list)
         has_item = True
 
+    
+    order_types = [list(choice) for choice in AirOrder.choices]
+    
+    selected_order_type = (
+        request.user.last_order_type
+        or request.user.prefered_air_order
+    )
+    
+    source_preference_map = {
+        MediaTypes.TV.value: request.user.last_source_used_tv,
+        MediaTypes.MOVIE.value: request.user.last_source_used_movie,
+        MediaTypes.ANIME.value: request.user.last_source_used_anime,
+        MediaTypes.MANGA.value: request.user.last_source_used_manga,
+        MediaTypes.GAME.value: request.user.last_source_used_game,
+        MediaTypes.BOOK.value: request.user.last_source_used_book,
+        MediaTypes.COMIC.value: request.user.last_source_used_comic,
+        MediaTypes.BOARDGAME.value: request.user.last_source_used_boardgame,
+    }
+    
+    preference_key = source_preference_map.get(MediaTypes.TV.value)
+    
+    source = preference_key or helpers.get_default_source(request.user, MediaTypes.TV.value)
+
+    sample_url = helpers.sample_search(
+        source=source,
+        media_type=MediaTypes.TV.value,
+        user=request.user,
+        order_type=selected_order_type,
+    )
+    
     return render(
         request,
         "lists/components/list_item_button.html",
-        {"custom_list": custom_list, "item": item, "has_item": has_item},
+        {
+            "custom_list": custom_list, 
+            "item": item, 
+            "has_item": has_item,
+            "order_types": order_types,
+            "selected_order_type": selected_order_type,
+            "source_choices": MediaSourceChoices.all(),
+            "sample_url": sample_url,
+        },
     )

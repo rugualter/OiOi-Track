@@ -1,5 +1,5 @@
 {% load app_tags %}
-
+{% load i18n %}
 {% for media in media_list.items %}
   {% component_id 'track' media.item media.id as track_component_id %}
   {% component_id 'lists' media.item as lists_component_id %}
@@ -8,7 +8,7 @@
        class="bg-[#2a2f35] rounded-lg overflow-hidden shadow-lg transition-all duration-300"
        x-data="{ trackOpen: false, listsOpen: false, historyOpen: false }">
     <div class="relative">
-      <a href="{{ media.item|media_url }}">
+      <a href="{{ media.item|media_url:item.order_type }}">
         <img alt="{{ media }}"
              class="lazyload w-full aspect-2/3 {% if media.item.image != IMG_NONE %}object-cover{% endif %}"
              data-src="{{ media.item.image }}"
@@ -32,11 +32,11 @@
       {% endif %}
 
       <div class="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 hover-tap:opacity-100{% if user.clickable_media_cards %} pointer-coarse:hidden{% endif %}">
-        <a href="{{ media.item|media_url }}" class="absolute inset-0 z-0"></a>
+        <a href="{{ media.item|media_url:item.order_type }}" class="absolute inset-0 z-0"></a>
 
         <div class="relative z-10 flex items-center justify-center space-x-2.5">
           <button class="cursor-pointer rounded-full bg-indigo-600 p-2.5 text-white transition-all duration-200 hover:scale-110 hover:bg-indigo-500 hover:shadow-[0_0_15px_rgba(99,102,241,0.5)]"
-                  title="Add to tracker"
+                  title="{% trans 'Add to tracker' %}"
                   hx-get="{% media_view_url 'track_modal' media.item %}"
                   hx-vals='{"return_url": "{{ request.get_full_path|urlencode }}", "instance_id": "{{ media.id }}"}'
                   hx-target="#{{ track_component_id }}"
@@ -44,7 +44,7 @@
                   @click="trackOpen = true">{% include "app/icons/edit.svg" with classes="w-4 h-4" %}</button>
 
           <button class="cursor-pointer rounded-full bg-emerald-600 p-2.5 text-white transition-all duration-200 hover:scale-110 hover:bg-emerald-500 hover:shadow-[0_0_15px_rgba(16,185,129,0.5)]"
-                  title="Add to custom lists"
+                  title="{% trans 'Add to custom lists' %}"
                   hx-get="{% media_view_url 'lists_modal' media.item %}"
                   hx-vals='{"return_url": "{{ request.get_full_path|urlencode }}"}'
                   hx-target="#{{ lists_component_id }}"
@@ -52,7 +52,7 @@
                   @click="listsOpen = true">{% include "app/icons/list-add.svg" with classes="w-4 h-4" %}</button>
 
           <button class="cursor-pointer rounded-full bg-amber-600 p-2.5 text-white transition-all duration-200 hover:scale-110 hover:bg-amber-500 hover:shadow-[0_0_15px_rgba(245,158,11,0.5)]"
-                  title="View your activity history"
+                  title="{% trans 'View your activity history' %}"
                   hx-get="{% media_view_url 'history_modal' media.item %}"
                   hx-vals='{"return_url": "{{ request.get_full_path|urlencode }}"}'
                   hx-target="#{{ history_component_id }}"
@@ -63,7 +63,7 @@
     </div>
 
     <div class="p-3">
-      <a href="{{ media.item|media_url }}"
+      <a href="{{ media.item|media_url:item.order_type }}"
          class="line-clamp-1 text-center text-sm font-semibold text-white transition duration-300 {% if home_status == Status.PLANNING.value %}hover:text-sky-400{% else %}hover:text-indigo-400{% endif %}"
          title="{{ media }}">{{ media }}</a>
     </div>

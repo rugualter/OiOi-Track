@@ -6,7 +6,7 @@ from pathlib import Path
 from django.apps import apps
 from django.conf import settings
 from django.utils.dateparse import parse_datetime
-
+from django.utils.translation import gettext_lazy as _
 import app
 from app.models import MediaTypes, Sources, Status
 from integrations.imports import helpers
@@ -97,10 +97,12 @@ class KitsuImporter:
             msg = f"User {username} not found."
             raise MediaImportError(msg)
         if len(response["data"]) > 1:
-            msg = (
-                f"Multiple users found for {username}, please use your user ID. "
+            msg = _(
+                "Multiple users found for %(username)s, please use your user ID. "
                 "User IDs can be found in the URL when viewing your Kitsu profile."
-            )
+            ) % {
+                "username": username,
+            }
             raise MediaImportError(msg)
 
         return response["data"][0]["id"]
@@ -247,10 +249,12 @@ class KitsuImporter:
         """Fetch media data from Kitsu related URL when relationship data is null."""
         related_url = relationship["links"]["related"]
         if not related_url:
-            msg = (
-                f"Could not import unknown item - missing media data from Kitsu. "
-                f"Relationship: {relationship}"
-            )
+            msg = _(
+                "Could not import unknown item - missing media data from Kitsu. "
+                "Relationship: %(relationship)s"
+            ) % {
+                "relationship": relationship,
+            }
             raise MediaImportError(msg)
 
         params = {

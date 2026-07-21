@@ -33,7 +33,7 @@ def anilist_date_parser(start_date):
     return dt.timestamp()
 
 
-def process_anime_bulk(items, events_bulk):
+def process_anime_bulk(items, events_bulk, user):
     """Process multiple anime items and add events to the event list."""
     if not items:
         return
@@ -65,7 +65,7 @@ def process_anime_bulk(items, events_bulk):
                 item.title,
                 item.media_id,
             )
-            process_other(item, events_bulk)
+            process_other(item, events_bulk, user)
 
 
 def _collect_airing_schedule_pages(query, url, media_ids, page):
@@ -112,9 +112,9 @@ def _collect_airing_schedule_pages(query, url, media_ids, page):
 
 def _get_mal_total_episodes(mal_id):
     mal_metadata = services.get_media_metadata(
-        media_type=MediaTypes.ANIME.value,
-        media_id=mal_id,
-        source=Sources.MAL.value,
+        media_type = MediaTypes.ANIME.value,
+        media_id = mal_id,
+        source = Sources.MAL.value,
     )
     return mal_metadata["max_progress"]
 

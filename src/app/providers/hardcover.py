@@ -3,7 +3,7 @@ import logging
 import requests
 from django.conf import settings
 from django.core.cache import cache
-
+from django.utils.translation import gettext_lazy as _
 from app import helpers
 from app.models import MediaTypes, Sources
 from app.providers import services
@@ -181,7 +181,7 @@ def book(media_id):
             "title": book_data["title"],
             "max_progress": book_data.get("pages"),
             "image": book_data.get("cached_image") or settings.IMG_NONE,
-            "synopsis": book_data.get("description") or "No synopsis available.",
+            "synopsis": book_data.get("description") or _("No synopsis available."),
             "genres": get_tags(book_data.get("cached_tags")),
             "score": get_ratings(book_data.get("rating")),
             "score_count": book_data.get("ratings_count", 0),
@@ -231,7 +231,7 @@ def get_edition_details(edition_data):
         publisher_name = edition_data["publisher"].get("name")
 
     return {
-        "format": edition_data.get("edition_format") or "Unknown",
+        "format": edition_data.get("edition_format") or _("Unknown"),
         "publisher": publisher_name,
         "isbn": isbns or None,
         "release_date": edition_data.get("release_date"),

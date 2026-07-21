@@ -1,5 +1,7 @@
 {% extends "allauth/layouts/base.html" %}
 {% load allauth account %}
+{% load static %}
+{% load i18n %}
 
 {% block body %}
   <div class="flex min-h-screen bg-[#212529] text-gray-100">
@@ -7,7 +9,7 @@
       <div class="w-full max-w-md">
         <div class="text-center mb-8">
           {% element h1 %}
-            Yamtrack
+            <img src="{% static 'img/oioitrack-white.png' %}" alt="OiOi-Track" class="mx-auto w-auto" style="height: 40px;">
           {% endelement %}
 
           <p class="text-gray-400">
