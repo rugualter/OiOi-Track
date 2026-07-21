@@ -352,7 +352,11 @@ def media_list(request, username, media_type):
     }
 
     # Handle HTMX requests for partial updates
-    if request.headers.get("HX-Request"):
+    # Handle HTMX requests for partial updates. Soft-navigation requests (e.g.
+    # after saving from an edit modal) need the full page for the body swap.
+    if request.headers.get("HX-Request") and not request.headers.get(
+        "X-Soft-Navigation"
+    ):
         # Filtering from empty list
         if request.headers.get("HX-Target") == "empty_list":
             # If still empty, keep user in the same page
@@ -1348,8 +1352,11 @@ def journal(request):
     }
 
     # The activity dashboard only appears on the full page, so skip its queries
-    # on the HTMX partial requests that load additional feed pages.
-    if request.headers.get("HX-Request"):
+    # on the HTMX partial requests that load additional feed pages. Soft
+    # navigations (body swaps) still need the full page.
+    if request.headers.get("HX-Request") and not request.headers.get(
+        "X-Soft-Navigation"
+    ):
         return render(request, "app/components/journal_items.html", context)
 
     context.update(

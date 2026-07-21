@@ -123,16 +123,6 @@ def datetime_format(datetime, user):
     return formatted_date
 
 
-@register.simple_tag
-def now_plus_minutes(minutes):
-    """Return a date/datetime-local value for now plus minutes."""
-    minutes = int(minutes)
-    local_dt = timezone.localtime(timezone.now() + timedelta(minutes=minutes))
-    if settings.TRACK_TIME:
-        return local_dt.strftime("%Y-%m-%dT%H:%M")
-    return local_dt.strftime("%Y-%m-%d")
-
-
 @register.filter
 def is_list(arg1):
     """Return True if the object is a list."""
