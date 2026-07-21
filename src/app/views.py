@@ -439,7 +439,13 @@ def media_search(request):
 def media_details(request, source, media_type, media_id, title, order_type=None):  # noqa: ARG001 title for URL
     """Return the details page for a media item.""" 
     provider = helpers.get_default_provider(request.user, source)
-    media_metadata = services.get_media_metadata(media_type = media_type, media_id = media_id, order_type=order_type, provider=provider, source = source)
+    media_metadata = services.get_media_metadata(
+        media_type = media_type,
+        media_id = media_id, 
+        order_type=order_type, 
+        provider=provider, 
+        source = source
+    )
     user_medias = BasicMedia.objects.filter_media_prefetch(
         request.user,
         media_id,
@@ -741,7 +747,7 @@ def sync_metadata(request, source, media_type, media_id, order_type=None, season
                     title,
                 )
 
-        item.fetch_releases(delay=False)
+        item.fetch_releases(delay=False, user=request.user)
 
         msg = _(
             "%(title)s was synced to %(source)s successfully."
@@ -851,6 +857,7 @@ def media_save(request):
     source = request.POST["source"]
     media_type = request.POST["media_type"]
     season_number = request.POST.get("season_number")
+    order_type = request.POST.get("order_type")
     instance_id = request.POST.get("instance_id")
 
     if instance_id:
@@ -862,12 +869,14 @@ def media_save(request):
             media_id = media_id,
             source = source,
             provider = provider,
+            order_type = order_type,
             season_numbers = [season_number],
         )
         item, _ = Item.objects.get_or_create(
             media_id=media_id,
             source=source,
             media_type=media_type,
+            order_type = order_type,
             season_number=season_number,
             defaults={
                 "title": metadata["title"],
@@ -933,6 +942,7 @@ def episode_save(request):
     season_number = int(request.POST["season_number"])
     episode_number = int(request.POST["episode_number"])
     source = request.POST["source"]
+    order_type = request.POST["order_type"]
 
     form = EpisodeForm(request.POST)
     if not form.is_valid():
@@ -953,6 +963,7 @@ def episode_save(request):
             media_type = "tv_with_seasons",
             media_id = media_id,
             source = source,
+            order_type = order_type,
             provider = provider,
             season_numbers = [season_number],
         )
@@ -962,6 +973,7 @@ def episode_save(request):
             media_id=media_id,
             source=source,
             media_type=MediaTypes.SEASON.value,
+            order_type = order_type,
             season_number=season_number,
             defaults={
                 "title": tv_with_seasons_metadata["title"],

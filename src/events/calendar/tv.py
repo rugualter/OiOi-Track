@@ -9,6 +9,7 @@ from django.db.models import Prefetch
 from django.utils import timezone
 from simple_history.utils import bulk_create_with_history, bulk_update_with_history
 
+from app import helpers
 from app.models import TV, Item, MediaTypes, Season, Status
 from app.providers import services
 from events.models import Event
@@ -18,12 +19,12 @@ from .helpers import date_parser, resolve_episode_datetimes
 logger = logging.getLogger(__name__)
 
 
-def process_tv(tv_item, events_bulk):
+def process_tv(tv_item, events_bulk, user):
     """Process TV item and create events for all seasons and episodes."""
     logger.info("Processing TV show: %s", tv_item)
 
     try:
-        seasons_to_process = get_seasons_to_process(tv_item)
+        seasons_to_process = get_seasons_to_process(tv_item, user)
 
         if not seasons_to_process:
             logger.info("%s - No seasons need processing", tv_item)
@@ -49,11 +50,14 @@ def process_tv(tv_item, events_bulk):
         logger.exception("Error processing %s", tv_item)
 
 
-def get_seasons_to_process(tv_item):
+def get_seasons_to_process(tv_item, user):
     """Identify which seasons of a TV show need to be processed."""
+    provider = helpers.get_default_provider(user, tv_item.source)
     tv_metadata = services.get_media_metadata(
         media_type = MediaTypes.TV.value,
         media_id = tv_item.media_id,
+        order_type = tv_item.order_type,
+        provider = provider,
         source = tv_item.source,
     )
 
@@ -109,12 +113,15 @@ def get_seasons_to_process(tv_item):
     return seasons_to_process
 
 
-def process_tv_seasons(tv_item, seasons_to_process, events_bulk):
+def process_tv_seasons(tv_item, seasons_to_process, events_bulk, user):
     """Process specific seasons of a TV show."""
+    provider = helpers.get_default_provider(user, tv_item.source)
     process_seasons_data = services.get_media_metadata(
         media_type = "tv_with_seasons",
         media_id = tv_item.media_id,
         source = tv_item.source,
+        order_type = tv_item.order_type,
+        provider = provider,
         season_numbers = seasons_to_process,
     )
     

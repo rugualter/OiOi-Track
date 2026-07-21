@@ -21,14 +21,14 @@ def fetch_releases(user=None, items_to_process=None):
     if not items_to_process:
         return _("No items to process")
 
-    events_bulk = process_items(items_to_process)
+    events_bulk = process_items(items_to_process, user)
     items_updated = save_events(events_bulk)
     cleanup_invalid_events(events_bulk)
 
     return generate_final_message(items_to_process, items_updated)
 
 
-def process_items(items_to_process):
+def process_items(items_to_process, user):
     """Process items and categorize them."""
     events_bulk = []
     anime_to_process = []
@@ -37,13 +37,13 @@ def process_items(items_to_process):
         if item.media_type == MediaTypes.ANIME.value:
             anime_to_process.append(item)
         elif item.media_type == MediaTypes.TV.value:
-            process_tv(item, events_bulk)
+            process_tv(item, events_bulk, user)
         elif item.media_type == MediaTypes.COMIC.value:
             process_comic(item, events_bulk)
         else:
-            process_other(item, events_bulk)
+            process_other(item, events_bulk, user)
 
-    process_anime_bulk(anime_to_process, events_bulk)
+    process_anime_bulk(anime_to_process, events_bulk, user)
     return events_bulk
 
 

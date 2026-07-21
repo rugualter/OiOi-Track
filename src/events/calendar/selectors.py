@@ -170,7 +170,7 @@ def get_changed_movie_ids(source):
     """Return changed Provider movie ids, tolerating provider errors."""
     try:
         return services.get_media_metadata(
-            media_type = "get_changed_tv_ids", 
+            media_type = "get_changed_movie_ids", 
             source = source
         )
     except services.ProviderAPIError:

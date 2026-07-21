@@ -30,7 +30,7 @@ from simple_history.utils import bulk_create_with_history, bulk_update_with_hist
 import app
 import events
 import users
-from app import providers
+from app import providers, helpers
 from app.mixins import CalendarTriggerMixin
 
 logger = logging.getLogger(__name__)
@@ -176,12 +176,6 @@ class Item(CalendarTriggerMixin, models.Model):
         choices=Sources,
     )
     
-    provider = models.CharField(
-        max_length=20,
-        choices=WatchProviderServicesChoices,
-        default=WatchProviderServicesChoices.TMDB.value,
-    )
-    
     order_type = models.CharField(
         max_length=20,
         choices=AirOrder,
@@ -291,19 +285,19 @@ class Item(CalendarTriggerMixin, models.Model):
         """
         return str(uuid.uuid4())
 
-    def fetch_releases(self, delay):
+    def fetch_releases(self, delay, user):
         """Fetch releases for the item."""
-        
+
         if self._disable_calendar_triggers:
             return
 
         if self.media_type == MediaTypes.SEASON.value:
             # Get or create the TV item for this season
+            
             try:
                 tv_item = Item.objects.get(
                     media_id=self.media_id,
                     source=self.source,
-                    provider=self.provider,
                     order_type=self.order_type,
                     media_type=MediaTypes.TV.value,
                 )
@@ -314,12 +308,11 @@ class Item(CalendarTriggerMixin, models.Model):
                     media_id = self.media_id,
                     source = self.source,
                     order_type = self.order_type,
-                    provider = self.provider,
+                    provider = helpers.get_default_provider(user, self.source),
                 )
                 tv_item = Item.objects.create(
                     media_id=self.media_id,
                     source=self.source,
-                    provider=self.provider,
                     order_type=self.order_type,
                     media_type=MediaTypes.TV.value,
                     title=tv_metadata["title"],
@@ -1134,6 +1127,8 @@ class Media(models.Model):
             max_progress = providers.services.get_media_metadata(
                 media_type = self.item.media_type,
                 media_id = self.item.media_id,
+                order_type = self.item.order_type,
+                provider = helpers.get_default_provider(self.user, self.item.source),
                 source = self.item.source,
             )["max_progress"]
 
@@ -1152,13 +1147,15 @@ class Media(models.Model):
             max_progress = providers.services.get_media_metadata(
                 media_type = self.item.media_type,
                 media_id = self.item.media_id,
+                order_type = self.item.order_type,
+                provider = helpers.get_default_provider(self.user, self.item.source),
                 source = self.item.source,
             )["max_progress"]
 
             if max_progress:
                 self.progress = max_progress
 
-        self.item.fetch_releases(delay=True)
+        self.item.fetch_releases(delay=True, user=self.user)
 
     @property
     def formatted_score(self):
@@ -1229,7 +1226,7 @@ class TV(Media):
             ):
                 self._start_next_available_season()
 
-            self.item.fetch_releases(delay=True)
+            self.item.fetch_releases(delay=True, user=self.user)
 
     @property
     def progress(self):
@@ -1310,6 +1307,8 @@ class TV(Media):
         tv_metadata = providers.services.get_media_metadata(
             media_type = self.item.media_type,
             media_id = self.item.media_id,
+            order_type = self.item.order_type,
+            provider = helpers.get_default_provider(self.user, self.item.source),
             source = self.item.source,
         )
         max_progress = tv_metadata["max_progress"]
@@ -1333,7 +1332,7 @@ class TV(Media):
             media_id = self.item.media_id,
             source = self.item.source,
             order_type = self.item.order_type,
-            provider = self.item.provider,
+            provider = helpers.get_default_provider(self.user, self.item.source),
             season_numbers = season_numbers,
         )
         for season_number in season_numbers:
@@ -1458,6 +1457,8 @@ class TV(Media):
         tv_metadata = providers.services.get_media_metadata(
             media_type = self.item.media_type,
             media_id = self.item.media_id,
+            order_type = self.item.order_type,
+            provider = helpers.get_default_provider(self.user, self.item.source),
             source = self.item.source,
         )
         related_seasons = tv_metadata.get("related", {}).get("seasons", [])
@@ -1629,6 +1630,8 @@ class Season(Media):
                     media_type = MediaTypes.SEASON.value,
                     media_id = self.item.media_id,
                     source = self.item.source,
+                    order_type = self.item.order_type,
+                    provider = helpers.get_default_provider(self.user, self.item.source),
                     season_numbers = [self.item.season_number],
                 )
                 current_date = timezone.localdate()
@@ -1707,7 +1710,7 @@ class Season(Media):
                     fields=["status"],
                 )
 
-            self.item.fetch_releases(delay=True)
+            self.item.fetch_releases(delay=True, user=self.user)
 
     def _get_latest_watched_episode_number(self):
         """Return the highest watched episode number for the season."""
@@ -1811,6 +1814,8 @@ class Season(Media):
             media_type = MediaTypes.SEASON.value,
             media_id= self.item.media_id,
             source = self.item.source,
+            order_type = self.item.order_type,
+            provider = helpers.get_default_provider(self.user, self.item.source),
             season_numbers= [self.item.season_number],
         )
         episodes = season_metadata["episodes"]
@@ -1823,6 +1828,8 @@ class Season(Media):
                 media_type = "find_next_episode",
                 episodes = episodes,
                 source = self.item.source,
+                order_type = self.item.order_type,
+                provider = helpers.get_default_provider(self.user, self.item.source),
                 progress = self.progress,
             )
 
@@ -1895,6 +1902,8 @@ class Season(Media):
             tv_metadata = providers.services.get_media_metadata(
                 media_type = MediaTypes.TV.value,
                 media_id = self.item.media_id,
+                order_type = self.item.order_type,
+                provider = helpers.get_default_provider(self.user, self.item.source),
                 source = self.item.source,
             )
 
@@ -1976,6 +1985,8 @@ class Season(Media):
                 media_type = MediaTypes.SEASON.value,
                 media_id = self.item.media_id,
                 source = self.item.source,
+                order_type = self.item.order_type,
+                provider = helpers.get_default_provider(self.user, self.item.source),
                 season_numbers = [self.item.season_number],
             )
 
@@ -2051,7 +2062,7 @@ class Episode(models.Model):
             media_id = self.item.media_id,
             source = self.item.source,
             order_type = self.item.order_type,
-            provider = self.item.provider,
+            provider = helpers.get_default_provider(self.user, self.item.source),
             season_numbers = [season_number],
         )
         season_metadata = tv_with_seasons_metadata[f"season/{season_number}"]
