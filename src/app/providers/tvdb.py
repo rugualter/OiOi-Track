@@ -254,8 +254,8 @@ def get_release_year(response):
 
 def get_series_order_type(media_id, order_type=None):
     """Get the matching order type for a TV series."""
-    
-    cache_key = f"search_order_type_info_{Sources.TVDB.value}_{media_id}"
+    preferred_language = get_tvdb_language()
+    cache_key = f"search_order_type_info_{Sources.TVDB.value}_{preferred_language}_{media_id}"
     data = cache.get(cache_key)
     response = None
     
@@ -279,7 +279,9 @@ def get_series_order_type(media_id, order_type=None):
 
 def search(media_type, query, page, order_type=None):
     """Search for media on TVDB."""
-    cache_key = f"search_{Sources.TVDB.value}_{media_type}_{order_type}_{query}_{page}"
+    preferred_language = get_tvdb_language()
+    
+    cache_key = f"search_{Sources.TVDB.value}_{preferred_language}_{media_type}_{order_type}_{query}_{page}"
     data = cache.get(cache_key)
 
     if data is not None:
@@ -304,7 +306,7 @@ def search(media_type, query, page, order_type=None):
         handle_error(error)
         return None
     
-    preferred_language = get_tvdb_language()
+    
     
     results = []
 
@@ -402,11 +404,10 @@ def search(media_type, query, page, order_type=None):
 
 def find(external_id, external_source):
     """Search for media on TVDB."""
-    cache_key = f"find_{Sources.TVDB.value}_{external_id}_{external_source}"
+    preferred_language = get_tvdb_language()
+    cache_key = f"find_{Sources.TVDB.value}_{preferred_language}_{external_id}_{external_source}"
     data = cache.get(cache_key)
     
-    
-
     if data is None:
         try:
             response = tvdb.search_by_remote_id(external_id)
@@ -532,7 +533,7 @@ def get_first_none_official_list(lists, preferred_language, primary_language):
     if not official_list:
         return None
     
-    cache_key = f"{Sources.TVDB.value}_list_{official_list.get("id")}"
+    cache_key = f"{Sources.TVDB.value}_{preferred_language}_list_{official_list.get("id")}"
     data = cache.get(cache_key)
     
     if data is not None:
@@ -717,7 +718,7 @@ def get_first_official_list(lists, preferred_language, primary_language):
     if not official_list:
         return None
     
-    cache_key = f"{Sources.TVDB.value}_list_{official_list.get("id")}"
+    cache_key = f"{Sources.TVDB.value}_{preferred_language}_list_{official_list.get("id")}"
     data = cache.get(cache_key)
     
     if data is not None:
@@ -898,7 +899,7 @@ def get_first_list(lists, preferred_language, primary_language):
     if not official_list:
         return None
     
-    cache_key = f"{Sources.TVDB.value}_list_{official_list.get("id")}"
+    cache_key = f"{Sources.TVDB.value}_{preferred_language}_list_{official_list.get("id")}"
     data = cache.get(cache_key)
     
     if data is not None:
@@ -1144,7 +1145,8 @@ def get_readable_duration(duration):
 
 def movie(media_id, provider):
     """Return the metadata for the selected movie from The Movie Database."""
-    cache_key = f"{Sources.TVDB.value}_{provider}_{MediaTypes.MOVIE.value}_{media_id}"
+    preferred_language = get_tvdb_language()
+    cache_key = f"{Sources.TVDB.value}_{preferred_language}_{provider}_{MediaTypes.MOVIE.value}_{media_id}"
     data = cache.get(cache_key)
 
     if data is None:
@@ -1154,7 +1156,7 @@ def movie(media_id, provider):
         except Exception as error:
             handle_error(error)
 
-        preferred_language = get_tvdb_language()
+        
         primary_language = response.get("originalLanguage")
         
         collection_info = get_first_official_list(response.get("lists"), preferred_language, primary_language)
@@ -1260,10 +1262,10 @@ def get_cached_seasons(media_id, season_numbers, order_type=None, provider = Non
     """Check cache for seasons and return cached data and list of uncached seasons."""
     cached_data = {}
     uncached_seasons = []
-
+    preferred_language = get_tvdb_language()
     for season_number in sorted(season_numbers, key=int):
         season_cache_key = (
-            f"{Sources.TVDB.value}_{provider}_{MediaTypes.SEASON.value}_{media_id}_{order_type}_{season_number}"
+            f"{Sources.TVDB.value}_{preferred_language}_{provider}_{MediaTypes.SEASON.value}_{media_id}_{order_type}_{season_number}"
         )
         season_data = cache.get(season_cache_key)
         if season_data:
@@ -1302,8 +1304,9 @@ def fetch_and_cache_seasons(media_id, season_numbers, tv_data, order_type=None, 
 
     # Cache TV metadata if we haven't fetched it yet
     if fetched_tv_data is None:
+        preferred_language = get_tvdb_language()
         fetched_tv_data = process_tv(response, media_id, order_type, provider)
-        tv_cache_key = f"{Sources.TVDB.value}_{provider}_{MediaTypes.TV.value}_{media_id}_{order_type}"
+        tv_cache_key = f"{Sources.TVDB.value}_{preferred_language}_{provider}_{MediaTypes.TV.value}_{media_id}_{order_type}"
         cache.set(tv_cache_key, fetched_tv_data)
 
     result_data = {}
@@ -1367,8 +1370,9 @@ def fetch_and_cache_seasons(media_id, season_numbers, tv_data, order_type=None, 
         if season_data is None:
             return None
 
+        preferred_language = get_tvdb_language()
         cache.set(
-            f"{Sources.TVDB.value}_{provider}_{MediaTypes.SEASON.value}_{media_id}_{order_type}_{season_number}",
+            f"{Sources.TVDB.value}_{preferred_language}_{provider}_{MediaTypes.SEASON.value}_{media_id}_{order_type}_{season_number}",
             season_data,
         )
 
@@ -1426,7 +1430,8 @@ def tv_with_seasons(media_id, season_numbers, order_type=None, provider = None):
     if not season_numbers:
         return tv(media_id, order_type)
 
-    tv_cache_key = f"{Sources.TVDB.value}_{provider}_{MediaTypes.TV.value}_{media_id}_{order_type}"
+    preferred_language = get_tvdb_language()
+    tv_cache_key = f"{Sources.TVDB.value}_{preferred_language}_{provider}_{MediaTypes.TV.value}_{media_id}_{order_type}"
     tv_data = cache.get(tv_cache_key)
 
     cached_seasons, uncached_seasons = get_cached_seasons(media_id, season_numbers, order_type, provider)
@@ -1459,7 +1464,8 @@ def tv_with_seasons(media_id, season_numbers, order_type=None, provider = None):
 
 def tv(media_id, order_type=None, provider = None):
     """Return the metadata for the selected tv show from The Movie Database."""
-    cache_key = f"{Sources.TVDB.value}_{provider}_{MediaTypes.TV.value}_{media_id}_{order_type}"
+    preferred_language = get_tvdb_language()
+    cache_key = f"{Sources.TVDB.value}_{preferred_language}_{provider}_{MediaTypes.TV.value}_{media_id}_{order_type}"
     data = cache.get(cache_key)
 
     if data is None:

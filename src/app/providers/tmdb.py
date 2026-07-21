@@ -96,7 +96,8 @@ def get_external_links(external_ids, tmdb_id=None):
 
 def search(media_type, query, page, order_type=None):
     """Search for media on TMDB."""
-    cache_key = f"search_{Sources.TMDB.value}_{media_type}_{query}_{page}"
+    preferred_language = get_tmdb_language()
+    cache_key = f"search_{Sources.TMDB.value}_{preferred_language}_{media_type}_{query}_{page}"
     data = cache.get(cache_key)
 
     if data is None:
@@ -186,7 +187,8 @@ def search(media_type, query, page, order_type=None):
 
 def find(external_id, external_source):
     """Search for media on TMDB."""
-    cache_key = f"find_{Sources.TMDB.value}_{external_id}_{external_source}"
+    preferred_language = get_tmdb_language()
+    cache_key = f"find_{Sources.TMDB.value}_{preferred_language}_{external_id}_{external_source}"
     data = cache.get(cache_key)
 
     if data is None:
@@ -275,6 +277,7 @@ def translated_genre(genre):
 def get_watch_providers(media_type, media_id, provider, season_number=None):
 
     if media_type == MediaTypes.MOVIE.value:
+        
         cache_key = f"{Sources.TMDB.value}_providers_{provider}_{MediaTypes.MOVIE.value}_{media_id}"
         data = cache.get(cache_key)
 
@@ -356,7 +359,8 @@ def get_watch_providers(media_type, media_id, provider, season_number=None):
         
 def movie(media_id, provider):
     """Return the metadata for the selected movie from The Movie Database."""
-    cache_key = f"{Sources.TMDB.value}_{provider}_{MediaTypes.MOVIE.value}_{media_id}"
+    preferred_language = get_tmdb_language()
+    cache_key = f"{Sources.TMDB.value}_{preferred_language}_{provider}_{MediaTypes.MOVIE.value}_{media_id}"
     data = cache.get(cache_key)
 
     if data is None:
@@ -471,10 +475,10 @@ def get_cached_seasons(media_id, season_numbers, order_type = None, provider = N
     """Check cache for seasons and return cached data and list of uncached seasons."""
     cached_data = {}
     uncached_seasons = []
-
+    preferred_language = get_tmdb_language()
     for season_number in season_numbers:
         season_cache_key = (
-            f"{Sources.TMDB.value}_{provider}_{MediaTypes.SEASON.value}_{media_id}_{order_type}_{season_number}"
+            f"{Sources.TMDB.value}_{preferred_language}_{provider}_{MediaTypes.SEASON.value}_{media_id}_{order_type}_{season_number}"
         )
         season_data = cache.get(season_cache_key)
         if season_data:
@@ -547,7 +551,8 @@ def fetch_and_cache_seasons(media_id, season_numbers, tv_data, order_type=None, 
         batch_tv_data = None
         
         if flag:
-            tv_cache_key = f"{Sources.TMDB.value}_{provider}_{MediaTypes.TV.value}_{media_id}_{order_type}"
+            preferred_language = get_tmdb_language()
+            tv_cache_key = f"{Sources.TMDB.value}_{preferred_language}_{provider}_{MediaTypes.TV.value}_{media_id}_{order_type}"
             batch_tv_data  = process_tv(response, order_type, provider)
             fetched_tv_data = batch_tv_data
             cache.set(tv_cache_key, batch_tv_data)
@@ -575,9 +580,9 @@ def fetch_and_cache_seasons(media_id, season_numbers, tv_data, order_type=None, 
             )
             
             #now we need to add the episodes translations so inside season
-
+            preferred_language = get_tmdb_language()
             cache.set(
-                f"{Sources.TMDB.value}_{provider}_{MediaTypes.SEASON.value}_{media_id}_{season_number}",
+                f"{Sources.TMDB.value}_{preferred_language}_{provider}_{MediaTypes.SEASON.value}_{media_id}_{season_number}",
                 season_data,
             )
             
@@ -625,7 +630,8 @@ def tv_with_seasons(media_id, season_numbers, order_type=None, provider = None):
     if not season_numbers:
         return tv(media_id, order_type)
 
-    tv_cache_key = f"{Sources.TMDB.value}_{provider}_{MediaTypes.TV.value}_{media_id}"
+    preferred_language = get_tmdb_language()
+    tv_cache_key = f"{Sources.TMDB.value}_{preferred_language}_{provider}_{MediaTypes.TV.value}_{media_id}"
     tv_data = cache.get(tv_cache_key)
 
     cached_seasons, uncached_seasons = get_cached_seasons(media_id, season_numbers, order_type, provider)
@@ -658,7 +664,8 @@ def tv_with_seasons(media_id, season_numbers, order_type=None, provider = None):
 
 def tv(media_id, order_type=None, provider = None):
     """Return the metadata for the selected tv show from The Movie Database."""
-    cache_key = f"{Sources.TMDB.value}_{provider}_{MediaTypes.TV.value}_{media_id}_{order_type}"
+    preferred_language = get_tmdb_language()
+    cache_key = f"{Sources.TMDB.value}_{preferred_language}_{provider}_{MediaTypes.TV.value}_{media_id}_{order_type}"
     data = cache.get(cache_key)
 
     if data is None:
